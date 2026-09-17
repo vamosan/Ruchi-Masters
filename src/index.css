@@ -1,0 +1,324 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    margin: 0;
+    background-color: #090d16;
+    color: #f1f5f9;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+.font-teko {
+  font-family: 'Teko', sans-serif;
+}
+
+.font-cabinet {
+  font-family: 'Cabinet Grotesk', sans-serif;
+}
+
+/* Neo-Brutalist & Modern Sporty 3D Utilities */
+.neo-card {
+  border: 2.5px solid #0f172a;
+  box-shadow: 4px 4px 0px #0f172a;
+}
+
+.neo-card-lg {
+  border: 3px solid #0f172a;
+  box-shadow: 6px 6px 0px #0f172a;
+}
+
+.neo-pill {
+  border: 2px solid #0f172a;
+  box-shadow: 3px 3px 0px #0f172a;
+}
+
+.neo-btn {
+  border: 2.5px solid #0f172a;
+  box-shadow: 4px 4px 0px #0f172a;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.neo-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px #0f172a;
+}
+
+.neo-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #0f172a;
+}
+
+/* Modern Sporty Playful Utilities */
+.sport-card {
+  border: 2.5px solid #0f172a;
+  box-shadow: 5px 5px 0px #0f172a;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sport-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 7px 7px 0px #0f172a;
+}
+
+.sport-badge {
+  border: 2px solid #0f172a;
+  box-shadow: 3px 3px 0px #0f172a;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sport-pill {
+  border: 2px solid #0f172a;
+  box-shadow: 3px 3px 0px #0f172a;
+  border-radius: 9999px;
+}
+
+.sport-btn {
+  border: 2.5px solid #0f172a;
+  box-shadow: 4px 4px 0px #0f172a;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sport-btn:hover {
+  transform: translate(-2px, -2px) scale(1.02);
+  box-shadow: 6px 6px 0px #0f172a;
+}
+
+.sport-btn:active {
+  transform: translate(2px, 2px) scale(0.98);
+  box-shadow: 1px 1px 0px #0f172a;
+}
+
+.sport-slant {
+  transform: skewX(-4deg);
+}
+
+.sport-unslant {
+  transform: skewX(4deg);
+}
+
+.sport-dots-bg {
+  background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+}
+
+.sport-glow-lime {
+  box-shadow: 0 0 25px -4px rgba(204, 255, 0, 0.6);
+}
+
+.sport-glow-cyan {
+  box-shadow: 0 0 25px -4px rgba(0, 240, 255, 0.6);
+}
+
+.sport-glow-pink {
+  box-shadow: 0 0 25px -4px rgba(255, 51, 102, 0.6);
+}
+
+/* Interactive Cricket Animations */
+@keyframes float-slow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(3deg);
+  }
+}
+
+@keyframes float-reverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(10px) rotate(-4deg);
+  }
+}
+
+@keyframes bat-swing {
+  0%, 100% {
+    transform: rotate(0deg) scale(1);
+  }
+  25% {
+    transform: rotate(-15deg) scale(1.05);
+  }
+  50% {
+    transform: rotate(18deg) scale(1.1);
+  }
+  75% {
+    transform: rotate(-5deg) scale(1.02);
+  }
+}
+
+@keyframes ball-spin-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ball-bounce-arc {
+  0%, 100% {
+    transform: translateY(0) scale(1, 1);
+  }
+  30% {
+    transform: translateY(-24px) scale(0.95, 1.05);
+  }
+  60% {
+    transform: translateY(0) scale(1.15, 0.85);
+  }
+  75% {
+    transform: translateY(-8px) scale(1, 1);
+  }
+}
+
+@keyframes zing-flash {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px #ef4444);
+  }
+  50% {
+    filter: drop-shadow(0 0 16px #ff0055);
+  }
+}
+
+.anim-float {
+  animation: float-slow 4s ease-in-out infinite;
+}
+
+.anim-float-rev {
+  animation: float-reverse 5s ease-in-out infinite;
+}
+
+.anim-bat {
+  animation: bat-swing 6s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+.anim-ball-spin {
+  animation: ball-spin-spin 4s linear infinite;
+}
+
+.anim-ball-bounce {
+  animation: ball-bounce-arc 2.5s ease-in-out infinite;
+}
+
+.anim-zing {
+  animation: zing-flash 1.5s ease-in-out infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Ball badge styling */
+.ball-dot {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.75rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.ball-run-0 {
+  background-color: #1e293b;
+  color: #94a3b8;
+  border: 1px solid #334155;
+}
+.ball-run-1, .ball-run-2, .ball-run-3 {
+  background-color: #172554;
+  color: #93c5fd;
+  border: 1px solid #1e40af;
+}
+.ball-run-4 {
+  background-color: #047857;
+  color: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 0 15px -3px rgba(16, 185, 129, 0.4);
+}
+.ball-run-6 {
+  background-color: #7e22ce;
+  color: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 0 15px -3px rgba(168, 85, 247, 0.5);
+}
+.ball-wicket {
+  background-color: #e11d48;
+  color: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 0 15px -3px rgba(225, 29, 72, 0.6);
+}
+.ball-extra {
+  background-color: #d97706;
+  color: #fffbeb;
+  font-weight: 700;
+  border: 1px solid #f59e0b;
+}
+
+/* Grass pattern backdrop */
+.cricket-turf-bg {
+  background-color: #0b1510;
+  background-image: radial-gradient(#153e26 1px, transparent 1px), radial-gradient(#153e26 1px, #0b1510 1px);
+  background-size: 40px 40px;
+  background-position: 0 0, 20px 20px;
+}
+
+/* Glassmorphism panel */
+.glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: rgba(30, 41, 59, 0.6);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.shadow-glow-gold {
+  box-shadow: 0 0 20px -3px rgba(245, 158, 11, 0.35);
+}
+
+.shadow-glow-emerald {
+  box-shadow: 0 0 20px -3px rgba(16, 185, 129, 0.35);
+}
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .glass-panel, .glass-card {
+    background: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    color: #000000 !important;
+  }
+}
