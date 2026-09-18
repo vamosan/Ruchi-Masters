@@ -333,11 +333,11 @@ export const RuchiDashboard: React.FC = () => {
             </div>
 
             {/* Sponsor Brand Display - Clean Enlarged Logo without inner box */}
-            <div className="py-2 sm:py-3 flex items-center justify-center sm:justify-start">
+            <div className="py-4 flex items-center justify-center">
               <img 
                 src="/images/ruchi-sponsor.png" 
                 alt="Ruchi Restaurant & Catering" 
-                className="h-20 sm:h-24 md:h-28 max-w-full object-contain hover:scale-105 transition-transform"
+                className="h-32 sm:h-36 md:h-44 w-auto max-w-full object-contain hover:scale-105 transition-transform"
               />
             </div>
 
