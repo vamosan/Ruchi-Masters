@@ -325,26 +325,26 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, initialTeamId }) =
                           key={team.id}
                           type="button"
                           onClick={() => setSelectedTeamId(team.id)}
-                          className={'w-full px-3.5 py-2 flex items-center justify-between text-left text-xs transition-colors ' + (
+                          className={'w-full px-4 py-2.5 flex items-center justify-between text-left text-xs transition-all ' + (
                             isSelected 
-                              ? 'bg-[#CCFF00]/40 font-black text-slate-950' 
-                              : 'hover:bg-slate-50 text-slate-700'
+                              ? 'bg-slate-950 text-white font-black' 
+                              : 'hover:bg-slate-100 text-slate-800'
                           )}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <div className="min-w-0">
-                              <div className="font-bold truncate text-slate-900 font-cabinet text-sm">{team.name}</div>
-                              <div className="text-[10px] text-slate-500 font-mono">Captain: {team.players.find(p=>p.isCaptain)?.name || team.managerName || 'Assigned'}</div>
+                              <div className={'font-bold truncate font-cabinet text-sm ' + (isSelected ? 'text-[#CCFF00]' : 'text-slate-900')}>{team.name}</div>
+                              <div className={'text-[10px] font-mono ' + (isSelected ? 'text-slate-300' : 'text-slate-500')}>Captain: {team.players.find(p=>p.isCaptain)?.name || team.managerName || 'Assigned'}</div>
                             </div>
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
                             {hasPin ? (
-                              <span className="text-[10px] text-emerald-700 font-black bg-emerald-100 px-2 py-0.5 rounded-lg flex items-center gap-1" title="PIN Protected">
+                              <span className={'text-[10px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1 ' + (isSelected ? 'bg-emerald-950 text-emerald-300 border border-emerald-700' : 'bg-emerald-100 text-emerald-800')} title="PIN Protected">
                                 <Lock className="w-2.5 h-2.5" /> PIN Set
                               </span>
                             ) : (
-                              <span className="text-[10px] text-amber-700 font-black bg-amber-100 px-2 py-0.5 rounded-lg flex items-center gap-1" title="First Time Setup Required">
+                              <span className={'text-[10px] font-black px-2 py-0.5 rounded-lg flex items-center gap-1 ' + (isSelected ? 'bg-amber-950 text-amber-300 border border-amber-700' : 'bg-amber-100 text-amber-800')} title="First Time Setup Required">
                                 <Sparkles className="w-2.5 h-2.5" /> New
                               </span>
                             )}
@@ -355,18 +355,6 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, initialTeamId }) =
                   )}
                 </div>
               </div>
-
-              {/* Selected Team Highlight Banner */}
-              {selectedTeam && (
-                <div className="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-950 text-white flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div>
-                      <h4 className="font-black text-base font-cabinet leading-tight text-[#CCFF00]">{selectedTeam.name}</h4>
-                      <div className="text-[11px] text-slate-300 font-medium">Captain on record: <strong className="text-white">{captain?.name || selectedTeam.managerName || 'Team Captain'}</strong></div>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* STEP 2: DYNAMIC FLOW - (FIRST-TIME PIN SETUP vs LOGIN vs RESET) */}
               
