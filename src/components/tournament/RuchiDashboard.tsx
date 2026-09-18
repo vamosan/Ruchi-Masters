@@ -332,12 +332,12 @@ export const RuchiDashboard: React.FC = () => {
               </span>
             </div>
 
-            {/* Sponsor Brand Display */}
-            <div className="bg-white rounded-2xl p-4 border-2 border-slate-900 shadow-[3px_3px_0px_#0f172a] flex items-center justify-center my-3 group hover:scale-[1.02] transition-transform">
+            {/* Sponsor Brand Display - Clean Enlarged Logo without inner box */}
+            <div className="py-2 sm:py-3 flex items-center justify-center sm:justify-start">
               <img 
                 src="/images/ruchi-sponsor.png" 
                 alt="Ruchi Restaurant & Catering" 
-                className="h-14 sm:h-16 object-contain"
+                className="h-20 sm:h-24 md:h-28 max-w-full object-contain hover:scale-105 transition-transform"
               />
             </div>
 
