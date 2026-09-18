@@ -612,66 +612,70 @@ export const HallOfFamePage: React.FC = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent pointer-events-none" />
                   
-                  {/* Top Right Direct Image Upload & Edit Action */}
-                  <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={handleStartAdjustImage}
-                      className={`px-3 py-1.5 rounded-xl font-black text-xs border border-white/30 backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105 ${
-                        isAdjustingImage 
-                          ? 'bg-[#FFE600] text-slate-950' 
-                          : 'bg-slate-950/85 hover:bg-slate-950 text-white'
-                      }`}
-                    >
-                      <Move className="w-3.5 h-3.5 text-amber-400" />
-                      <span>{isAdjustingImage ? '✋ Dragging Mode Active' : '↔️ Drag / Recenter'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEditYear(currentEntry)}
-                      className="px-3 py-1.5 rounded-xl bg-slate-950/85 hover:bg-slate-950 text-[#FFE600] font-black text-xs border border-white/30 backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105"
-                    >
-                      <Edit3 className="w-3.5 h-3.5" />
-                      <span>✏️ Edit Season Details</span>
-                    </button>
-
-                    <label className="cursor-pointer px-3 py-1.5 rounded-xl bg-slate-950/85 hover:bg-slate-950 text-white font-black text-xs border border-white/30 backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105">
-                      <Camera className="w-3.5 h-3.5 text-[#FFE600]" />
-                      <span>📷 Change Image</span>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={handleTrophyPhotoUpload} 
-                      />
-                    </label>
-                  </div>
-
-                  <div className="absolute bottom-4 left-4 right-4 text-white space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="px-3 py-1 rounded-xl bg-[#FFE600] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider inline-flex items-center gap-1.5 shadow">
-                        <Trophy className="w-3.5 h-3.5" />
-                        {currentEntry.year} Official Trophy Lift
-                      </span>
-                      {currentEntry.cricHeroesMatchUrl && (
-                        <a
-                          href={currentEntry.cricHeroesMatchUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-2.5 py-0.5 rounded-lg bg-slate-900/90 hover:bg-slate-950 text-[#CCFF00] font-black text-[11px] border border-[#CCFF00]/50 inline-flex items-center gap-1 shadow"
-                        >
-                          <span>⚡ Verified CricHeroes Match #{currentEntry.cricHeroesMatchId || '27086324'}</span>
-                          <ExternalLink className="w-3 h-3" />
-                        </a>
-                      )}
+                  <div className="absolute bottom-4 left-4 right-4 text-white flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
+                    <div className="space-y-2 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="px-3 py-1 rounded-xl bg-[#FFE600] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider inline-flex items-center gap-1.5 shadow">
+                          <Trophy className="w-3.5 h-3.5" />
+                          {currentEntry.year} Official Trophy Lift
+                        </span>
+                        {currentEntry.cricHeroesMatchUrl && (
+                          <a
+                            href={currentEntry.cricHeroesMatchUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-2.5 py-0.5 rounded-lg bg-slate-900/90 hover:bg-slate-950 text-[#CCFF00] font-black text-[11px] border border-[#CCFF00]/50 inline-flex items-center gap-1 shadow"
+                          >
+                            <span>⚡ Verified CricHeroes Match #{currentEntry.cricHeroesMatchId || '27086324'}</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-black font-cabinet text-white">
+                        {currentEntry.editionName}
+                      </h3>
+                      <p className="text-xs text-slate-300 font-medium">
+                        Score: {currentEntry.finalScore}
+                      </p>
                     </div>
-                    <h3 className="text-lg sm:text-xl font-black font-cabinet text-white">
-                      {currentEntry.editionName}
-                    </h3>
-                    <p className="text-xs text-slate-300 font-medium">
-                      Score: {currentEntry.finalScore}
-                    </p>
+
+                    {/* Bottom-right Clean Icon Action Buttons */}
+                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto bg-slate-950/70 p-1.5 rounded-2xl border border-white/20 backdrop-blur-md shadow-xl">
+                      <button
+                        type="button"
+                        onClick={handleStartAdjustImage}
+                        title="Drag / Recenter Image"
+                        className={`w-8 h-8 rounded-xl border border-white/30 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 ${
+                          isAdjustingImage 
+                            ? 'bg-[#FFE600] text-slate-950 ring-2 ring-white shadow-md' 
+                            : 'bg-slate-900/90 hover:bg-slate-800 text-white'
+                        }`}
+                      >
+                        <Move className="w-4 h-4 text-amber-400" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleOpenEditYear(currentEntry)}
+                        title="Edit Season Details"
+                        className="w-8 h-8 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-[#FFE600] border border-white/30 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 shadow-md"
+                      >
+                        <Edit3 className="w-4 h-4" />
+                      </button>
+
+                      <label 
+                        title="Change Image"
+                        className="cursor-pointer w-8 h-8 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white border border-white/30 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 shadow-md"
+                      >
+                        <Camera className="w-4 h-4 text-[#CCFF00]" />
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={handleTrophyPhotoUpload} 
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
 
