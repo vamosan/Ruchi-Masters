@@ -138,6 +138,18 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, team, onClose }) =>
               </span>
             )}
 
+            {isAuthorized && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 transition-all shadow"
+                title="Remove Player from Squad"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Delete Player</span>
+              </button>
+            )}
+
             <button
               onClick={onClose}
               className="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 flex items-center justify-center font-bold text-white transition-colors"
@@ -399,10 +411,10 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, team, onClose }) =>
               <button
                 type="button"
                 onClick={handleDelete}
-                className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold flex items-center gap-1.5 transition-colors border border-rose-200"
+                className="px-4 py-2.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-black flex items-center gap-1.5 transition-colors border-2 border-rose-300"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Remove Player</span>
+                <Trash2 className="w-4 h-4 text-rose-600" />
+                <span>Delete Player from Squad</span>
               </button>
             ) : (
               <div />

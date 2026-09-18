@@ -31,7 +31,8 @@ import {
   Lock,
   KeyRound,
   ShieldAlert,
-  ShieldCheck
+  ShieldCheck,
+  Trash2
 } from 'lucide-react';
 import { Team, Player, Match, PlayerRole, BattingStyle, BowlingStyle } from '../../types/cricket';
 import { useTournament } from '../../context/TournamentContext';
@@ -779,6 +780,19 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                             title="Edit Player Info"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
+                          </button>
+
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Are you sure you want to remove ${player.name} from ${team.name}?`)) {
+                                deletePlayer(team.id, player.id);
+                              }
+                            }}
+                            className="p-1.5 rounded-xl text-rose-600 hover:text-white hover:bg-rose-600 border-2 border-rose-200 hover:border-rose-600 transition-all"
+                            title="Delete Player from Squad"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </>
                       ) : (
