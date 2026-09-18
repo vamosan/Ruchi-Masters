@@ -167,8 +167,7 @@ export const RuchiNavbar: React.FC<Props> = ({ themeMode, setThemeMode }) => {
               title={'Logged in as ' + currentUser.teamName + ' Captain. Click to switch franchise.'}
             >
               <Crown className="w-4 h-4 text-amber-700 shrink-0" />
-              <span className="text-sm shrink-0">{currentUser.teamLogo}</span>
-              <span className="font-cabinet">{currentUser.teamCode} Captain</span>
+              <span className="font-cabinet max-w-[150px] truncate">{currentUser.teamName} Captain</span>
             </button>
           ) : (
             <button

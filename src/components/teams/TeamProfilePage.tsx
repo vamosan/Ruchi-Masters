@@ -737,7 +737,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                   <div className="pt-2 border-t-2 border-slate-100 flex items-center justify-between text-xs gap-2">
                     {/* View Certificate / Passport button */}
                     <button
-                      onClick={() => setSelectedCertPlayer(player)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCertPlayer(player);
+                      }}
                       className="inline-flex items-center gap-1 font-bold text-emerald-800 text-[11px] bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-xl border border-emerald-300 transition-colors"
                       title="View Official Player ID"
                     >
@@ -745,7 +748,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                       <span>Player ID</span>
                     </button>
 
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                       {isAuthorized ? (
                         <>
                           <label 
@@ -768,7 +771,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                           </label>
 
                           <button
-                            onClick={() => startEditPlayer(player)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEnlargedPlayer(player);
+                            }}
                             className="p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-900 transition-all"
                             title="Edit Player Info"
                           >
@@ -776,9 +782,15 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                           </button>
                         </>
                       ) : (
-                        <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-200 font-bold">
-                          {player.isAuthenticated ? 'Verified' : 'Rostered'}
-                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEnlargedPlayer(player);
+                          }}
+                          className="text-[10px] font-mono text-slate-700 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-xl border border-slate-300 font-bold flex items-center gap-1"
+                        >
+                          <span>View Profile ➔</span>
+                        </button>
                       )}
                     </div>
                   </div>

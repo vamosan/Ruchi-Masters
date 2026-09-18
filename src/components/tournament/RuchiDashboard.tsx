@@ -152,7 +152,7 @@ export const RuchiDashboard: React.FC = () => {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-2xl">{team.logo}</span>
-                      <span className="text-[11px] font-black font-mono text-slate-400">{team.code}</span>
+                      
                     </div>
 
                     <div>
@@ -312,7 +312,7 @@ export const RuchiDashboard: React.FC = () => {
                     <div>
                       <h3 className="font-black text-slate-900 leading-tight text-base font-cabinet">{team.name}</h3>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[10px] font-black text-slate-500 uppercase font-mono">{team.code}</span>
+                        
                         <span className="text-[10px] text-slate-400">•</span>
                         <span className="text-[10px] font-bold text-amber-600">{team.group || 'Group A'}</span>
                       </div>

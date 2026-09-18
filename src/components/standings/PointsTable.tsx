@@ -147,7 +147,7 @@ export const PointsTable: React.FC = () => {
                               </span>
                             )}
                           </div>
-                          <span className="text-[10px] text-slate-400 font-mono uppercase">{entry.teamCode}</span>
+                          
                         </div>
                       </div>
                     </td>
