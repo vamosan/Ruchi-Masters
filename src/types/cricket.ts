@@ -72,11 +72,16 @@ export interface Team {
   bannerUrl?: string;
   teamPhotoUrl?: string;
   establishedYear?: number;
+  address?: string;
+  website?: string;
+  instagram?: string;
+  facebook?: string;
   supportStaff?: { role: string; name: string }[];
   socialLinks?: {
     twitter?: string;
     instagram?: string;
     website?: string;
+    facebook?: string;
   };
   passcode?: string;
   isPinSet?: boolean;

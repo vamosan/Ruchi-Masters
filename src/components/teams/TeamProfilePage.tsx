@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { 
-  ArrowLeft, 
+  ArrowLeft,
+  Globe,
+  AtSign,
+  Share2,
+  Link2,
+  Building2, 
   Edit3, 
   Plus, 
   Shield, 
@@ -404,33 +409,45 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               </span>
             </div>
 
-            {isAuthorized ? (
-              <label 
-                htmlFor="team-direct-photo-upload"
-                className="cursor-pointer px-3.5 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-950 backdrop-blur text-xs font-black transition-all border border-white/30 flex items-center gap-1.5"
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span>Upload Team Photo</span>
-                <input
-                  id="team-direct-photo-upload"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files && e.target.files[0];
-                    if (f) handleDirectTeamPhoto(f);
-                  }}
-                />
-              </label>
-            ) : (
-              <button
-                onClick={() => openAuthModal(team.id)}
-                className="px-3.5 py-1.5 rounded-xl bg-black/50 hover:bg-[#CCFF00] text-slate-300 hover:text-slate-950 backdrop-blur text-xs font-bold transition-all border border-white/20 flex items-center gap-1.5"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                <span>Captain Login (PIN: 2026)</span>
-              </button>
-            )}
+            <div className="flex items-center gap-2">
+              {isAuthorized ? (
+                <>
+                  <button
+                    onClick={() => setShowEditModal(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-[#FFE600] hover:bg-[#ebd300] text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-[2px_2px_0px_#0f172a] transition-all"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Edit Team Info</span>
+                  </button>
+
+                  <label 
+                    htmlFor="team-direct-photo-upload"
+                    className="cursor-pointer px-3.5 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-950 backdrop-blur text-xs font-black transition-all border border-white/30 flex items-center gap-1.5"
+                  >
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>Upload Team Photo</span>
+                    <input
+                      id="team-direct-photo-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files && e.target.files[0];
+                        if (f) handleDirectTeamPhoto(f);
+                      }}
+                    />
+                  </label>
+                </>
+              ) : (
+                <button
+                  onClick={() => openAuthModal(team.id)}
+                  className="px-3.5 py-1.5 rounded-xl bg-black/50 hover:bg-[#CCFF00] text-slate-300 hover:text-slate-950 backdrop-blur text-xs font-bold transition-all border border-white/20 flex items-center gap-1.5"
+                >
+                  <Lock className="w-3.5 h-3.5" />
+                  <span>Captain Login to Edit Info</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Main Hero Header: Team Title on Left, High Elevated Team Photo on Right */}
@@ -447,22 +464,64 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
                 
 
-                <div className="flex flex-wrap items-center gap-4 text-xs text-slate-200 font-medium pt-1">
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-cyan-400" />
-                    {team.homeGround}
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-slate-200 font-medium pt-1">
+                  <span className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-xl border border-white/10">
+                    <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="font-bold">{team.homeGround || 'Apex Oval Complex'}</span>
                   </span>
-                  {captain && (
-                    <span className="flex items-center gap-1.5 bg-black/50 px-3 py-0.5 rounded-full border border-white/20 text-white font-bold">
-                      <Crown className="w-3.5 h-3.5 text-amber-400" />
-                      Captain: <strong className="text-amber-300 font-black">{captain.name}</strong>
+
+                  {team.address && (
+                    <span className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-xl border border-white/10 hidden sm:flex">
+                      <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                      <span>{team.address}</span>
                     </span>
                   )}
-                  {team.coach && (
-                    <span className="flex items-center gap-1.5 hidden md:flex">
-                      <User className="w-3.5 h-3.5 text-emerald-400" />
-                      Coach: <strong className="text-white font-bold">{team.coach}</strong>
+
+                  {captain && (
+                    <span className="flex items-center gap-1.5 bg-black/60 px-3 py-1 rounded-xl border border-white/20 text-white font-bold">
+                      <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                      <span>Captain: <strong className="text-amber-300 font-black">{captain.name}</strong></span>
                     </span>
+                  )}
+
+                  {/* Online links if available */}
+                  {team.website && (
+                    <a
+                      href={team.website.startsWith('http') ? team.website : 'https://' + team.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 bg-cyan-500/20 hover:bg-cyan-500 text-cyan-200 hover:text-slate-950 px-2.5 py-1 rounded-xl border border-cyan-400/30 transition-all font-bold"
+                      title="Visit Official Website"
+                    >
+                      <Globe className="w-3.5 h-3.5" />
+                      <span>Website</span>
+                    </a>
+                  )}
+
+                  {team.instagram && (
+                    <a
+                      href={team.instagram.startsWith('http') ? team.instagram : 'https://instagram.com/' + team.instagram.replace('@', '')}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 bg-pink-500/20 hover:bg-pink-500 text-pink-200 hover:text-white px-2.5 py-1 rounded-xl border border-pink-400/30 transition-all font-bold"
+                      title="View Instagram"
+                    >
+                      <AtSign className="w-3.5 h-3.5" />
+                      <span>Instagram</span>
+                    </a>
+                  )}
+
+                  {team.facebook && (
+                    <a
+                      href={team.facebook.startsWith('http') ? team.facebook : 'https://facebook.com/' + team.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 bg-blue-500/20 hover:bg-blue-500 text-blue-200 hover:text-white px-2.5 py-1 rounded-xl border border-blue-400/30 transition-all font-bold"
+                      title="View Facebook"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                      <span>Facebook</span>
+                    </a>
                   )}
                 </div>
               </div>
