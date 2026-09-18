@@ -348,6 +348,8 @@ export interface HallOfFameEntry {
   margin: string;
   venue: string;
   captainName: string;
+  cricHeroesMatchUrl?: string;
+  cricHeroesMatchId?: string;
   playerOfTheTournament?: string;
   highestRunScorer?: string;
   highestWicketTaker?: string;

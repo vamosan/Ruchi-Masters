@@ -2,6 +2,50 @@ import { HallOfFameEntry } from '../types/cricket';
 
 export const INITIAL_HALL_OF_FAME: HallOfFameEntry[] = [
   {
+    "id": "hof-2026",
+    "year": 2026,
+    "editionName": "Ruchi Masters T20 2026 (5th Edition)",
+    "championTeamId": "team-tsv-frankfurt-spartans",
+    "championTeamName": "Frankfurt Spartans Cricket Club",
+    "championLogo": "🛡️",
+    "runnerUpTeamName": "Frankfurt Strikers",
+    "finalScore": "Frankfurt Spartans defeated Frankfurt Strikers (Grand Final)",
+    "margin": "2026 Grand Champions",
+    "venue": "Frankfurt Cricket Ground, Germany",
+    "captainName": "Spartans Captain",
+    "cricHeroesMatchUrl": "https://cricheroes.com/scorecard/27086324/ruchi-masters-t20-2026-5th-edition-/frankfurt-strikers-vs-frankfurt-spartans-cricket-club/scorecard",
+    "cricHeroesMatchId": "27086324",
+    "playerOfTheTournament": "Tournament MVP (Frankfurt Spartans)",
+    "highestRunScorer": "Leading Run Scorer",
+    "highestWicketTaker": "Leading Wicket Taker",
+    "trophyPhotoUrl": "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80",
+    "celebrationBannerUrl": "https://images.unsplash.com/photo-1531415074868-036b1c57e3ce?auto=format&fit=crop&w=1200&q=80",
+    "story": "Frankfurt Spartans Cricket Club triumphed in the high-stakes 5th Edition Grand Final against Frankfurt Strikers to lift the prestigious 2026 Ruchi Masters T20 Cup! The tournament featured 40 elite teams competing in high-voltage matches culminating in a spectacular championship victory.",
+    "media": [
+      {
+        "id": "med-2026-1",
+        "type": "image",
+        "url": "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80",
+        "title": "5th Edition Grand Trophy Presentation",
+        "caption": "Frankfurt Spartans lifting the 2026 Ruchi Masters 5th Edition Championship Trophy."
+      },
+      {
+        "id": "med-2026-2",
+        "type": "image",
+        "url": "https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=800&q=80",
+        "title": "Frankfurt Spartans Championship Squad Photo",
+        "caption": "Winning squad and support staff celebrating the 2026 title."
+      },
+      {
+        "id": "med-2026-3",
+        "type": "video",
+        "url": "https://cricheroes.com/scorecard/27086324/ruchi-masters-t20-2026-5th-edition-/frankfurt-strikers-vs-frankfurt-spartans-cricket-club/scorecard",
+        "title": "⚡ Official CricHeroes Final Match Scorecard & Graphs",
+        "caption": "Verified ball-by-ball scorecard, batting analysis, and bowling spell breakdowns."
+      }
+    ]
+  },
+  {
     "id": "hof-2025",
     "year": 2025,
     "editionName": "Ruchi Masters T20 2025 Cup",
