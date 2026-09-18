@@ -450,25 +450,13 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, initialTeamId }) =
                     />
                   </div>
 
-                  <div className="space-y-2 pt-1">
+                  <div className="pt-2">
                     <button
                       type="submit"
                       className="w-full py-3 rounded-2xl bg-slate-950 hover:bg-slate-900 text-white font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 border-2 border-slate-900 shadow-[3px_3px_0px_#CCFF00] transition-all"
                     >
                       <KeyRound className="w-4 h-4 text-[#CCFF00]" />
                       <span>Log In to Manage {selectedTeam?.name || 'Squad'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setPasscode(selectedTeam?.passcode || '2026');
-                        setTimeout(() => handleTeamLogin(), 50);
-                      }}
-                      className="w-full py-2.5 rounded-2xl bg-[#CCFF00] hover:bg-[#bdf000] text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] transition-all"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>⚡ 1-Click Quick Login ({selectedTeam?.name || 'Franchise'})</span>
                     </button>
                   </div>
                 </form>
@@ -543,25 +531,13 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, initialTeamId }) =
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-2 pt-1">
+              <div className="pt-2">
                 <button
                   type="submit"
                   className="w-full py-3 rounded-2xl bg-[#FFE600] hover:bg-[#ebd300] text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 border-2 border-slate-900 shadow-[3px_3px_0px_#0f172a] transition-all"
                 >
                   <ShieldCheck className="w-4 h-4 text-slate-950" />
                   <span>Log In as Super Admin</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setPasscode('admin123');
-                    setTimeout(() => handleAdminLogin(), 50);
-                  }}
-                  className="w-full py-2.5 rounded-2xl bg-slate-950 hover:bg-slate-900 text-white font-black text-xs flex items-center justify-center gap-1.5 border-2 border-slate-900 shadow-[2px_2px_0px_#FFE600] transition-all"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-[#FFE600]" />
-                  <span>⚡ 1-Click Super Admin Access</span>
                 </button>
               </div>
             </form>
