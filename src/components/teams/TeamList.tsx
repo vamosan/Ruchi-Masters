@@ -133,7 +133,7 @@ export const TeamList: React.FC = () => {
             Franchises & Squad Directory
           </h1>
           <p className="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
-            Browse all verified squads, view player profiles, or login as Team Captain (PIN: 2026) to manage your roster.
+            Browse all verified squads, view player profiles, or login as Team Captain to manage your roster.
           </p>
         </div>
 
@@ -168,7 +168,7 @@ export const TeamList: React.FC = () => {
             ) : currentUser.role === 'team' ? (
               <span><strong>Logged in as {currentUser.teamName} Captain:</strong> You have exclusive permission to edit your squad and upload player photos.</span>
             ) : (
-              <span><strong>Public View:</strong> Squads are view-only. Team Captains can log in with their team PIN (default: <strong>2026</strong>) to edit rosters.</span>
+              <span><strong>Public View:</strong> Squads are view-only. Team Captains can log in with their secret franchise PIN to edit rosters.</span>
             )}
           </span>
         </div>
@@ -177,7 +177,7 @@ export const TeamList: React.FC = () => {
           onClick={() => openAuthModal()}
           className="px-3 py-1.5 rounded-xl bg-[#CCFF00] text-slate-950 font-black text-xs sport-btn shrink-0"
         >
-          {currentUser.role === 'spectator' ? 'Captain Login (PIN: 2026)' : 'Switch Account'}
+          {currentUser.role === 'spectator' ? 'Captain Login' : 'Switch Account'}
         </button>
       </div>
 

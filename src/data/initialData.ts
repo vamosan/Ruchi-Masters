@@ -71,7 +71,7 @@ export const INITIAL_ANNOUNCEMENTS: Announcement[] = [
     category: 'Rule',
     pinned: true,
     author: 'Technical Committee',
-    content: 'Team captains can log in using their franchise PIN (default: 2026) to update player details, add new squad members, and change their PIN.'
+    content: 'Team captains can log in using their franchise PIN  to update player details, add new squad members, and change their PIN.'
   },
   {
     id: 'ann-3',

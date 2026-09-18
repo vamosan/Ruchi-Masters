@@ -100,7 +100,7 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, initialTeamId }) =
         onClose();
       }, 800);
     } else {
-      setErrorMsg('Invalid franchise passcode. Default PIN is 2026. (If needed, click "Reset PIN").');
+      setErrorMsg('Invalid franchise PIN. Please enter the correct PIN or click "Forgot / Reset PIN".');
     }
   };
 
