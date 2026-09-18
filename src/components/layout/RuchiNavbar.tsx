@@ -63,32 +63,44 @@ export const RuchiNavbar: React.FC<Props> = ({ themeMode, setThemeMode }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
         
         {/* Playful Sporty Brand Logo */}
-        <div 
-          onClick={() => setActiveTab('overview')}
-          className="flex items-center gap-3 cursor-pointer select-none group shrink-0"
-        >
-          <div className="relative shrink-0">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#CCFF00] sport-pill flex items-center justify-center group-hover:rotate-6 group-hover:scale-105 transition-all shadow-[3px_3px_0px_#0f172a]">
-              <CricketBallIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+        <div className="flex items-center gap-3 shrink-0">
+          <div 
+            onClick={() => setActiveTab('overview')}
+            className="flex items-center gap-3 cursor-pointer select-none group"
+          >
+            <div className="relative shrink-0">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-[#CCFF00] sport-pill flex items-center justify-center group-hover:rotate-6 group-hover:scale-105 transition-all shadow-[3px_3px_0px_#0f172a]">
+                <CricketBallIcon className="w-6 h-6 sm:w-7 sm:h-7" />
+              </div>
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 border-2 border-slate-950 flex items-center justify-center text-[8px] text-white font-black animate-pulse">
+                !
+              </span>
             </div>
-            <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 border-2 border-slate-950 flex items-center justify-center text-[8px] text-white font-black animate-pulse">
-              !
-            </span>
+
+            <div className="shrink-0">
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="font-black text-xl sm:text-2xl lg:text-3xl tracking-tight text-slate-950 font-cabinet">
+                  Ruchi Masters
+                </span>
+                <span className="px-2 py-0.5 rounded-xl bg-[#00F0FF] text-slate-950 font-black text-[11px] sm:text-xs sport-badge transform -rotate-2">
+                  T20
+                </span>
+              </div>
+              <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 whitespace-nowrap">
+                <span className="text-rose-600 font-black">● 2026 CUP</span>
+                <span>•</span>
+                <span className="text-emerald-600 font-bold">CHAMPIONSHIP HUB</span>
+              </div>
+            </div>
           </div>
 
-          <div className="shrink-0">
-            <div className="flex items-center gap-1.5 whitespace-nowrap">
-              <span className="font-black text-xl sm:text-2xl lg:text-3xl tracking-tight text-slate-950 font-cabinet">
-                Ruchi Masters
-              </span>
-              <span className="px-2 py-0.5 rounded-xl bg-[#00F0FF] text-slate-950 font-black text-[11px] sm:text-xs sport-badge transform -rotate-2">
-                T20
-              </span>
+          {/* Discreet Title Sponsor Badge */}
+          <div className="hidden xl:flex items-center gap-2 pl-3 border-l-2 border-slate-200">
+            <div className="text-[9px] font-black uppercase tracking-wider text-slate-400 leading-tight">
+              <span>Title</span><br/><span className="text-rose-600 font-black">Sponsor</span>
             </div>
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-1.5 whitespace-nowrap">
-              <span className="text-rose-600 font-black">● 2026 CUP</span>
-              <span>•</span>
-              <span className="text-emerald-600 font-bold">CHAMPIONSHIP HUB</span>
+            <div className="h-9 px-2.5 py-0.5 bg-white hover:bg-slate-50 rounded-xl border-2 border-slate-900 shadow-[2px_2px_0px_#0f172a] flex items-center transition-all">
+              <img src="/images/ruchi-sponsor.png" alt="Ruchi Title Sponsor" className="h-6 object-contain" />
             </div>
           </div>
         </div>

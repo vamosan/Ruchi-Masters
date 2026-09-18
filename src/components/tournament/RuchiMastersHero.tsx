@@ -58,10 +58,14 @@ export const RuchiMastersHero: React.FC = () => {
               <span>⚡ 2026 PRO EDITION</span>
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00F0FF] sport-badge text-slate-950 text-xs transform -rotate-1">
-              <span>🔥 6 TOP FRANCHISES</span>
+              <span>🔥 40+ FRANCHISES</span>
             </div>
-            <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-950 text-amber-300 font-mono text-xs font-black shadow">
-              <span>🏆 $100,000 CUP</span>
+            
+            {/* Title Sponsor Pill in Hero */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-2xl bg-white border-2 border-slate-900 text-slate-950 font-black text-xs shadow-[2px_2px_0px_#0f172a]">
+              <span className="text-[10px] uppercase font-bold text-slate-500">Presented by</span>
+              <img src="/images/ruchi-sponsor.png" alt="Ruchi Sponsor" className="h-5 object-contain" />
+              <span className="text-[10px] font-bold text-rose-600 bg-rose-50 px-1.5 py-0.2 rounded border border-rose-200">Title Sponsor</span>
             </div>
           </div>
 
@@ -120,34 +124,34 @@ export const RuchiMastersHero: React.FC = () => {
           {/* Sporty Mini Tickers */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-5 border-t-3 border-slate-900">
             <div className="bg-slate-50 p-3.5 rounded-2xl sport-card flex items-center gap-3">
-              <span className="text-3xl">🦁</span>
+              <span className="text-3xl">🛡️</span>
               <div>
-                <div className="text-lg font-black text-slate-950 leading-tight">6 Teams</div>
-                <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Pro Squads</div>
+                <div className="text-lg font-black text-slate-950 leading-tight">40+ Teams</div>
+                <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider">8 Groups</div>
               </div>
             </div>
 
             <div className="bg-slate-50 p-3.5 rounded-2xl sport-card flex items-center gap-3">
               <span className="text-3xl">⚡</span>
               <div>
-                <div className="text-lg font-black text-slate-950 leading-tight">18 Games</div>
+                <div className="text-lg font-black text-slate-950 leading-tight">18+ Games</div>
                 <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider">T20 Schedule</div>
               </div>
             </div>
 
             <div className="bg-slate-50 p-3.5 rounded-2xl sport-card flex items-center gap-3">
-              <span className="text-3xl">🛡️</span>
+              <span className="text-3xl">📸</span>
               <div>
                 <div className="text-lg font-black text-slate-950 leading-tight">100% Auth</div>
-                <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Captain Certified</div>
+                <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Squad Photos</div>
               </div>
             </div>
 
             <div className="bg-slate-50 p-3.5 rounded-2xl sport-card flex items-center gap-3">
               <span className="text-3xl">🏆</span>
               <div>
-                <div className="text-lg font-black text-slate-950 leading-tight">Champions</div>
-                <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Grand Trophy</div>
+                <div className="text-lg font-black text-slate-950 leading-tight">Grand Cup</div>
+                <div className="text-[10px] font-black text-slate-500 uppercase tracking-wider">2026 Glory</div>
               </div>
             </div>
           </div>

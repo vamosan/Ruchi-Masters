@@ -257,89 +257,110 @@ export const RuchiDashboard: React.FC = () => {
 
       </div>
 
-      {/* 4. Franchises Quick Roster Hub */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 sport-card space-y-6">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      {/* 4. Franchises Gateway Hub & Official Title Sponsor Showcase */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        {/* Tournament Squads Gateway Card (7 cols) */}
+        <div className="lg:col-span-7 bg-white rounded-3xl p-6 sm:p-8 sport-card space-y-5 flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl">🛡️</span>
-              <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-cabinet">
-                Tournament Franchises & Squads
-              </h2>
-            </div>
-            <p className="text-xs text-slate-500 mt-1">
-              Verified squad rosters with captain authentication and photo certificates. Click any card for full details.
-            </p>
-          </div>
-
-          <button
-            onClick={() => setActiveTab('teams')}
-            className="px-4 py-2.5 rounded-2xl bg-[#CCFF00] text-slate-950 font-black text-xs sport-btn flex items-center gap-1.5 shadow-[3px_3px_0px_#0f172a]"
-          >
-            <Users className="w-3.5 h-3.5" />
-            <span>View All Squads & Photos ➔</span>
-          </button>
-        </div>
-
-        {/* Sporty Team Cards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {teams.map((team) => {
-            const captain = team.players.find(p => p.isCaptain || p.id === team.captainId);
-            const verifiedCount = team.players.filter(p => p.isAuthenticated).length;
-
-            return (
-              <div
-                key={team.id}
-                onClick={() => {
-                  setActiveTab('teams');
-                }}
-                className="p-5 rounded-3xl border-3 border-slate-950 bg-slate-50 hover:bg-amber-50/60 hover:-translate-y-1.5 transition-all cursor-pointer shadow-[4px_4px_0px_#0f172a] space-y-4 group relative overflow-hidden"
-              >
-                {/* Team Top Accent Bar */}
-                <div 
-                  className="absolute top-0 left-0 right-0 h-1.5"
-                  style={{ backgroundColor: team.primaryColor || '#2563eb' }}
-                />
-
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center gap-3">
-                    <div 
-                      className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl border-2 border-slate-900 shadow group-hover:scale-110 transition-transform"
-                      style={{ backgroundColor: (team.primaryColor || '#2563eb') + '25' }}
-                    >
-                      {team.logo}
-                    </div>
-                    <div>
-                      <h3 className="font-black text-slate-900 leading-tight text-base font-cabinet">{team.name}</h3>
-                      <div className="flex items-center gap-1.5 mt-0.5">
-                        
-                        <span className="text-[10px] text-slate-400">•</span>
-                        <span className="text-[10px] font-bold text-amber-600">{team.group || 'Group A'}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <span className="px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-900 text-[10px] font-black border border-emerald-300 sport-badge">
-                    {team.players.length} Squad
-                  </span>
-                </div>
-
-                <div className="pt-3 border-t-2 border-slate-200/80 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <Crown className="w-3.5 h-3.5 text-amber-500" />
-                    <span className="text-slate-600 font-medium">
-                      Captain: <strong className="text-slate-900">{captain?.name || team.managerName || 'TBD'}</strong>
-                    </span>
-                  </div>
-                  <span className="text-emerald-700 font-bold flex items-center gap-1 text-[11px] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    <ShieldCheck className="w-3.5 h-3.5" />
-                    <span>{verifiedCount} Auth</span>
-                  </span>
+            <div className="flex items-center justify-between gap-4 mb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="w-10 h-10 rounded-2xl bg-[#00F0FF] text-slate-950 flex items-center justify-center font-black text-xl shadow-[2px_2px_0px_#0f172a]">
+                  🛡️
+                </span>
+                <div>
+                  <h2 className="text-xl sm:text-2xl font-black text-slate-900 font-cabinet">
+                    40+ Tournament Franchises
+                  </h2>
+                  <span className="text-xs text-slate-500 font-medium">8 Tournament Groups • 1000+ Registered Athletes</span>
                 </div>
               </div>
-            );
-          })}
+
+              <span className="px-3 py-1 rounded-xl bg-emerald-100 text-emerald-900 text-xs font-black border border-emerald-300 sport-badge shrink-0">
+                100% Certified
+              </span>
+            </div>
+
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
+              Explore complete franchise squads with high-resolution player photos, captain certificates, verified rosters, and team home grounds in our dedicated squads arena.
+            </p>
+
+            {/* Quick Group Pills preview */}
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2 pt-4">
+              {['Group A', 'Group B', 'Group C', 'Group D', 'Group E', 'Group F', 'Group G', 'Group H'].map((grp) => (
+                <button
+                  key={grp}
+                  onClick={() => setActiveTab('teams')}
+                  className="p-2 rounded-xl bg-slate-50 hover:bg-[#CCFF00] border-2 border-slate-900 text-center transition-all shadow-[2px_2px_0px_#0f172a] group"
+                >
+                  <span className="text-[10px] font-black text-slate-900 block group-hover:scale-105 transition-transform">{grp}</span>
+                  <span className="text-[9px] text-slate-500 font-bold block">5 Teams</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-4 border-t-2 border-slate-100 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+              <ShieldCheck className="w-4 h-4 text-emerald-600" />
+              <span>Full player search & captain auth available</span>
+            </div>
+
+            <button
+              onClick={() => setActiveTab('teams')}
+              className="px-5 py-2.5 rounded-2xl bg-[#CCFF00] hover:bg-[#bbf000] text-slate-950 font-black text-xs sport-btn flex items-center gap-2 shadow-[3px_3px_0px_#0f172a]"
+            >
+              <Users className="w-4 h-4" />
+              <span>Explore All 40 Squads & Photos ➔</span>
+            </button>
+          </div>
         </div>
+
+        {/* Title Sponsor Spotlight Card (5 cols) */}
+        <div className="lg:col-span-5 bg-gradient-to-br from-amber-500/10 via-white to-rose-500/10 rounded-3xl p-6 sm:p-8 sport-card space-y-5 flex flex-col justify-between relative overflow-hidden border-3 border-slate-950 shadow-[5px_5px_0px_#0f172a]">
+          {/* Subtle Accent Glow */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl pointer-events-none" />
+          
+          <div>
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <span className="px-3 py-1 rounded-xl bg-[#FFE600] text-slate-950 text-[11px] font-black sport-badge uppercase tracking-wider flex items-center gap-1.5 shadow-[2px_2px_0px_#0f172a]">
+                <Crown className="w-3.5 h-3.5 text-amber-800" />
+                Title Sponsor
+              </span>
+              <span className="text-[10px] font-mono font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-full border border-rose-200">
+                Official Partner
+              </span>
+            </div>
+
+            {/* Sponsor Brand Display */}
+            <div className="bg-white rounded-2xl p-4 border-2 border-slate-900 shadow-[3px_3px_0px_#0f172a] flex items-center justify-center my-3 group hover:scale-[1.02] transition-transform">
+              <img 
+                src="/images/ruchi-sponsor.png" 
+                alt="Ruchi Restaurant & Catering" 
+                className="h-14 sm:h-16 object-contain"
+              />
+            </div>
+
+            <div className="space-y-1">
+              <h3 className="text-lg sm:text-xl font-black text-slate-900 font-cabinet">
+                Ruchi Restaurant & Catering
+              </h3>
+              <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                Authentic Indian delicacies, premier tournament catering & official hospitality partner for the Ruchi Masters T20 2026 Championship.
+              </p>
+            </div>
+          </div>
+
+          <div className="pt-3 border-t-2 border-slate-200/80 flex items-center justify-between text-[11px] font-bold text-slate-700">
+            <span className="flex items-center gap-1 text-emerald-700">
+              <span>🍽️</span> Hospitality Partner
+            </span>
+            <span className="text-rose-600 font-black">
+              ★ Proudly Supporting Sports
+            </span>
+          </div>
+        </div>
+
       </div>
 
       {/* 5. Match Highlights & Media Carousel */}
