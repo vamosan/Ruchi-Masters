@@ -63,7 +63,12 @@ export const HallOfFamePage: React.FC = () => {
   const [newMargin, setNewMargin] = useState('');
   const [newVenue, setNewVenue] = useState('Apex National Stadium');
   const [newCaptain, setNewCaptain] = useState('');
+  const [newCaptainBio, setNewCaptainBio] = useState('');
   const [newMvp, setNewMvp] = useState('');
+  const [newOrangeCap, setNewOrangeCap] = useState('');
+  const [newPurpleCap, setNewPurpleCap] = useState('');
+  const [newBestWicketKeeper, setNewBestWicketKeeper] = useState('');
+  const [newBestFielder, setNewBestFielder] = useState('');
   const [newStory, setNewStory] = useState('');
   const [newTrophyPhoto, setNewTrophyPhoto] = useState('');
   const [newCricHeroesUrl, setNewCricHeroesUrl] = useState('');
@@ -106,10 +111,6 @@ export const HallOfFamePage: React.FC = () => {
   };
 
   const handleOpenAddYear = () => {
-    if (currentUser.role !== 'admin') {
-      openAuthModal();
-      return;
-    }
     setIsEditingYear(false);
     setNewYear(new Date().getFullYear());
     setIsCurrentActiveSeason(false);
@@ -118,9 +119,14 @@ export const HallOfFamePage: React.FC = () => {
     setNewSecondRunnerUp('');
     setNewFinalScore('');
     setNewMargin('');
-    setNewVenue('Apex National Stadium');
+    setNewVenue('Frankfurt Cricket Ground, Germany');
     setNewCaptain('');
+    setNewCaptainBio('');
     setNewMvp('');
+    setNewOrangeCap('');
+    setNewPurpleCap('');
+    setNewBestWicketKeeper('');
+    setNewBestFielder('');
     setNewStory('');
     setNewTrophyPhoto('');
     setNewCricHeroesUrl('');
@@ -128,10 +134,6 @@ export const HallOfFamePage: React.FC = () => {
   };
 
   const handleOpenEditYear = (entry: HallOfFameEntry) => {
-    if (currentUser.role !== 'admin') {
-      openAuthModal();
-      return;
-    }
     setIsEditingYear(true);
     setNewYear(entry.year);
     setIsCurrentActiveSeason(entry.finalScore.includes('In Progress') || entry.margin.includes('In Progress'));
@@ -142,7 +144,12 @@ export const HallOfFamePage: React.FC = () => {
     setNewMargin(entry.margin);
     setNewVenue(entry.venue);
     setNewCaptain(entry.captainName);
+    setNewCaptainBio(entry.captainBio || ('Led ' + entry.championTeamName + ' to championship glory in ' + entry.year + '.'));
     setNewMvp(entry.playerOfTheTournament || '');
+    setNewOrangeCap(entry.highestRunScorer || '');
+    setNewPurpleCap(entry.highestWicketTaker || '');
+    setNewBestWicketKeeper(entry.bestWicketKeeper || '');
+    setNewBestFielder(entry.bestFielder || '');
     setNewStory(entry.story);
     setNewTrophyPhoto(entry.trophyPhotoUrl);
     setNewCricHeroesUrl(entry.cricHeroesMatchUrl || '');
@@ -170,7 +177,7 @@ export const HallOfFamePage: React.FC = () => {
     const newEntry: HallOfFameEntry = {
       id: 'hof-' + newYear,
       year: Number(newYear),
-      editionName: 'Ruchi Masters T20 ' + newYear + ' (5th Edition)',
+      editionName: isEditingYear && currentEntry ? currentEntry.editionName : ('Ruchi Masters T20 ' + newYear + ' (5th Edition)'),
       championTeamId: champTeam.id,
       championTeamName: champTeam.name,
       championLogo: champTeam.logo,
@@ -180,9 +187,14 @@ export const HallOfFamePage: React.FC = () => {
       margin: entryMargin,
       venue: newVenue.trim() || 'Apex National Stadium',
       captainName: newCaptain.trim() || champTeam.players.find(p=>p.isCaptain)?.name || champTeam.managerName || 'Captain',
+      captainBio: newCaptainBio.trim() || undefined,
       cricHeroesMatchUrl: newCricHeroesUrl.trim() || undefined,
       cricHeroesMatchId: newCricHeroesUrl.trim() ? (newCricHeroesUrl.match(/scorecard\/(\d+)/)?.[1] || undefined) : undefined,
       playerOfTheTournament: newMvp.trim() || undefined,
+      highestRunScorer: newOrangeCap.trim() || undefined,
+      highestWicketTaker: newPurpleCap.trim() || undefined,
+      bestWicketKeeper: newBestWicketKeeper.trim() || undefined,
+      bestFielder: newBestFielder.trim() || undefined,
       trophyPhotoUrl: newTrophyPhoto.trim() || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80',
       celebrationBannerUrl: 'https://images.unsplash.com/photo-1531415074868-036b1c57e3ce?auto=format&fit=crop&w=1200&q=80',
       story: entryStory,
@@ -417,9 +429,18 @@ export const HallOfFamePage: React.FC = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
                   
-                  {/* Top Right Direct Image Upload Action */}
-                  <div className="absolute top-3 right-3 z-20">
-                    <label className="cursor-pointer px-3.5 py-1.5 rounded-xl bg-slate-950/85 hover:bg-slate-950 text-white font-black text-xs border border-white/30 backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105">
+                  {/* Top Right Direct Image Upload & Edit Action */}
+                  <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditYear(currentEntry)}
+                      className="px-3 py-1.5 rounded-xl bg-slate-950/85 hover:bg-slate-950 text-[#FFE600] font-black text-xs border border-white/30 backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>✏️ Edit Season Details</span>
+                    </button>
+
+                    <label className="cursor-pointer px-3 py-1.5 rounded-xl bg-slate-950/85 hover:bg-slate-950 text-white font-black text-xs border border-white/30 backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105">
                       <Camera className="w-3.5 h-3.5 text-[#FFE600]" />
                       <span>📷 Change Trophy Image</span>
                       <input 
@@ -460,11 +481,21 @@ export const HallOfFamePage: React.FC = () => {
 
                 {/* Match Story */}
                 <div className="p-5 rounded-2xl bg-slate-50 border-2 border-slate-300 text-slate-800 space-y-2">
-                  <h4 className="font-black text-sm font-cabinet text-slate-950 flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-amber-500" />
-                    Championship Winning Story
-                  </h4>
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-black text-sm font-cabinet text-slate-950 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-amber-500" />
+                      Championship Winning Story
+                    </h4>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditYear(currentEntry)}
+                      className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-200 text-slate-900 border border-slate-300 text-[11px] font-bold flex items-center gap-1 shadow-sm transition-all"
+                    >
+                      <Edit3 className="w-3 h-3 text-amber-600" />
+                      <span>Edit Story</span>
+                    </button>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium whitespace-pre-line">
                     {currentEntry.story}
                   </p>
                 </div>
@@ -475,43 +506,92 @@ export const HallOfFamePage: React.FC = () => {
                 
                 {/* Captain Badge */}
                 <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-black text-amber-900">
-                    <Crown className="w-4 h-4 text-amber-600" />
-                    <span>Winning Captain</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-black text-amber-900">
+                      <Crown className="w-4 h-4 text-amber-600" />
+                      <span>Winning Captain</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditYear(currentEntry)}
+                      className="px-2 py-0.5 rounded-lg bg-white/80 hover:bg-white text-slate-900 border border-amber-300 text-[10px] font-black flex items-center gap-1 shadow-sm transition-all"
+                    >
+                      <Edit3 className="w-2.5 h-2.5 text-amber-600" />
+                      <span>Edit</span>
+                    </button>
                   </div>
                   <div className="text-lg font-black font-cabinet text-slate-950">
                     {currentEntry.captainName}
                   </div>
                   <div className="text-[11px] text-amber-800 font-medium">
-                    Led {currentEntry.championTeamName} to championship glory in {currentEntry.year}.
+                    {currentEntry.captainBio || ('Led ' + currentEntry.championTeamName + ' to championship glory in ' + currentEntry.year + '.')}
                   </div>
                 </div>
 
                 {/* MVP & Honors */}
                 <div className="p-4 rounded-2xl bg-slate-900 text-white border-2 border-slate-950 space-y-3 shadow-md">
-                  <div className="text-xs font-black text-[#FFE600] uppercase tracking-wider flex items-center gap-1.5">
-                    <Award className="w-4 h-4" />
-                    <span>Tournament Honors</span>
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                    <div className="text-xs font-black text-[#FFE600] uppercase tracking-wider flex items-center gap-1.5">
+                      <Award className="w-4 h-4 text-[#FFE600]" />
+                      <span>Tournament Honors</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenEditYear(currentEntry)}
+                      className="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[#CCFF00] border border-slate-700 text-[10px] font-black flex items-center gap-1 shadow-sm transition-all"
+                    >
+                      <Edit3 className="w-2.5 h-2.5" />
+                      <span>Edit Honors</span>
+                    </button>
                   </div>
 
                   {currentEntry.playerOfTheTournament && (
                     <div className="border-b border-slate-800 pb-2">
-                      <div className="text-[10px] text-slate-400 uppercase font-mono">Player of the Tournament</div>
-                      <div className="text-sm font-black text-[#00F0FF]">{currentEntry.playerOfTheTournament}</div>
+                      <div className="text-[10px] text-slate-400 uppercase font-mono flex items-center gap-1">
+                        <span>🌟</span>
+                        <span>Player of the Tournament (MVP)</span>
+                      </div>
+                      <div className="text-sm font-black text-[#00F0FF] mt-0.5">{currentEntry.playerOfTheTournament}</div>
                     </div>
                   )}
 
                   {currentEntry.highestRunScorer && (
                     <div className="border-b border-slate-800 pb-2">
-                      <div className="text-[10px] text-slate-400 uppercase font-mono">Orange Cap (Top Batsman)</div>
-                      <div className="text-sm font-bold text-white">{currentEntry.highestRunScorer}</div>
+                      <div className="text-[10px] text-amber-400 uppercase font-mono flex items-center gap-1">
+                        <span>🏏</span>
+                        <span>Orange Cap (Top Batsman)</span>
+                      </div>
+                      <div className="text-sm font-bold text-white mt-0.5">{currentEntry.highestRunScorer}</div>
                     </div>
                   )}
 
                   {currentEntry.highestWicketTaker && (
                     <div className="border-b border-slate-800 pb-2">
-                      <div className="text-[10px] text-slate-400 uppercase font-mono">Purple Cap (Top Bowler)</div>
-                      <div className="text-sm font-bold text-emerald-400">{currentEntry.highestWicketTaker}</div>
+                      <div className="text-[10px] text-emerald-400 uppercase font-mono flex items-center gap-1">
+                        <span>🎯</span>
+                        <span>Purple Cap (Top Bowler)</span>
+                      </div>
+                      <div className="text-sm font-bold text-emerald-400 mt-0.5">{currentEntry.highestWicketTaker}</div>
+                    </div>
+                  )}
+
+                  {currentEntry.bestWicketKeeper && (
+                    <div className="border-b border-slate-800 pb-2">
+                      <div className="text-[10px] text-cyan-400 uppercase font-mono flex items-center gap-1">
+                        <span>🧤</span>
+                        <span>Best Wicket Keeper (WK)</span>
+                      </div>
+                      <div className="text-sm font-bold text-cyan-300 mt-0.5">{currentEntry.bestWicketKeeper}</div>
+                    </div>
+                  )}
+
+                  {currentEntry.bestFielder && (
+                    <div className="border-b border-slate-800 pb-2">
+                      <div className="text-[10px] text-rose-400 uppercase font-mono flex items-center gap-1">
+                        <span>🦅</span>
+                        <span>Best Fielder</span>
+                      </div>
+                      <div className="text-sm font-bold text-rose-300 mt-0.5">{currentEntry.bestFielder}</div>
                     </div>
                   )}
 
@@ -1067,17 +1147,115 @@ export const HallOfFamePage: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                  Player of the Tournament (MVP)
-                </label>
-                <input
-                  type="text"
-                  value={newMvp}
-                  onChange={(e) => setNewMvp(e.target.value)}
-                  placeholder="e.g. Virat Kohli (520 runs)"
-                  className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50"
-                />
+              {/* Winning Captain Details */}
+              <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-black text-amber-950 uppercase tracking-wider">
+                  <Crown className="w-4 h-4 text-amber-600" />
+                  <span>Winning Captain Details</span>
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-black uppercase text-amber-900 mb-1">
+                      Captain Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={newCaptain}
+                      onChange={(e) => setNewCaptain(e.target.value)}
+                      placeholder="e.g. Spartans Captain"
+                      className="w-full px-3.5 py-2 rounded-xl border-2 border-amber-300 text-xs font-bold bg-white text-slate-950"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-black uppercase text-amber-900 mb-1">
+                      Captain Subtitle / Bio
+                    </label>
+                    <input
+                      type="text"
+                      value={newCaptainBio}
+                      onChange={(e) => setNewCaptainBio(e.target.value)}
+                      placeholder="e.g. Led team to championship glory in 2026."
+                      className="w-full px-3.5 py-2 rounded-xl border-2 border-amber-300 text-xs font-medium bg-white text-slate-950"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Tournament Leaderboard & Honors */}
+              <div className="p-4 rounded-2xl bg-slate-900 text-white border-2 border-slate-950 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-black text-[#FFE600] uppercase tracking-wider">
+                  <Award className="w-4 h-4" />
+                  <span>Tournament Honors & Leaderboard</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="sm:col-span-2">
+                    <label className="block text-[11px] font-black uppercase text-[#00F0FF] mb-1">
+                      🌟 Player of the Tournament (MVP)
+                    </label>
+                    <input
+                      type="text"
+                      value={newMvp}
+                      onChange={(e) => setNewMvp(e.target.value)}
+                      placeholder="e.g. Aditya Sharma (Frankfurt Spartans - 340 runs, 12 wkts)"
+                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-700 text-xs font-bold bg-slate-800 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-black uppercase text-amber-400 mb-1">
+                      🏏 Orange Cap (Top Batsman / Runs)
+                    </label>
+                    <input
+                      type="text"
+                      value={newOrangeCap}
+                      onChange={(e) => setNewOrangeCap(e.target.value)}
+                      placeholder="e.g. Rohit Mehra (412 runs)"
+                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-700 text-xs font-bold bg-slate-800 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-black uppercase text-emerald-400 mb-1">
+                      🎯 Purple Cap (Top Bowler / Wickets)
+                    </label>
+                    <input
+                      type="text"
+                      value={newPurpleCap}
+                      onChange={(e) => setNewPurpleCap(e.target.value)}
+                      placeholder="e.g. Karan Patel (18 wkts)"
+                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-700 text-xs font-bold bg-slate-800 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-black uppercase text-cyan-400 mb-1">
+                      🧤 Best Wicket Keeper (WK)
+                    </label>
+                    <input
+                      type="text"
+                      value={newBestWicketKeeper}
+                      onChange={(e) => setNewBestWicketKeeper(e.target.value)}
+                      placeholder="e.g. Siddharth Rao (15 Dismissals)"
+                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-700 text-xs font-bold bg-slate-800 text-white"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-black uppercase text-rose-400 mb-1">
+                      🦅 Best Fielder (Catches & Run-outs)
+                    </label>
+                    <input
+                      type="text"
+                      value={newBestFielder}
+                      onChange={(e) => setNewBestFielder(e.target.value)}
+                      placeholder="e.g. Manish Tiwari (11 Catches, 4 Run-outs)"
+                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-700 text-xs font-bold bg-slate-800 text-white"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -1101,7 +1279,7 @@ export const HallOfFamePage: React.FC = () => {
                   value={newStory}
                   onChange={(e) => setNewStory(e.target.value)}
                   placeholder="Brief summary of how the tournament was won..."
-                  rows={2}
+                  rows={3}
                   className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-medium bg-slate-50"
                 />
               </div>

@@ -134,11 +134,11 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Authentication State
     const [hallOfFame, setHallOfFame] = useState<HallOfFameEntry[]>(() => {
-    const saved = localStorage.getItem('cricmaster_hall_of_fame_v2');
+    const saved = localStorage.getItem('cricmaster_hall_of_fame_v3');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.some(e => e.year === 2026 && e.cricHeroesMatchUrl)) {
+        if (Array.isArray(parsed) && parsed.some(e => e.year === 2026 && e.bestWicketKeeper)) {
           return parsed;
         }
       } catch (e) {
@@ -149,7 +149,7 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
 
   useEffect(() => {
-    localStorage.setItem('cricmaster_hall_of_fame_v2', JSON.stringify(hallOfFame));
+    localStorage.setItem('cricmaster_hall_of_fame_v3', JSON.stringify(hallOfFame));
   }, [hallOfFame]);
 
   const addHallOfFameEntry = (entry: HallOfFameEntry) => {
