@@ -92,11 +92,11 @@ interface TournamentContextType {
 const TournamentContext = createContext<TournamentContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  TOURNAMENT: 'cricmaster_tournament_v2',
-  TEAMS: 'cricmaster_teams_v2',
-  MATCHES: 'cricmaster_matches_v2',
-  VIEW_MODE: 'cricmaster_view_mode_v2',
-  AUTH_USER: 'cricmaster_auth_user_v2',
+  TOURNAMENT: 'cricmaster_tournament_v3',
+  TEAMS: 'cricmaster_teams_v3',
+  MATCHES: 'cricmaster_matches_v3',
+  VIEW_MODE: 'cricmaster_view_mode_v3',
+  AUTH_USER: 'cricmaster_auth_user_v3',
 };
 
 export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {

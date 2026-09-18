@@ -53,7 +53,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
     currentUser, 
     canEditTeam, 
     isAdmin, 
-    openAuthModal, 
+    openAuthModal,
+    addTeam,
+    updateTeam,
+    deleteTeam,
     addPlayer, 
     updatePlayer, 
     deletePlayer, 
@@ -137,6 +140,20 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
     setIdProofNum('');
   };
 
+
+
+  const handleDirectTeamPhoto = async (file: File) => {
+    try {
+      const base64 = await processPlayerPhoto(file);
+      updateTeam({
+        ...team,
+        teamPhotoUrl: base64
+      });
+    } catch (err) {
+      console.error(err);
+      alert('Could not upload team photo');
+    }
+  };
 
   const handleDirectPlayerPhoto = async (player: Player, file: File) => {
     try {
@@ -376,8 +393,8 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
           {/* Top Row: Group Badge & Edit Action */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="px-3.5 py-1 rounded-xl bg-[#CCFF00] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider shadow-[2px_2px_0px_#0f172a]">
-                {team.group || 'Group A'}
+              <span className="px-3.5 py-1 rounded-xl bg-white/20 backdrop-blur text-white font-mono font-bold text-xs border border-white/20">
+                OFFICIAL FRANCHISE
               </span>
               <span className="px-3 py-1 rounded-xl bg-black/60 backdrop-blur text-white border border-white/20 text-xs font-mono font-bold">
                 EST. {team.establishedYear || 2022}
@@ -385,20 +402,30 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             </div>
 
             {isAuthorized ? (
-              <button
-                onClick={() => setShowEditModal(true)}
-                className="px-3.5 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-950 backdrop-blur text-xs font-black transition-all border border-white/30 flex items-center gap-1.5"
+              <label 
+                htmlFor="team-direct-photo-upload"
+                className="cursor-pointer px-3.5 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-950 backdrop-blur text-xs font-black transition-all border border-white/30 flex items-center gap-1.5"
               >
                 <Camera className="w-3.5 h-3.5" />
-                <span>Change Team Photo</span>
-              </button>
+                <span>Upload Team Photo</span>
+                <input
+                  id="team-direct-photo-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files && e.target.files[0];
+                    if (f) handleDirectTeamPhoto(f);
+                  }}
+                />
+              </label>
             ) : (
               <button
                 onClick={() => openAuthModal(team.id)}
-                className="px-3.5 py-1.5 rounded-xl bg-black/50 hover:bg-black text-slate-300 hover:text-white backdrop-blur text-xs font-bold transition-all border border-white/20 flex items-center gap-1.5"
+                className="px-3.5 py-1.5 rounded-xl bg-black/50 hover:bg-[#CCFF00] text-slate-300 hover:text-slate-950 backdrop-blur text-xs font-bold transition-all border border-white/20 flex items-center gap-1.5"
               >
                 <Lock className="w-3.5 h-3.5" />
-                <span>Captain Lock</span>
+                <span>Captain Login (PIN: 2026)</span>
               </button>
             )}
           </div>
@@ -409,10 +436,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             {/* Left: Mascot & Team Name */}
             <div className="flex items-start sm:items-center gap-4 sm:gap-6 flex-1 min-w-0">
               <div 
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center text-4xl sm:text-5xl border-3 border-white shadow-2xl shrink-0"
-                style={{ backgroundColor: (team.primaryColor || '#2563eb') + 'dd' }}
+                className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center text-2xl sm:text-3xl font-black font-mono border-3 border-white shadow-2xl shrink-0 text-white"
+                style={{ backgroundColor: team.primaryColor || '#0284c7' }}
               >
-                {team.logo}
+                {team.code}
               </div>
 
               <div className="space-y-1.5 flex-1 min-w-0">
@@ -425,9 +452,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                   </span>
                 </div>
 
-                <p className="text-[#CCFF00] text-sm sm:text-base font-bold italic drop-shadow">
-                  "{team.slogan || 'Play Bold, Strike Hard'}"
-                </p>
+                
 
                 <div className="flex flex-wrap items-center gap-4 text-xs text-slate-200 font-medium pt-1">
                   <span className="flex items-center gap-1.5">
@@ -453,8 +478,11 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             {/* Right: Elevated Team Squad Photo Card (Fully visible and elevated) */}
             <div 
               onClick={() => {
-                if (isAuthorized) setShowEditModal(true);
-                else openAuthModal(team.id);
+                if (isAuthorized) {
+                  document.getElementById('team-direct-photo-upload')?.click();
+                } else {
+                  openAuthModal(team.id);
+                }
               }}
               className="relative group cursor-pointer shrink-0 rounded-2xl overflow-hidden border-3 border-white shadow-[0_10px_35px_rgba(0,0,0,0.6)] hover:scale-102 transition-all w-full sm:w-80 bg-slate-900"
             >

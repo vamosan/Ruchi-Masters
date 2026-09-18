@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Team, Player } from '../../types/cricket';
 import { useTournament } from '../../context/TournamentContext';
+import { processPlayerPhoto } from '../../utils/imageUtils';
 
 interface Props {
   team: Team;
@@ -78,25 +79,27 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
   const [activeEditTab, setActiveEditTab] = useState<'general' | 'media' | 'branding' | 'staff'>('general');
 
   // Handle local file uploads (Team Photo & Banner)
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTeamPhotoUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await processPlayerPhoto(file);
+        setTeamPhotoUrl(compressed);
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
-  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setBannerUrl(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await processPlayerPhoto(file);
+        setBannerUrl(compressed);
+      } catch (err) {
+        console.error(err);
+      }
     }
   };
 
