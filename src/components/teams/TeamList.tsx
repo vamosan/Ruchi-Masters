@@ -227,22 +227,16 @@ export const TeamList: React.FC = () => {
                       YOUR SQUAD
                     </span>
                   )}
-
-                  <span className="px-2.5 py-0.5 rounded-xl text-xs font-black bg-white text-slate-950 shadow border-2 border-slate-950 font-mono">
-                    {team.code}
-                  </span>
                 </div>
 
                 {/* Team Monogram Badge sitting inside bottom-left */}
                 <div className="absolute bottom-3 left-3 flex items-center gap-3">
                   <div 
-                    className="w-12 h-12 rounded-2xl flex items-center justify-center font-black font-mono text-base border-2 border-white shadow-xl text-white"
-                    style={{ backgroundColor: team.primaryColor || '#0284c7' }}
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center border-2 border-white/40 shadow-xl text-white bg-slate-900/60 backdrop-blur"
                   >
-                    {team.code}
+                    <Shield className="w-5 h-5 text-white" />
                   </div>
                   <div className="text-white drop-shadow-md">
-                    <span className="text-[10px] font-black uppercase tracking-wider block text-slate-300 font-mono">FRANCHISE</span>
                     <span className="text-lg font-black leading-tight block font-cabinet">{team.name}</span>
                   </div>
                 </div>

@@ -39,6 +39,7 @@ import { processPlayerPhoto } from '../../utils/imageUtils';
 import { EditTeamModal } from './EditTeamModal';
 import { HoloTiltCard } from '../common/HoloTiltCard';
 import { PlayerCertificateModal } from './PlayerCertificateModal';
+import { PlayerDetailModal } from './PlayerDetailModal';
 
 interface Props {
   team: Team;
@@ -72,6 +73,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [authPlayerModal, setAuthPlayerModal] = useState<Player | null>(null);
   const [selectedCertPlayer, setSelectedCertPlayer] = useState<Player | null>(null);
+  const [enlargedPlayer, setEnlargedPlayer] = useState<Player | null>(null);
 
   // Search & Filters for squad
   const [searchQuery, setSearchQuery] = useState('');
@@ -295,7 +297,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             >
               {teams.map(t => (
                 <option key={t.id} value={t.id}>
-                  {t.logo} {t.name} ({t.code})
+                  {t.name}
                 </option>
               ))}
             </select>
@@ -347,7 +349,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               className="px-4 py-2 rounded-xl bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 font-black text-xs sport-btn flex items-center gap-1.5"
             >
               <Crown className="w-4 h-4 text-amber-800" />
-              <span>Log In as {team.code} Captain</span>
+              <span>Log In as Team Captain</span>
             </button>
           </div>
         </div>
@@ -436,10 +438,9 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             {/* Left: Mascot & Team Name */}
             <div className="flex items-start sm:items-center gap-4 sm:gap-6 flex-1 min-w-0">
               <div 
-                className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl flex items-center justify-center text-2xl sm:text-3xl font-black font-mono border-3 border-white shadow-2xl shrink-0 text-white"
-                style={{ backgroundColor: team.primaryColor || '#0284c7' }}
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center border-2 border-white/40 shadow-2xl shrink-0 text-white bg-slate-900/60 backdrop-blur"
               >
-                {team.code}
+                <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
               </div>
 
               <div className="space-y-1.5 flex-1 min-w-0">
@@ -447,9 +448,6 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-cabinet tracking-tight text-white drop-shadow-md truncate">
                     {team.name}
                   </h1>
-                  <span className="px-3 py-1 rounded-xl text-xs sm:text-sm font-black bg-white text-slate-950 shadow border-2 border-slate-900 font-mono shrink-0">
-                    {team.code}
-                  </span>
                 </div>
 
                 
@@ -679,10 +677,11 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               <HoloTiltCard
                 key={player.id}
                 isSpecial={player.isCaptain}
-                className="h-full"
+                className="h-full cursor-pointer group"
+                onClick={() => setEnlargedPlayer(player)}
               >
                 <div
-                  className={'bg-white rounded-3xl border-3 border-slate-950 p-5 flex flex-col justify-between space-y-4 transition-all h-full relative overflow-hidden ' + (
+                  className={'bg-white rounded-3xl border-3 border-slate-950 p-5 flex flex-col justify-between space-y-4 transition-all h-full relative overflow-hidden group-hover:border-cyan-500 group-hover:shadow-[6px_6px_0px_#00F0FF] ' + (
                     player.isAuthenticated 
                       ? 'shadow-[4px_4px_0px_#0f172a]' 
                       : 'bg-amber-50/40 border-dashed border-amber-500 shadow'
@@ -822,8 +821,8 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                   <span className="font-black text-slate-900 text-sm">{team.homeGround}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 font-bold block">Tournament Group:</span>
-                  <span className="font-black text-slate-900 text-sm">{team.group || 'Group A'}</span>
+                  <span className="text-slate-500 font-bold block">Tournament Format:</span>
+                  <span className="font-black text-slate-900 text-sm">T20 Championship</span>
                 </div>
                 <div>
                   <span className="text-slate-500 font-bold block">Established:</span>
@@ -941,9 +940,9 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
                       <div className="flex items-center gap-3 pt-1">
                         <div className="flex items-center gap-2 font-black text-base">
-                          <span>{team.logo} {team.code}</span>
+                          <span>{team.name}</span>
                           <span className="text-slate-400 font-bold">vs</span>
-                          <span>{opponent?.logo} {opponent?.name || 'Opponent'}</span>
+                          <span>{opponent?.name || 'Opponent'}</span>
                         </div>
                       </div>
 
@@ -1037,14 +1036,13 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               }}
             >
               <div className="flex items-center justify-between">
-                <span className="text-4xl p-2 rounded-2xl bg-black/30 backdrop-blur">{team.logo}</span>
-                <span className="px-3 py-1 rounded-xl bg-white text-slate-950 font-black text-xs shadow font-mono">
-                  {team.code}
-                </span>
+                <div className="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center font-black text-lg">
+                  <Shield className="w-6 h-6 text-white" />
+                </div>
               </div>
               <div>
                 <h4 className="text-xl font-black font-cabinet">{team.name}</h4>
-                <p className="text-xs opacity-90 italic">"{team.slogan || 'Play Bold'}"</p>
+                <p className="text-xs opacity-90 font-medium">Official Team Kit & Theme</p>
               </div>
             </div>
 
@@ -1067,6 +1065,15 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             </div>
           </div>
         </div>
+      )}
+
+      {/* ENLARGED PLAYER DETAIL PROFILE MODAL */}
+      {enlargedPlayer && (
+        <PlayerDetailModal
+          player={enlargedPlayer}
+          team={team}
+          onClose={() => setEnlargedPlayer(null)}
+        />
       )}
 
       {/* EDIT TEAM PROFILE & MEDIA MODAL */}

@@ -5,13 +5,15 @@ interface HoloTiltCardProps {
   className?: string;
   isSpecial?: boolean;
   maxRotation?: number;
+  onClick?: () => void;
 }
 
 export const HoloTiltCard: React.FC<HoloTiltCardProps> = ({
   children,
   className = '',
   isSpecial = false,
-  maxRotation = 12
+  maxRotation = 12,
+  onClick
 }) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
@@ -50,6 +52,7 @@ export const HoloTiltCard: React.FC<HoloTiltCardProps> = ({
   return (
     <div
       ref={cardRef}
+      onClick={onClick}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
