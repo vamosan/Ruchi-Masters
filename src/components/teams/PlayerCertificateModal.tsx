@@ -11,7 +11,8 @@ import {
   Calendar, 
   CheckCircle2, 
   Share2,
-  FileBadge
+  FileBadge,
+  Shield
 } from 'lucide-react';
 import { Player, Team } from '../../types/cricket';
 
@@ -92,10 +93,9 @@ export const PlayerCertificateModal: React.FC<Props> = ({ player, team, onClose 
           <div className="flex items-center justify-between border-b-2 border-slate-900 pb-4">
             <div className="flex items-center gap-3">
               <div 
-                className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl border-2 border-slate-950 shadow-md"
-                style={{ backgroundColor: (team.primaryColor || '#2563eb') + '25' }}
+                className="w-12 h-12 rounded-2xl flex items-center justify-center border-2 border-slate-950 shadow-md bg-slate-100"
               >
-                {team.logo}
+                <Shield className="w-6 h-6 text-slate-900" />
               </div>
               <div>
                 <span className="text-[10px] font-black font-mono uppercase tracking-widest text-[#FF3366] block">
@@ -105,7 +105,7 @@ export const PlayerCertificateModal: React.FC<Props> = ({ player, team, onClose 
                   Player Identity Verification Certificate
                 </h2>
                 <span className="text-xs font-bold text-slate-500">
-                  {team.name} ({team.code}) • {team.group || 'Group A'}
+                  {team.name} • Official Squad Member
                 </span>
               </div>
             </div>

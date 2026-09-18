@@ -435,14 +435,8 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
           {/* Main Hero Header: Team Title on Left, High Elevated Team Photo on Right */}
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pt-2">
             
-            {/* Left: Mascot & Team Name */}
+            {/* Left: Team Name */}
             <div className="flex items-start sm:items-center gap-4 sm:gap-6 flex-1 min-w-0">
-              <div 
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl flex items-center justify-center border-2 border-white/40 shadow-2xl shrink-0 text-white bg-slate-900/60 backdrop-blur"
-              >
-                <Shield className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-              </div>
-
               <div className="space-y-1.5 flex-1 min-w-0">
                 <div className="flex items-center gap-3 flex-wrap">
                   <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-cabinet tracking-tight text-white drop-shadow-md truncate">
@@ -688,14 +682,14 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                   )}
                 >
                   <div className="flex items-start gap-4">
-                    {/* Player Photo Avatar */}
+                    {/* Enlarged Player Photo Avatar (+50% larger: w-24 h-24 sm:w-26 sm:h-26) */}
                     <div className="relative shrink-0">
                       <img
-                        src={player.photoUrl || player.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80'}
+                        src={player.photoUrl || player.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80'}
                         alt={player.name}
-                        className="w-16 h-16 rounded-2xl object-cover border-2 border-slate-950 shadow-md"
+                        className="w-24 h-24 sm:w-26 sm:h-26 rounded-2xl object-cover border-3 border-slate-950 shadow-md bg-slate-100 group-hover:scale-103 transition-transform"
                       />
-                      <span className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-lg bg-slate-950 text-[#CCFF00] text-[10px] font-mono font-black border border-slate-700 shadow">
+                      <span className="absolute -bottom-1 -right-1 px-2.5 py-0.5 rounded-lg bg-slate-950 text-[#CCFF00] text-xs font-mono font-black border border-slate-700 shadow">
                         #{player.jerseyNumber}
                       </span>
                     </div>

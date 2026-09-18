@@ -153,30 +153,30 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, team, onClose }) =>
           {/* Main Photo & Identification Banner */}
           <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-slate-50 border-2 border-slate-900">
             
-            {/* Player Photo with Camera Overlay */}
+            {/* Player Photo with Camera Overlay (Enlarged by over 50%) */}
             <div className="relative group shrink-0">
               <img
-                src={photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80'}
+                src={photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80'}
                 alt={name}
-                className="w-28 h-28 sm:w-32 sm:h-32 rounded-2xl object-cover border-3 border-slate-950 shadow-md bg-slate-200"
+                className="w-44 h-44 sm:w-48 sm:h-48 rounded-3xl object-cover border-3 border-slate-950 shadow-xl bg-slate-200"
               />
 
               {isAuthorized ? (
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute inset-0 bg-slate-950/60 rounded-2xl opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-black gap-1 cursor-pointer"
+                  className="absolute inset-0 bg-slate-950/60 rounded-3xl opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-black gap-1 cursor-pointer"
                 >
-                  <Camera className="w-6 h-6 text-[#CCFF00]" />
-                  <span>{isUploading ? 'Compressing...' : 'Change Photo'}</span>
+                  <Camera className="w-8 h-8 text-[#CCFF00]" />
+                  <span className="bg-slate-950/80 px-2.5 py-1 rounded-lg border border-white/20">{isUploading ? 'Compressing...' : 'Change Photo'}</span>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => openAuthModal(team.id)}
-                  className="absolute inset-0 bg-slate-950/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-black gap-1"
+                  className="absolute inset-0 bg-slate-950/60 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-black gap-1"
                 >
-                  <Lock className="w-5 h-5 text-amber-400" />
+                  <Lock className="w-6 h-6 text-amber-400" />
                   <span>Captain Login</span>
                 </button>
               )}
