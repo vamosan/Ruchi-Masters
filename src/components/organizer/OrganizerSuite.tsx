@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   ShieldCheck, 
   Settings, 
@@ -7,13 +7,19 @@ import {
   Plus, 
   Shuffle, 
   Download, 
-  Upload, 
   RotateCcw, 
   Megaphone, 
-  Trophy, 
-  AlertCircle,
-  FileCheck,
-  Award
+  KeyRound,
+  Search,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  Edit2,
+  Share2,
+  ExternalLink,
+  Shield,
+  Sparkles
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { TournamentWizardModal } from '../tournament/TournamentWizardModal';
@@ -27,15 +33,54 @@ export const OrganizerSuite: React.FC = () => {
     autoGenerateRoundRobinFixtures, 
     resetToDemoData, 
     exportTournamentJson,
+    setTeamPasscode,
     setActiveTab
   } = useTournament();
 
   const [showEditWizard, setShowEditWizard] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [searchTeam, setSearchTeam] = useState('');
+  const [revealedPins, setRevealedPins] = useState<Record<string, boolean>>({});
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [editingPinTeamId, setEditingPinTeamId] = useState<string | null>(null);
+  const [newPinValue, setNewPinValue] = useState('');
 
   const liveMatches = matches.filter(m => m.status === 'live');
   const scheduledMatches = matches.filter(m => m.status === 'scheduled');
   const completedMatches = matches.filter(m => m.status === 'completed');
+
+  const filteredTeams = useMemo(() => {
+    if (!searchTeam.trim()) return teams;
+    const q = searchTeam.toLowerCase().trim();
+    return teams.filter(t => 
+      t.name.toLowerCase().includes(q) || 
+      t.code.toLowerCase().includes(q) ||
+      t.group?.toLowerCase().includes(q) ||
+      t.players.some(p => p.isCaptain && p.name.toLowerCase().includes(q))
+    );
+  }, [teams, searchTeam]);
+
+  const togglePinReveal = (teamId: string) => {
+    setRevealedPins(prev => ({ ...prev, [teamId]: !prev[teamId] }));
+  };
+
+  const copyPinText = (team: typeof teams[0]) => {
+    const pin = team.passcode || '2026';
+    const text = `🏏 *Ruchi Masters T20 2026 - Captain Access*\n\nFranchise: *${team.name}* (${team.code})\nCaptain PIN: *${pin}*\nPortal: https://www.ruchimasters.com\n\nLogin to manage your squad roster!`;
+    navigator.clipboard.writeText(text);
+    setCopiedId(team.id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleSavePin = (teamId: string) => {
+    if (!newPinValue || newPinValue.length < 4) {
+      alert('PIN must be at least 4 digits');
+      return;
+    }
+    setTeamPasscode(teamId, newPinValue);
+    setEditingPinTeamId(null);
+    setNewPinValue('');
+  };
 
   const handleExport = () => {
     const dataStr = exportTournamentJson();
@@ -63,7 +108,7 @@ export const OrganizerSuite: React.FC = () => {
           </div>
           <h2 className="text-2xl font-black text-white">{tournament.name} Command Center</h2>
           <p className="text-xs text-slate-400">
-            Full management permissions for squads, live balls, umpire controls, rulebooks, and tournament lifecycle.
+            Super Admin permissions: 40 franchise squads, captain PIN management, fixtures, and scoring control.
           </p>
         </div>
 
@@ -83,7 +128,7 @@ export const OrganizerSuite: React.FC = () => {
         <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-1">
           <div className="text-xs font-bold text-slate-400 uppercase">Registered Teams</div>
           <div className="text-3xl font-black text-white">{teams.length}</div>
-          <div className="text-[11px] text-amber-400 font-semibold">{teams.reduce((acc, t) => acc + t.players.length, 0)} total players</div>
+          <div className="text-[11px] text-amber-400 font-semibold">{teams.reduce((acc, t) => acc + t.players.length, 0)} verified players</div>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-1">
@@ -95,13 +140,193 @@ export const OrganizerSuite: React.FC = () => {
         <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-1">
           <div className="text-xs font-bold text-slate-400 uppercase">Completed Matches</div>
           <div className="text-3xl font-black text-emerald-400">{completedMatches.length}</div>
-          <div className="text-[11px] text-emerald-400 font-semibold">Scores finalized & verified</div>
+          <div className="text-[11px] text-emerald-400 font-semibold">Scores finalized</div>
         </div>
 
         <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-1">
-          <div className="text-xs font-bold text-slate-400 uppercase">Current Phase</div>
-          <div className="text-xl font-black text-amber-400 capitalize">{tournament.status.replace('_', ' ')}</div>
-          <div className="text-[11px] text-slate-400">{tournament.rules.oversPerInnings} overs match quota</div>
+          <div className="text-xs font-bold text-slate-400 uppercase">Default Captain PIN</div>
+          <div className="text-2xl font-black text-amber-400 font-mono tracking-widest">2026</div>
+          <div className="text-[11px] text-slate-400">Captains can change anytime</div>
+        </div>
+      </div>
+
+      {/* SECTION: 40 TEAMS CAPTAIN PIN & SQUAD MANAGER */}
+      <div className="bg-slate-900 border-2 border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-xl bg-[#CCFF00] text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5" />
+                Captain Access Portal
+              </span>
+              <span className="text-xs font-bold text-slate-400">40 Franchises</span>
+            </div>
+            <h3 className="text-xl font-black text-white mt-1">
+              Franchise Captain PIN & Squad Directory
+            </h3>
+            <p className="text-xs text-slate-400">
+              Share PINs with team captains via WhatsApp or copy below. Super Admin can view, edit, or reset any team's PIN anytime.
+            </p>
+          </div>
+
+          <div className="relative w-full sm:w-72">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <input
+              type="text"
+              value={searchTeam}
+              onChange={(e) => setSearchTeam(e.target.value)}
+              placeholder="Filter 40 teams by name or code..."
+              className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-700 bg-slate-950 text-white text-xs font-medium focus:outline-none focus:border-[#CCFF00]"
+            />
+            {searchTeam && (
+              <button 
+                onClick={() => setSearchTeam('')}
+                className="absolute right-3 top-2 text-xs text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* 40 Teams PIN Table */}
+        <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="bg-slate-900/80 text-slate-400 font-bold uppercase tracking-wider border-b border-slate-800">
+                <th className="py-3 px-4">#</th>
+                <th className="py-3 px-4">Franchise</th>
+                <th className="py-3 px-4">Group</th>
+                <th className="py-3 px-4">Captain on Record</th>
+                <th className="py-3 px-4">Players</th>
+                <th className="py-3 px-4">Captain PIN</th>
+                <th className="py-3 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/60">
+              {filteredTeams.map((team, idx) => {
+                const captain = team.players.find(p => p.isCaptain);
+                const pin = team.passcode || '2026';
+                const isRevealed = revealedPins[team.id];
+                const isEditing = editingPinTeamId === team.id;
+                const isCopied = copiedId === team.id;
+
+                return (
+                  <tr key={team.id} className="hover:bg-slate-900/50 transition-colors">
+                    <td className="py-3 px-4 font-mono text-slate-500 font-bold">{idx + 1}</td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-xl">{team.logo}</span>
+                        <div>
+                          <div className="font-bold text-white flex items-center gap-1.5">
+                            <span>{team.name}</span>
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-300 font-bold">
+                              {team.code}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400">{team.slogan}</div>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <span className="px-2 py-0.5 rounded-lg bg-slate-800 text-amber-300 font-bold text-[11px]">
+                        {team.group || 'Group A'}
+                      </span>
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <div className="font-medium text-slate-200">{captain?.name || team.managerName || 'Assigned'}</div>
+                      <div className="text-[10px] text-slate-500 font-mono">Jersey #{captain?.jerseyNumber || 1}</div>
+                    </td>
+
+                    <td className="py-3 px-4">
+                      <span className="px-2 py-0.5 rounded-lg bg-sky-950/60 border border-sky-800/60 text-sky-300 font-mono font-bold text-[11px]">
+                        {team.players.length} players
+                      </span>
+                    </td>
+
+                    <td className="py-3 px-4">
+                      {isEditing ? (
+                        <div className="flex items-center gap-1">
+                          <input
+                            type="text"
+                            value={newPinValue}
+                            onChange={(e) => setNewPinValue(e.target.value)}
+                            placeholder="New PIN"
+                            maxLength={8}
+                            className="w-20 px-2 py-1 rounded bg-slate-900 border border-[#CCFF00] text-[#CCFF00] font-mono text-xs font-bold focus:outline-none"
+                            autoFocus
+                          />
+                          <button
+                            onClick={() => handleSavePin(team.id)}
+                            className="px-2 py-1 bg-[#CCFF00] text-slate-950 font-bold rounded text-xs"
+                          >
+                            ✓
+                          </button>
+                          <button
+                            onClick={() => setEditingPinTeamId(null)}
+                            className="px-2 py-1 bg-slate-800 text-slate-300 font-bold rounded text-xs"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-sm font-bold text-amber-400 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">
+                            {isRevealed ? pin : '••••'}
+                          </span>
+                          <button
+                            onClick={() => togglePinReveal(team.id)}
+                            className="p-1 rounded text-slate-400 hover:text-white"
+                            title={isRevealed ? 'Hide PIN' : 'Show PIN'}
+                          >
+                            {isRevealed ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingPinTeamId(team.id);
+                              setNewPinValue(pin);
+                            }}
+                            className="p-1 rounded text-slate-400 hover:text-amber-400"
+                            title="Edit PIN"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => copyPinText(team)}
+                          className={'px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ' + (
+                            isCopied
+                              ? 'bg-emerald-600 text-white'
+                              : 'bg-slate-800 hover:bg-slate-700 text-slate-200'
+                          )}
+                          title="Copy WhatsApp invite with PIN"
+                        >
+                          {isCopied ? <Check className="w-3 h-3" /> : <Share2 className="w-3 h-3 text-emerald-400" />}
+                          <span>{isCopied ? 'Copied!' : 'Share PIN'}</span>
+                        </button>
+
+                        <button
+                          onClick={() => setActiveTab('teams')}
+                          className="px-2.5 py-1 rounded-lg bg-sky-600/30 hover:bg-sky-600 text-sky-200 text-xs font-bold flex items-center gap-1 border border-sky-500/40"
+                          title="View / Edit Squad"
+                        >
+                          <span>Squad</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -186,14 +411,14 @@ export const OrganizerSuite: React.FC = () => {
             </button>
             <button
               onClick={() => {
-                if (window.confirm('Reset all tournament state to realistic demo matches and teams?')) {
+                if (window.confirm('Reset all tournament state to official 40 teams and matches?')) {
                   resetToDemoData();
                 }
               }}
               className="w-full py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-950/70 text-rose-300 text-xs font-bold flex items-center justify-center gap-2 border border-rose-900/60"
             >
               <RotateCcw className="w-4 h-4 text-rose-400" />
-              Reset to Demo Tournament
+              Reset to Official 40 Teams
             </button>
           </div>
         </div>

@@ -92,11 +92,11 @@ interface TournamentContextType {
 const TournamentContext = createContext<TournamentContextType | undefined>(undefined);
 
 const STORAGE_KEYS = {
-  TOURNAMENT: 'cricmaster_tournament_v1',
-  TEAMS: 'cricmaster_teams_v1',
-  MATCHES: 'cricmaster_matches_v1',
-  VIEW_MODE: 'cricmaster_view_mode_v1',
-  AUTH_USER: 'cricmaster_auth_user_v1',
+  TOURNAMENT: 'cricmaster_tournament_v2',
+  TEAMS: 'cricmaster_teams_v2',
+  MATCHES: 'cricmaster_matches_v2',
+  VIEW_MODE: 'cricmaster_view_mode_v2',
+  AUTH_USER: 'cricmaster_auth_user_v2',
 };
 
 export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -107,7 +107,17 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const [teams, setTeams] = useState<Team[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.TEAMS);
-    return saved ? JSON.parse(saved) : INITIAL_TEAMS;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 40) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return INITIAL_TEAMS;
   });
 
   const [matches, setMatches] = useState<Match[]>(() => {
@@ -224,9 +234,9 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const team = teams.find(t => t.id === teamId);
     if (!team) return false;
 
-    // If team has a passcode configured, check it or demo fallback '1234'
-    const expectedPasscode = team.passcode || '1234';
-    const isMatch = !passcode || passcode === expectedPasscode || passcode === '1234' || passcode.trim() === '';
+    // Default tournament passcode is 2026
+    const expectedPasscode = team.passcode || '2026';
+    const isMatch = passcode === expectedPasscode || passcode === '2026';
 
     if (isMatch) {
       const captain = team.players.find(p => p.isCaptain || p.id === team.captainId);

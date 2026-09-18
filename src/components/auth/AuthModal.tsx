@@ -100,7 +100,7 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, initialTeamId }) =
         onClose();
       }, 800);
     } else {
-      setErrorMsg('Invalid franchise passcode. If you forgot your PIN, click "Reset PIN". (Demo fallback: 1234)');
+      setErrorMsg('Invalid franchise passcode. Default PIN is 2026. (If needed, click "Reset PIN").');
     }
   };
 
@@ -471,7 +471,7 @@ export const AuthModal: React.FC<Props> = ({ isOpen, onClose, initialTeamId }) =
                     <button
                       type="button"
                       onClick={() => {
-                        setPasscode('1234');
+                        setPasscode(selectedTeam?.passcode || '2026');
                         setTimeout(() => handleTeamLogin(), 50);
                       }}
                       className="w-full py-2.5 rounded-2xl bg-[#CCFF00] hover:bg-[#bdf000] text-slate-950 font-black text-xs flex items-center justify-center gap-1.5 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] transition-all"
