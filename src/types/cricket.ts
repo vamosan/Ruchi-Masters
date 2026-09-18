@@ -344,6 +344,7 @@ export interface HallOfFameEntry {
   championTeamName: string;
   championLogo: string;
   runnerUpTeamName: string;
+  secondRunnerUpTeamName?: string;
   finalScore: string;
   margin: string;
   venue: string;

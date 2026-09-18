@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { HallOfFameEntry, HallOfFameMedia } from '../../types/cricket';
+import { processBannerPhoto } from '../../utils/imageUtils';
 
 export const HallOfFamePage: React.FC = () => {
   const { 
@@ -57,6 +58,7 @@ export const HallOfFamePage: React.FC = () => {
   const [newYear, setNewYear] = useState<number>(2026);
   const [newChampionTeamId, setNewChampionTeamId] = useState(teams[0]?.id || '');
   const [newRunnerUp, setNewRunnerUp] = useState('');
+  const [newSecondRunnerUp, setNewSecondRunnerUp] = useState('');
   const [newFinalScore, setNewFinalScore] = useState('');
   const [newMargin, setNewMargin] = useState('');
   const [newVenue, setNewVenue] = useState('Apex National Stadium');
@@ -87,6 +89,22 @@ export const HallOfFamePage: React.FC = () => {
     setShowAddMediaModal(false);
   };
 
+  const handleMediaFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      const base64 = await processBannerPhoto(file);
+      setMediaUrl(base64);
+      if (!mediaTitle.trim()) {
+        const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+        setMediaTitle(cleanName.charAt(0).toUpperCase() + cleanName.slice(1));
+      }
+    } catch (err) {
+      console.error('Failed to process image file', err);
+      alert('Could not process this image file. Please try another image.');
+    }
+  };
+
   const handleOpenAddYear = () => {
     if (currentUser.role !== 'admin') {
       openAuthModal();
@@ -97,6 +115,7 @@ export const HallOfFamePage: React.FC = () => {
     setIsCurrentActiveSeason(false);
     setNewChampionTeamId(teams[0]?.id || '');
     setNewRunnerUp('');
+    setNewSecondRunnerUp('');
     setNewFinalScore('');
     setNewMargin('');
     setNewVenue('Apex National Stadium');
@@ -118,6 +137,7 @@ export const HallOfFamePage: React.FC = () => {
     setIsCurrentActiveSeason(entry.finalScore.includes('In Progress') || entry.margin.includes('In Progress'));
     setNewChampionTeamId(entry.championTeamId);
     setNewRunnerUp(entry.runnerUpTeamName);
+    setNewSecondRunnerUp(entry.secondRunnerUpTeamName || '');
     setNewFinalScore(entry.finalScore);
     setNewMargin(entry.margin);
     setNewVenue(entry.venue);
@@ -140,7 +160,7 @@ export const HallOfFamePage: React.FC = () => {
     if (isCurrentActiveSeason) {
       if (!entryFinalScore) entryFinalScore = '2026 Championship Tournament In Progress';
       if (!entryMargin) entryMargin = '🏆 Battle for the Cup Underway';
-      if (!entryStory) entryStory = 'The ' + newYear + ' edition of Ruchi Masters T20 is currently live with 6 elite franchises battling for the ultimate trophy.';
+      if (!entryStory) entryStory = 'The ' + newYear + ' edition of Ruchi Masters T20 is currently live with 40 elite franchises battling for the ultimate trophy.';
     } else {
       if (!entryFinalScore) entryFinalScore = champTeam.name + ' won the championship';
       if (!entryMargin) entryMargin = 'Won Grand Final';
@@ -150,11 +170,12 @@ export const HallOfFamePage: React.FC = () => {
     const newEntry: HallOfFameEntry = {
       id: 'hof-' + newYear,
       year: Number(newYear),
-      editionName: 'Ruchi Masters T20 ' + newYear + ' Cup',
+      editionName: 'Ruchi Masters T20 ' + newYear + ' (5th Edition)',
       championTeamId: champTeam.id,
       championTeamName: champTeam.name,
       championLogo: champTeam.logo,
       runnerUpTeamName: newRunnerUp.trim() || (isCurrentActiveSeason ? 'Top Contenders' : 'Finalist Squad'),
+      secondRunnerUpTeamName: newSecondRunnerUp.trim() || undefined,
       finalScore: entryFinalScore,
       margin: entryMargin,
       venue: newVenue.trim() || 'Apex National Stadium',
@@ -171,6 +192,23 @@ export const HallOfFamePage: React.FC = () => {
     addHallOfFameEntry(newEntry);
     setSelectedYear(Number(newYear));
     setShowAddChampionModal(false);
+  };
+
+  // Direct Trophy Photo Upload Handler
+  const handleTrophyPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file || !currentEntry) return;
+
+    try {
+      const base64 = await processBannerPhoto(file);
+      addHallOfFameEntry({
+        ...currentEntry,
+        trophyPhotoUrl: base64
+      });
+    } catch (err) {
+      console.error('Failed to upload trophy photo', err);
+      alert('Could not upload this image. Please try another image.');
+    }
   };
 
   const handleSampleImage = (type: 'trophy' | 'team' | 'celebration') => {
@@ -267,17 +305,17 @@ export const HallOfFamePage: React.FC = () => {
             <button
               key={entry.year}
               onClick={() => setSelectedYear(entry.year)}
-              className={'h-12 px-6 rounded-2xl text-sm font-black shrink-0 flex items-center gap-3 border-3 transition-all ' + (
+              className={'h-14 px-5 rounded-2xl text-sm font-black shrink-0 flex items-center gap-3 border-3 transition-all ' + (
                 isSelected
                   ? 'bg-slate-950 text-white border-slate-950 shadow-[4px_4px_0px_#FFE600] scale-105'
                   : 'bg-white text-slate-800 border-slate-950 hover:bg-amber-50 hover:scale-102 shadow-[2px_2px_0px_#0f172a]'
               )}
             >
-              <span className="text-xl">{entry.championLogo}</span>
+              <span className="text-2xl">{entry.championLogo}</span>
               <div className="text-left">
                 <div className="font-cabinet leading-none text-base">{entry.year}</div>
-                <div className={'text-[10px] font-mono ' + (isSelected ? 'text-[#FFE600]' : 'text-slate-500')}>
-                  {entry.championTeamName.split(' ')[0]}
+                <div className={'text-[11px] font-bold font-cabinet truncate max-w-[170px] ' + (isSelected ? 'text-[#FFE600]' : 'text-slate-600')}>
+                  {entry.championTeamName}
                 </div>
               </div>
               <Trophy className={'w-4 h-4 ' + (isSelected ? 'text-[#FFE600]' : 'text-amber-500')} />
@@ -293,45 +331,74 @@ export const HallOfFamePage: React.FC = () => {
           {/* Main Gold Trophy Presentation Card */}
           <div className="bg-white rounded-3xl p-6 sm:p-8 sport-card border-3 border-slate-950 shadow-[8px_8px_0px_#0f172a] space-y-6">
             
-            {/* Top Ribbon */}
-            <div className="flex flex-wrap items-center justify-between gap-4 border-b-2 border-slate-200 pb-5">
-              <div className="flex items-center gap-3">
-                <span className="text-4xl p-2.5 rounded-2xl bg-amber-100 border-2 border-amber-300 shadow-sm">
-                  {currentEntry.championLogo}
-                </span>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-black text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
-                      {currentEntry.year} CHAMPIONS
-                    </span>
-                    <span className="text-xs text-slate-400 font-bold">📍 {currentEntry.venue}</span>
+            {/* Top Ribbon & Podium Summary */}
+            <div className="space-y-4 border-b-2 border-slate-200 pb-5">
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="text-4xl p-2.5 rounded-2xl bg-amber-100 border-2 border-amber-300 shadow-sm">
+                    {currentEntry.championLogo}
+                  </span>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-mono font-black text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
+                        {currentEntry.year} CHAMPIONS
+                      </span>
+                      <span className="text-xs text-slate-400 font-bold">📍 {currentEntry.venue}</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-4xl font-black font-cabinet text-slate-950 mt-1">
+                      {currentEntry.championTeamName}
+                    </h2>
                   </div>
-                  <h2 className="text-2xl sm:text-4xl font-black font-cabinet text-slate-950 mt-1">
-                    {currentEntry.championTeamName}
-                  </h2>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+                  {currentEntry.cricHeroesMatchUrl && (
+                    <a
+                      href={currentEntry.cricHeroesMatchUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 rounded-2xl bg-[#00F0FF] hover:bg-[#00d8ea] text-slate-950 font-black text-xs sport-btn flex items-center gap-2 border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] hover:scale-105 transition-all"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping shrink-0" />
+                      <span>⚡ CricHeroes Match Scorecard</span>
+                      <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                    </a>
+                  )}
+
+                  <div className="text-right">
+                    <div className="text-xs font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-xl inline-block font-mono">
+                      {currentEntry.margin}
+                    </div>
+                    <div className="text-xs font-bold text-slate-500 mt-1">
+                      Score: <strong className="text-slate-800">{currentEntry.finalScore}</strong>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
-                {currentEntry.cricHeroesMatchUrl && (
-                  <a
-                    href={currentEntry.cricHeroesMatchUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2 rounded-2xl bg-[#00F0FF] hover:bg-[#00d8ea] text-slate-950 font-black text-xs sport-btn flex items-center gap-2 border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] hover:scale-105 transition-all"
-                  >
-                    <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping shrink-0" />
-                    <span>⚡ CricHeroes Match Scorecard</span>
-                    <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                  </a>
-                )}
-
-                <div className="text-right">
-                  <div className="text-xs font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-xl inline-block font-mono">
-                    {currentEntry.margin}
+              {/* Official Tournament Podium: 1st, 2nd & 3rd Place */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100">
+                <div className="p-3 rounded-2xl bg-amber-50 border-2 border-amber-300 flex items-center gap-2.5 shadow-sm">
+                  <span className="text-2xl">🥇</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 block">1st Place • Champion</span>
+                    <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet">{currentEntry.championTeamName}</strong>
                   </div>
-                  <div className="text-xs font-bold text-slate-500 mt-1">
-                    Runner Up: <strong className="text-slate-800">{currentEntry.runnerUpTeamName}</strong>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-slate-100 border-2 border-slate-300 flex items-center gap-2.5 shadow-sm">
+                  <span className="text-2xl">🥈</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 block">2nd Place • Runner Up</span>
+                    <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet">{currentEntry.runnerUpTeamName}</strong>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-orange-50 border-2 border-orange-300 flex items-center gap-2.5 shadow-sm">
+                  <span className="text-2xl">🥉</span>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-black uppercase tracking-wider text-orange-800 block">3rd Position • 2nd Runner Up</span>
+                    <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet">{currentEntry.secondRunnerUpTeamName || 'Semi-Finalists'}</strong>
                   </div>
                 </div>
               </div>
@@ -350,6 +417,20 @@ export const HallOfFamePage: React.FC = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
                   
+                  {/* Top Right Direct Image Upload Action */}
+                  <div className="absolute top-3 right-3 z-20">
+                    <label className="cursor-pointer px-3.5 py-1.5 rounded-xl bg-slate-950/85 hover:bg-slate-950 text-white font-black text-xs border border-white/30 backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105">
+                      <Camera className="w-3.5 h-3.5 text-[#FFE600]" />
+                      <span>📷 Change Trophy Image</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleTrophyPhotoUpload} 
+                      />
+                    </label>
+                  </div>
+
                   <div className="absolute bottom-4 left-4 right-4 text-white space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="px-3 py-1 rounded-xl bg-[#FFE600] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider inline-flex items-center gap-1.5 shadow">
@@ -656,16 +737,59 @@ export const HallOfFamePage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                  {mediaType === 'image' ? 'Photo Image URL / File Link *' : 'Video URL (YouTube / MP4) *'}
+                  {mediaType === 'image' ? 'Championship Photo *' : 'Video URL (YouTube / MP4) *'}
                 </label>
-                <input
-                  type="url"
-                  value={mediaUrl}
-                  onChange={(e) => setMediaUrl(e.target.value)}
-                  placeholder="https://images.unsplash.com/... or https://youtube.com/..."
-                  className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-mono bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
-                  required
-                />
+
+                {mediaType === 'image' ? (
+                  <div className="space-y-3">
+                    <div className="p-3 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col sm:flex-row items-center gap-3">
+                      {mediaUrl ? (
+                        <img 
+                          src={mediaUrl} 
+                          alt="Preview" 
+                          className="w-24 h-16 rounded-xl object-cover border-2 border-slate-900 shadow-sm shrink-0 bg-slate-200" 
+                        />
+                      ) : (
+                        <div className="w-24 h-16 rounded-xl bg-slate-200 border-2 border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
+                          <Camera className="w-6 h-6" />
+                        </div>
+                      )}
+                      <div className="flex-1 text-center sm:text-left space-y-1">
+                        <label className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-850 text-[#CCFF00] text-xs font-black border border-slate-900 shadow-sm transition-transform hover:scale-105">
+                          <Upload className="w-3.5 h-3.5" />
+                          <span>📁 Pick Image From Device</span>
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            className="hidden" 
+                            onChange={handleMediaFileUpload} 
+                          />
+                        </label>
+                        <p className="text-[10px] text-slate-500 font-medium">Supports JPG, PNG, WEBP. Auto-compressed for high speed.</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[10px] font-mono text-slate-500 block mb-1">Or paste direct image URL:</span>
+                      <input
+                        type="url"
+                        value={mediaUrl}
+                        onChange={(e) => setMediaUrl(e.target.value)}
+                        placeholder="https://images.unsplash.com/... or https://..."
+                        className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-mono bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <input
+                    type="url"
+                    value={mediaUrl}
+                    onChange={(e) => setMediaUrl(e.target.value)}
+                    placeholder="https://youtube.com/... or https://..."
+                    className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-mono bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
+                    required
+                  />
+                )}
               </div>
 
               {/* Sample Preset Buttons for Quick Demo */}
@@ -824,18 +948,80 @@ export const HallOfFamePage: React.FC = () => {
                   </select>
                 </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                    🥈 Runner Up Team *
+                  </label>
+                  <input
+                    type="text"
+                    value={newRunnerUp}
+                    onChange={(e) => setNewRunnerUp(e.target.value)}
+                    placeholder="e.g. Frankfurt Strikers"
+                    className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                    🥉 3rd Position Winner (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={newSecondRunnerUp}
+                    onChange={(e) => setNewSecondRunnerUp(e.target.value)}
+                    placeholder="e.g. Darmstadt Dazzlers"
+                    className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                  Runner Up Team *
+                  🏆 Championship Trophy / Squad Photo
                 </label>
-                <input
-                  type="text"
-                  value={newRunnerUp}
-                  onChange={(e) => setNewRunnerUp(e.target.value)}
-                  placeholder="e.g. Bangalore Blasters"
-                  className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50"
-                  required
-                />
+                <div className="p-3 bg-slate-50 rounded-2xl border-2 border-slate-300 flex flex-col sm:flex-row items-center gap-3">
+                  {newTrophyPhoto ? (
+                    <img 
+                      src={newTrophyPhoto} 
+                      alt="Trophy preview" 
+                      className="w-24 h-16 rounded-xl object-cover border-2 border-slate-900 shadow-sm shrink-0 bg-slate-200" 
+                    />
+                  ) : (
+                    <div className="w-24 h-16 rounded-xl bg-slate-200 border-2 border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
+                      <Trophy className="w-6 h-6 text-amber-500" />
+                    </div>
+                  )}
+                  <div className="flex-1 space-y-1.5 w-full">
+                    <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-850 text-[#FFE600] text-xs font-black border border-slate-900 shadow-sm transition-transform hover:scale-105">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>📁 Pick Image From Device</span>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={async (e) => {
+                          const file = e.target.files && e.target.files[0];
+                          if (!file) return;
+                          try {
+                            const base64 = await processBannerPhoto(file);
+                            setNewTrophyPhoto(base64);
+                          } catch (err) {
+                            console.error('Failed to process trophy photo', err);
+                          }
+                        }} 
+                      />
+                    </label>
+                    <input
+                      type="url"
+                      value={newTrophyPhoto}
+                      onChange={(e) => setNewTrophyPhoto(e.target.value)}
+                      placeholder="Or paste direct image URL (https://...)"
+                      className="w-full px-3 py-1.5 rounded-xl border-2 border-slate-900 text-[11px] font-mono bg-white"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
