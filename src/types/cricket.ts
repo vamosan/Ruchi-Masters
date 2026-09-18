@@ -358,6 +358,7 @@ export interface HallOfFameEntry {
   bestWicketKeeper?: string;
   bestFielder?: string;
   trophyPhotoUrl: string;
+  trophyPhotoPosY?: number;
   celebrationBannerUrl: string;
   story: string;
   media: HallOfFameMedia[];

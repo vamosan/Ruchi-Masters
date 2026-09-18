@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
   Trophy, 
   Sparkles, 
@@ -23,7 +23,10 @@ import {
   Edit3,
   Trash2,
   Lock,
-  Radio
+  Radio,
+  Move,
+  Sliders,
+  CheckCheck
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { HallOfFameEntry, HallOfFameMedia } from '../../types/cricket';
@@ -53,6 +56,14 @@ export const HallOfFamePage: React.FC = () => {
   const [mediaUrl, setMediaUrl] = useState('');
   const [mediaCaption, setMediaCaption] = useState('');
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+
+  // Interactive Image Repositioning Mode State
+  const [isAdjustingImage, setIsAdjustingImage] = useState(false);
+  const [tempPosY, setTempPosY] = useState<number>(50);
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
+  const [newTrophyPhotoPosY, setNewTrophyPhotoPosY] = useState<number>(50);
+  const dragStartY = useRef<number>(0);
+  const startPosY = useRef<number>(50);
 
   // New Year Champion State (for Admin or new seasons)
   const [newYear, setNewYear] = useState<number>(2026);
@@ -110,6 +121,57 @@ export const HallOfFamePage: React.FC = () => {
     }
   };
 
+  const handleStartAdjustImage = () => {
+    setTempPosY(currentEntry?.trophyPhotoPosY ?? 50);
+    setIsAdjustingImage(true);
+  };
+
+  const handleSaveAdjustImage = () => {
+    if (!currentEntry) return;
+    addHallOfFameEntry({
+      ...currentEntry,
+      trophyPhotoPosY: tempPosY
+    });
+    setIsAdjustingImage(false);
+  };
+
+  const handleMouseDownImage = (e: React.MouseEvent) => {
+    if (!isAdjustingImage) return;
+    e.preventDefault();
+    setIsDraggingImage(true);
+    dragStartY.current = e.clientY;
+    startPosY.current = tempPosY;
+  };
+
+  const handleMouseMoveImage = (e: React.MouseEvent) => {
+    if (!isDraggingImage) return;
+    const deltaY = e.clientY - dragStartY.current;
+    const newPos = Math.max(0, Math.min(100, Math.round(startPosY.current - (deltaY * 0.3))));
+    setTempPosY(newPos);
+  };
+
+  const handleMouseUpImage = () => {
+    setIsDraggingImage(false);
+  };
+
+  const handleTouchStartImage = (e: React.TouchEvent) => {
+    if (!isAdjustingImage) return;
+    setIsDraggingImage(true);
+    dragStartY.current = e.touches[0].clientY;
+    startPosY.current = tempPosY;
+  };
+
+  const handleTouchMoveImage = (e: React.TouchEvent) => {
+    if (!isDraggingImage) return;
+    const deltaY = e.touches[0].clientY - dragStartY.current;
+    const newPos = Math.max(0, Math.min(100, Math.round(startPosY.current - (deltaY * 0.3))));
+    setTempPosY(newPos);
+  };
+
+  const handleTouchEndImage = () => {
+    setIsDraggingImage(false);
+  };
+
   const handleOpenAddYear = () => {
     setIsEditingYear(false);
     setNewYear(new Date().getFullYear());
@@ -129,6 +191,7 @@ export const HallOfFamePage: React.FC = () => {
     setNewBestFielder('');
     setNewStory('');
     setNewTrophyPhoto('');
+    setNewTrophyPhotoPosY(50);
     setNewCricHeroesUrl('');
     setShowAddChampionModal(true);
   };
@@ -152,6 +215,7 @@ export const HallOfFamePage: React.FC = () => {
     setNewBestFielder(entry.bestFielder || '');
     setNewStory(entry.story);
     setNewTrophyPhoto(entry.trophyPhotoUrl);
+    setNewTrophyPhotoPosY(entry.trophyPhotoPosY ?? 50);
     setNewCricHeroesUrl(entry.cricHeroesMatchUrl || '');
     setShowAddChampionModal(true);
   };
@@ -196,6 +260,7 @@ export const HallOfFamePage: React.FC = () => {
       bestWicketKeeper: newBestWicketKeeper.trim() || undefined,
       bestFielder: newBestFielder.trim() || undefined,
       trophyPhotoUrl: newTrophyPhoto.trim() || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80',
+      trophyPhotoPosY: newTrophyPhotoPosY,
       celebrationBannerUrl: 'https://images.unsplash.com/photo-1531415074868-036b1c57e3ce?auto=format&fit=crop&w=1200&q=80',
       story: entryStory,
       media: isEditingYear && currentEntry ? currentEntry.media : []
@@ -389,28 +454,63 @@ export const HallOfFamePage: React.FC = () => {
               </div>
 
               {/* Official Tournament Podium: 1st, 2nd & 3rd Place */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100">
-                <div className="p-3 rounded-2xl bg-amber-50 border-2 border-amber-300 flex items-center gap-2.5 shadow-sm">
-                  <span className="text-2xl">🥇</span>
-                  <div className="min-w-0">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 block">1st Place • Champion</span>
-                    <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet">{currentEntry.championTeamName}</strong>
-                  </div>
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                    <Trophy className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Official Championship Podium</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEditYear(currentEntry)}
+                    className="px-2.5 py-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-[#FFE600] text-[11px] font-black flex items-center gap-1.5 shadow-sm transition-transform hover:scale-105"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    <span>✏️ Edit Podium Winners</span>
+                  </button>
                 </div>
 
-                <div className="p-3 rounded-2xl bg-slate-100 border-2 border-slate-300 flex items-center gap-2.5 shadow-sm">
-                  <span className="text-2xl">🥈</span>
-                  <div className="min-w-0">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 block">2nd Place • Runner Up</span>
-                    <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet">{currentEntry.runnerUpTeamName}</strong>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div 
+                    onClick={() => handleOpenEditYear(currentEntry)}
+                    className="p-3 rounded-2xl bg-amber-50 hover:bg-amber-100/80 border-2 border-amber-300 flex items-center justify-between gap-2.5 shadow-sm cursor-pointer transition-all group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="text-2xl">🥇</span>
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 block">1st Place • Champion</span>
+                        <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet group-hover:text-amber-700">{currentEntry.championTeamName}</strong>
+                      </div>
+                    </div>
+                    <span className="px-1.5 py-0.5 rounded bg-amber-200/80 text-[10px] font-bold text-amber-900 shrink-0">Edit</span>
                   </div>
-                </div>
 
-                <div className="p-3 rounded-2xl bg-orange-50 border-2 border-orange-300 flex items-center gap-2.5 shadow-sm">
-                  <span className="text-2xl">🥉</span>
-                  <div className="min-w-0">
-                    <span className="text-[10px] font-black uppercase tracking-wider text-orange-800 block">3rd Position • 2nd Runner Up</span>
-                    <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet">{currentEntry.secondRunnerUpTeamName || 'Semi-Finalists'}</strong>
+                  <div 
+                    onClick={() => handleOpenEditYear(currentEntry)}
+                    className="p-3 rounded-2xl bg-slate-100 hover:bg-slate-200/80 border-2 border-slate-300 flex items-center justify-between gap-2.5 shadow-sm cursor-pointer transition-all group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="text-2xl">🥈</span>
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 block">2nd Place • Runner Up</span>
+                        <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet group-hover:text-slate-700">{currentEntry.runnerUpTeamName}</strong>
+                      </div>
+                    </div>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-200 text-[10px] font-bold text-slate-700 shrink-0">Edit</span>
+                  </div>
+
+                  <div 
+                    onClick={() => handleOpenEditYear(currentEntry)}
+                    className="p-3 rounded-2xl bg-orange-50 hover:bg-orange-100/80 border-2 border-orange-300 flex items-center justify-between gap-2.5 shadow-sm cursor-pointer transition-all group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="text-2xl">🥉</span>
+                      <div className="min-w-0">
+                        <span className="text-[10px] font-black uppercase tracking-wider text-orange-800 block">3rd Position • 2nd Runner Up</span>
+                        <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet group-hover:text-orange-700">{currentEntry.secondRunnerUpTeamName || 'Semi-Finalists'}</strong>
+                      </div>
+                    </div>
+                    <span className="px-1.5 py-0.5 rounded bg-orange-200/80 text-[10px] font-bold text-orange-900 shrink-0">Edit</span>
                   </div>
                 </div>
               </div>
@@ -421,16 +521,112 @@ export const HallOfFamePage: React.FC = () => {
               
               {/* Photo Showcase */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="relative rounded-3xl overflow-hidden border-3 border-slate-950 h-72 sm:h-96 group shadow-lg bg-slate-950">
+                
+                {/* Repositioning Active Floating Bar */}
+                {isAdjustingImage && (
+                  <div className="p-3 rounded-2xl bg-slate-950 text-white border-2 border-[#FFE600] shadow-xl space-y-2.5 animate-in fade-in slide-in-from-top-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 text-xs font-black text-[#FFE600]">
+                        <Move className="w-4 h-4 animate-bounce" />
+                        <span>✋ Drag image up/down to reposition, or use controls:</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleSaveAdjustImage}
+                          className="px-3 py-1 rounded-xl bg-[#CCFF00] hover:bg-[#b5e600] text-slate-950 text-xs font-black flex items-center gap-1 shadow"
+                        >
+                          <CheckCheck className="w-3.5 h-3.5" />
+                          <span>Save Position</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsAdjustingImage(false)}
+                          className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                      <div className="flex-1 w-full flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-slate-400 shrink-0">Alignment: {tempPosY}%</span>
+                        <input 
+                          type="range" 
+                          min={0} 
+                          max={100} 
+                          value={tempPosY}
+                          onChange={(e) => setTempPosY(Number(e.target.value))}
+                          className="w-full accent-[#FFE600] cursor-pointer h-2 bg-slate-800 rounded-lg" 
+                        />
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setTempPosY(15)}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${tempPosY <= 25 ? 'bg-[#FFE600] text-slate-950' : 'bg-slate-800 text-slate-300'}`}
+                        >
+                          🔝 Top Focus
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTempPosY(50)}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${tempPosY > 25 && tempPosY < 75 ? 'bg-[#FFE600] text-slate-950' : 'bg-slate-800 text-slate-300'}`}
+                        >
+                          🎯 Center
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setTempPosY(85)}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${tempPosY >= 75 ? 'bg-[#FFE600] text-slate-950' : 'bg-slate-800 text-slate-300'}`}
+                        >
+                          🔻 Bottom Focus
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div 
+                  className={`relative rounded-3xl overflow-hidden border-3 border-slate-950 h-72 sm:h-96 group shadow-lg bg-slate-950 select-none ${
+                    isAdjustingImage ? 'cursor-grab active:cursor-grabbing ring-4 ring-[#FFE600]' : ''
+                  }`}
+                  onMouseDown={handleMouseDownImage}
+                  onMouseMove={handleMouseMoveImage}
+                  onMouseUp={handleMouseUpImage}
+                  onMouseLeave={handleMouseUpImage}
+                  onTouchStart={handleTouchStartImage}
+                  onTouchMove={handleTouchMoveImage}
+                  onTouchEnd={handleTouchEndImage}
+                >
                   <img 
                     src={currentEntry.trophyPhotoUrl} 
                     alt={currentEntry.championTeamName} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
+                    style={{
+                      objectPosition: `center ${isAdjustingImage ? tempPosY : (currentEntry.trophyPhotoPosY ?? 50)}%`
+                    }}
+                    className={`w-full h-full object-cover transition-transform duration-300 opacity-90 pointer-events-none ${
+                      isAdjustingImage ? 'scale-105' : 'group-hover:scale-102'
+                    }`}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent pointer-events-none" />
                   
                   {/* Top Right Direct Image Upload & Edit Action */}
                   <div className="absolute top-3 right-3 z-20 flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleStartAdjustImage}
+                      className={`px-3 py-1.5 rounded-xl font-black text-xs border border-white/30 backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105 ${
+                        isAdjustingImage 
+                          ? 'bg-[#FFE600] text-slate-950' 
+                          : 'bg-slate-950/85 hover:bg-slate-950 text-white'
+                      }`}
+                    >
+                      <Move className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{isAdjustingImage ? '✋ Dragging Mode Active' : '↔️ Drag / Recenter'}</span>
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => handleOpenEditYear(currentEntry)}
@@ -442,7 +638,7 @@ export const HallOfFamePage: React.FC = () => {
 
                     <label className="cursor-pointer px-3 py-1.5 rounded-xl bg-slate-950/85 hover:bg-slate-950 text-white font-black text-xs border border-white/30 backdrop-blur-md flex items-center gap-1.5 shadow-lg transition-transform hover:scale-105">
                       <Camera className="w-3.5 h-3.5 text-[#FFE600]" />
-                      <span>📷 Change Trophy Image</span>
+                      <span>📷 Change Image</span>
                       <input 
                         type="file" 
                         accept="image/*" 
@@ -1061,44 +1257,88 @@ export const HallOfFamePage: React.FC = () => {
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
                   🏆 Championship Trophy / Squad Photo
                 </label>
-                <div className="p-3 bg-slate-50 rounded-2xl border-2 border-slate-300 flex flex-col sm:flex-row items-center gap-3">
-                  {newTrophyPhoto ? (
-                    <img 
-                      src={newTrophyPhoto} 
-                      alt="Trophy preview" 
-                      className="w-24 h-16 rounded-xl object-cover border-2 border-slate-900 shadow-sm shrink-0 bg-slate-200" 
-                    />
-                  ) : (
-                    <div className="w-24 h-16 rounded-xl bg-slate-200 border-2 border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
-                      <Trophy className="w-6 h-6 text-amber-500" />
-                    </div>
-                  )}
-                  <div className="flex-1 space-y-1.5 w-full">
-                    <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-850 text-[#FFE600] text-xs font-black border border-slate-900 shadow-sm transition-transform hover:scale-105">
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>📁 Pick Image From Device</span>
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={async (e) => {
-                          const file = e.target.files && e.target.files[0];
-                          if (!file) return;
-                          try {
-                            const base64 = await processBannerPhoto(file);
-                            setNewTrophyPhoto(base64);
-                          } catch (err) {
-                            console.error('Failed to process trophy photo', err);
-                          }
-                        }} 
+                <div className="p-3 bg-slate-50 rounded-2xl border-2 border-slate-300 space-y-3">
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    {newTrophyPhoto ? (
+                      <img 
+                        src={newTrophyPhoto} 
+                        alt="Trophy preview" 
+                        style={{ objectPosition: `center ${newTrophyPhotoPosY}%` }}
+                        className="w-24 h-16 rounded-xl object-cover border-2 border-slate-900 shadow-sm shrink-0 bg-slate-200" 
                       />
-                    </label>
+                    ) : (
+                      <div className="w-24 h-16 rounded-xl bg-slate-200 border-2 border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
+                        <Trophy className="w-6 h-6 text-amber-500" />
+                      </div>
+                    )}
+                    <div className="flex-1 space-y-1.5 w-full">
+                      <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-850 text-[#FFE600] text-xs font-black border border-slate-900 shadow-sm transition-transform hover:scale-105">
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>📁 Pick Image From Device</span>
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={async (e) => {
+                            const file = e.target.files && e.target.files[0];
+                            if (!file) return;
+                            try {
+                              const base64 = await processBannerPhoto(file);
+                              setNewTrophyPhoto(base64);
+                            } catch (err) {
+                              console.error('Failed to process trophy photo', err);
+                            }
+                          }} 
+                        />
+                      </label>
+                      <input
+                        type="url"
+                        value={newTrophyPhoto}
+                        onChange={(e) => setNewTrophyPhoto(e.target.value)}
+                        placeholder="Or paste direct image URL (https://...)"
+                        className="w-full px-3 py-1.5 rounded-xl border-2 border-slate-900 text-[11px] font-mono bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Vertical alignment slider & presets */}
+                  <div className="pt-2 border-t border-slate-200 space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                      <span className="flex items-center gap-1">
+                        <Move className="w-3 h-3 text-amber-600" />
+                        <span>Vertical Alignment / Center: {newTrophyPhotoPosY}%</span>
+                      </span>
+                      <div className="flex gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setNewTrophyPhotoPosY(15)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${newTrophyPhotoPosY <= 25 ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-700'}`}
+                        >
+                          🔝 Top
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewTrophyPhotoPosY(50)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${newTrophyPhotoPosY > 25 && newTrophyPhotoPosY < 75 ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-700'}`}
+                        >
+                          🎯 Center
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setNewTrophyPhotoPosY(85)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${newTrophyPhotoPosY >= 75 ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-700'}`}
+                        >
+                          🔻 Bottom
+                        </button>
+                      </div>
+                    </div>
                     <input
-                      type="url"
-                      value={newTrophyPhoto}
-                      onChange={(e) => setNewTrophyPhoto(e.target.value)}
-                      placeholder="Or paste direct image URL (https://...)"
-                      className="w-full px-3 py-1.5 rounded-xl border-2 border-slate-900 text-[11px] font-mono bg-white"
+                      type="range"
+                      min={0}
+                      max={100}
+                      value={newTrophyPhotoPosY}
+                      onChange={(e) => setNewTrophyPhotoPosY(Number(e.target.value))}
+                      className="w-full accent-amber-500 cursor-pointer h-2 bg-slate-200 rounded-lg"
                     />
                   </div>
                 </div>
