@@ -36,7 +36,6 @@ export const RuchiNavbar: React.FC<Props> = ({ themeMode, setThemeMode }) => {
     { id: 'teams', label: 'Squads', icon: <Users className="w-4 h-4" />, badge: '40+' },
     { id: 'fixtures', label: 'Schedule', icon: <Calendar className="w-4 h-4" /> },
     { id: 'pickem', label: "Pick'Em", icon: <Flame className="w-4 h-4 text-rose-500" />, badge: '50 PTS' },
-    { id: 'social', label: 'Story Studio', icon: <Share2 className="w-4 h-4 text-cyan-500" /> },
   ];
 
   return (
@@ -136,20 +135,6 @@ export const RuchiNavbar: React.FC<Props> = ({ themeMode, setThemeMode }) => {
         {/* Right Action Buttons */}
         <div className="flex items-center gap-2 shrink-0">
           
-          {/* Live Scorer CTA Button */}
-          <button
-            onClick={() => setActiveTab('live')}
-            className={'h-10 px-3.5 sm:px-4 rounded-xl text-xs font-black flex items-center gap-2 border-2 border-slate-950 transition-all whitespace-nowrap shrink-0 ' + (
-              activeTab === 'live'
-                ? 'bg-[#FF3366] text-white shadow-[3px_3px_0px_#0f172a]'
-                : 'bg-[#FF3366] hover:bg-[#e02657] text-white shadow-[2px_2px_0px_#0f172a]'
-            )}
-          >
-            <span className="w-2 h-2 rounded-full bg-white animate-ping shrink-0"></span>
-            <Activity className="w-3.5 h-3.5 shrink-0" />
-            <span>Live Scorer</span>
-          </button>
-
           {/* Team / Admin Auth Button */}
           {currentUser.role === 'admin' ? (
             <button
@@ -172,7 +157,7 @@ export const RuchiNavbar: React.FC<Props> = ({ themeMode, setThemeMode }) => {
           ) : (
             <button
               onClick={() => openAuthModal()}
-              className="h-10 px-3.5 sm:px-4 rounded-xl bg-white hover:bg-[#CCFF00] text-slate-950 text-xs font-black flex items-center gap-2 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] transition-all whitespace-nowrap shrink-0"
+              className="h-10 px-3.5 sm:px-4 rounded-xl bg-[#CCFF00] hover:bg-[#bbf000] text-slate-950 text-xs font-black flex items-center gap-2 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] transition-all whitespace-nowrap shrink-0"
             >
               <KeyRound className="w-4 h-4 text-slate-900 shrink-0" />
               <span>Team / Admin Login</span>

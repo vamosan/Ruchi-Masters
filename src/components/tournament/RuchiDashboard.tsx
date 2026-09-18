@@ -52,7 +52,7 @@ export const RuchiDashboard: React.FC = () => {
       {/* 1. Main Sporty Hero Section */}
       <RuchiMastersHero />
 
-      {/* 2. Interactive Feature Action Hub (Pick'Em + Social Studio CTAs) */}
+      {/* 2. Interactive Feature Action Hub (Pick'Em + Hall of Fame CTAs) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         
         {/* Fan Pick'Em Banner Tile */}
@@ -77,25 +77,25 @@ export const RuchiDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Social Poster Studio Banner Tile */}
+        {/* Hall of Fame Championship History Banner Tile */}
         <div 
-          onClick={() => setActiveTab('social')}
-          className="bg-gradient-to-r from-cyan-950 via-slate-950 to-indigo-950 text-white p-6 rounded-3xl sport-card border-3 border-slate-950 shadow-[5px_5px_0px_#0f172a] hover:-translate-y-1.5 transition-all cursor-pointer group flex items-center justify-between gap-4"
+          onClick={() => setActiveTab('halloffame')}
+          className="bg-gradient-to-r from-amber-950 via-slate-950 to-indigo-950 text-white p-6 rounded-3xl sport-card border-3 border-slate-950 shadow-[5px_5px_0px_#0f172a] hover:-translate-y-1.5 transition-all cursor-pointer group flex items-center justify-between gap-4"
         >
           <div className="space-y-2">
-            <span className="px-3 py-1 rounded-xl bg-[#00F0FF] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider inline-flex items-center gap-1.5 shadow">
-              <Share2 className="w-3.5 h-3.5" />
-              Social Media Studio
+            <span className="px-3 py-1 rounded-xl bg-[#FFE600] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider inline-flex items-center gap-1.5 shadow">
+              <Trophy className="w-3.5 h-3.5 text-amber-800" />
+              Championship History
             </span>
-            <h3 className="text-xl sm:text-2xl font-black font-cabinet text-white group-hover:text-[#00F0FF] transition-colors">
-              Story & Poster Studio ➔
+            <h3 className="text-xl sm:text-2xl font-black font-cabinet text-white group-hover:text-[#FFE600] transition-colors">
+              Hall of Fame (2022–26) ➔
             </h3>
             <p className="text-xs text-slate-300 font-medium max-w-sm">
-              Export 9:16 Instagram Stories and 1:1 matchday lineup cards in 1 click for WhatsApp & Twitter.
+              Relive past champions, trophy celebrations, winner lineups, and legendary tournament moments.
             </p>
           </div>
-          <div className="w-16 h-16 rounded-2xl bg-[#00F0FF] text-slate-950 flex items-center justify-center text-3xl shrink-0 group-hover:-rotate-12 transition-transform shadow-xl border-2 border-slate-950">
-            📱
+          <div className="w-16 h-16 rounded-2xl bg-[#FFE600] text-slate-950 flex items-center justify-center text-3xl shrink-0 group-hover:-rotate-12 transition-transform shadow-xl border-2 border-slate-950">
+            🏆
           </div>
         </div>
 
@@ -248,10 +248,10 @@ export const RuchiDashboard: React.FC = () => {
           </div>
 
           <button
-            onClick={() => setActiveTab('live')}
-            className="w-full py-2.5 rounded-2xl bg-[#FF3366] text-white font-black text-xs sport-btn flex items-center justify-center gap-2 shadow-[3px_3px_0px_#0f172a]"
+            onClick={() => setActiveTab('fixtures')}
+            className="w-full py-2.5 rounded-2xl bg-[#CCFF00] hover:bg-[#bbf000] text-slate-950 font-black text-xs sport-btn flex items-center justify-center gap-2 shadow-[3px_3px_0px_#0f172a]"
           >
-            <span>Open Match Control & Scorer</span>
+            <span>View Tournament Match Schedule ➔</span>
           </button>
         </div>
 

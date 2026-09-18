@@ -14,7 +14,8 @@ import {
   TrendingUp,
   MapPin,
   ChevronRight,
-  Users
+  Users,
+  Calendar
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { CricketBallIcon } from '../common/CricketIcons';
@@ -85,22 +86,19 @@ export const RuchiMastersHero: React.FC = () => {
             
             <p className="text-base sm:text-lg font-bold text-slate-700 max-w-2xl pt-2 leading-relaxed">
               The high-voltage cricket tournament hub! Experience 
-              <span className="bg-[#FFE600] px-2 py-0.5 rounded-lg text-slate-950 font-black mx-1 border border-slate-900">ball-by-ball live scoring</span>, 
-              verified 25-player franchise squad cards, automated ICC NRR standings, and live match analytics.
+              <span className="bg-[#FFE600] px-2 py-0.5 rounded-lg text-slate-950 font-black mx-1 border border-slate-900">verified franchise squad cards</span>, 
+              captain certificates, automated ICC NRR standings, and historic hall of fame championship glory.
             </p>
           </div>
 
           {/* High Impact Action Buttons */}
           <div className="flex flex-wrap items-center gap-3.5 pt-2">
             <button
-              onClick={() => {
-                if (liveMatch) setActiveMatchId(liveMatch.id);
-                setActiveTab('live');
-              }}
+              onClick={() => setActiveTab('fixtures')}
               className="px-7 py-3.5 rounded-2xl bg-[#FF3366] sport-btn text-white font-black text-sm flex items-center gap-2.5 shadow-[4px_4px_0px_#0f172a]"
             >
-              <span className="w-3 h-3 rounded-full bg-white animate-pulse"></span>
-              <span>Enter Live Scorer</span>
+              <Calendar className="w-4 h-4" />
+              <span>Match Schedule</span>
               <ArrowRight className="w-4 h-4" />
             </button>
 
@@ -180,13 +178,13 @@ export const RuchiMastersHero: React.FC = () => {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
-                  setActiveMatchId(liveMatch.id);
-                  setActiveTab('live');
+                  if (liveMatch) setActiveMatchId(liveMatch.id);
+                  setActiveTab('fixtures');
                 }}
                 className="px-4 py-1.5 rounded-full bg-[#CCFF00] hover:bg-[#bbf000] text-slate-950 font-black text-xs sport-btn flex items-center gap-1.5"
               >
-                <Activity className="w-3.5 h-3.5" />
-                <span>Launch Live Scorer ➔</span>
+                <Calendar className="w-3.5 h-3.5" />
+                <span>View Match Schedule ➔</span>
               </button>
             </div>
           </div>
@@ -326,18 +324,18 @@ export const RuchiMastersHero: React.FC = () => {
         </div>
 
         <div 
-          onClick={() => setActiveTab('live')}
+          onClick={() => setActiveTab('standings')}
           className="bg-white rounded-3xl p-5 sport-card cursor-pointer hover:bg-slate-50 transition-all flex flex-col justify-between space-y-3 group"
         >
           <div className="w-12 h-12 rounded-2xl bg-[#FF3366] text-white sport-pill flex items-center justify-center text-2xl group-hover:scale-110 transition-transform">
-            ⚡
+            📊
           </div>
           <div>
-            <h3 className="font-black text-lg text-slate-900 group-hover:text-cyan-700 transition-colors">Live Scorer Console</h3>
-            <p className="text-xs text-slate-600 mt-1 font-medium">Ball-by-ball commentary, extras, and wicket rotation.</p>
+            <h3 className="font-black text-lg text-slate-900 group-hover:text-cyan-700 transition-colors">Points & Standings</h3>
+            <p className="text-xs text-slate-600 mt-1 font-medium">Group standings with automated ICC Net Run Rate (NRR) tables.</p>
           </div>
           <span className="text-xs font-black text-slate-900 flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-            <span>Open Console</span>
+            <span>View Standings</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </span>
         </div>
