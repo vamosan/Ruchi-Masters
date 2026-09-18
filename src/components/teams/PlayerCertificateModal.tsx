@@ -46,11 +46,11 @@ export const PlayerCertificateModal: React.FC<Props> = ({ player, team, onClose 
         <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between border-b-2 border-slate-900">
           <div className="flex items-center gap-2.5">
             <span className="p-2 rounded-xl bg-[#CCFF00] text-slate-950 sport-pill text-xs font-black">
-              🛡️ PASSPORT
+              OFFICIAL PLAYER ID
             </span>
             <div>
               <h3 className="text-base sm:text-lg font-black font-cabinet leading-tight">
-                Digital Captain Verification Certificate
+                Official Player Registration Credential
               </h3>
               <span className="text-xs text-slate-400 font-mono">RUCHI MASTERS T20 CREDENTIAL</span>
             </div>

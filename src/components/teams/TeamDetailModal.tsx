@@ -418,7 +418,7 @@ export const TeamDetailModal: React.FC<Props> = ({ team, onClose }) => {
                 {/* ID Proof Number */}
                 <div className="space-y-1">
                   <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-700">
-                    2. Tournament ID / Passport Number
+                    2. Tournament Player ID Number
                   </label>
                   <input
                     type="text"

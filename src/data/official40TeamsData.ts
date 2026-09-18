@@ -9114,7 +9114,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
       {
         id: 'p-team-skg-falconsxi-19',
         teamId: "team-skg-falconsxi",
-        name: "Rishi (Gabru) Raman",
+        name: "Rishi Raman",
         jerseyNumber: 19,
         role: "spin_bowler",
         battingStyle: 'Right-hand Bat',

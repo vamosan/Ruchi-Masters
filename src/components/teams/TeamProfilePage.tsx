@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { Team, Player, Match, PlayerRole, BattingStyle, BowlingStyle } from '../../types/cricket';
 import { useTournament } from '../../context/TournamentContext';
+import { processPlayerPhoto } from '../../utils/imageUtils';
 import { EditTeamModal } from './EditTeamModal';
 import { HoloTiltCard } from '../common/HoloTiltCard';
 import { PlayerCertificateModal } from './PlayerCertificateModal';
@@ -83,6 +84,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
   const [isCaptain, setIsCaptain] = useState(false);
   const [isViceCaptain, setIsViceCaptain] = useState(false);
   const [isWK, setIsWK] = useState(false);
+  const [playerFormPhoto, setPlayerFormPhoto] = useState<string>('');
 
   // Authentication State
   const [uploadedPhoto, setUploadedPhoto] = useState<string>('');
@@ -135,6 +137,23 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
     setIdProofNum('');
   };
 
+
+  const handleDirectPlayerPhoto = async (player: Player, file: File) => {
+    try {
+      const base64 = await processPlayerPhoto(file);
+      updatePlayer(team.id, {
+        ...player,
+        photoUrl: base64,
+        isAuthenticated: true,
+        authenticatedAt: new Date().toISOString(),
+        authenticatedBy: captain?.name || team.managerName || 'Team Captain'
+      });
+    } catch (err) {
+      console.error('Failed to process player photo', err);
+      alert('Could not upload image. Please choose another JPG/PNG image.');
+    }
+  };
+
   const handleSavePlayer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!playerName.trim() || !isAuthorized) return;
@@ -150,6 +169,8 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
         isCaptain,
         isViceCaptain,
         isWicketKeeper: isWK,
+        photoUrl: playerFormPhoto || editingPlayer.photoUrl,
+        isAuthenticated: true
       });
       setEditingPlayer(null);
     } else {
@@ -164,7 +185,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
         isCaptain,
         isViceCaptain,
         isWicketKeeper: isWK,
-        photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80',
+        photoUrl: playerFormPhoto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80',
         idProofNumber: 'RUCHI-T20-' + team.code + '-' + (Math.floor(Math.random() * 9000) + 1000),
         isAuthenticated: false,
         matchesPlayed: 0,
@@ -184,6 +205,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
     setIsViceCaptain(false);
     setIsWK(false);
     setShowAddPlayer(false);
+    setPlayerFormPhoto('');
   };
 
   const startEditPlayer = (p: Player) => {
@@ -193,6 +215,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
     }
     setEditingPlayer(p);
     setPlayerName(p.name);
+    setPlayerFormPhoto(p.photoUrl || '');
     setJerseyNum(p.jerseyNumber);
     setRole(p.role);
     setBattingStyle(p.battingStyle);
@@ -205,13 +228,13 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
   const getRoleLabel = (r: PlayerRole) => {
     switch (r) {
-      case 'pure_batter': return '🏏 Pure Batter';
-      case 'wk_batter': return '🧤 Wicketkeeper Batter';
-      case 'pace_allrounder': return '⚡ Pace All-Rounder';
-      case 'spin_allrounder': return '🌀 Spin All-Rounder';
-      case 'fast_bowler': return '🔥 Fast Bowler';
-      case 'spin_bowler': return '🎯 Spin Bowler';
-      default: return '🏏 Cricketer';
+      case 'pure_batter': return 'Pure Batter';
+      case 'wk_batter': return 'Wicketkeeper Batter';
+      case 'pace_allrounder': return 'Pace All-Rounder';
+      case 'spin_allrounder': return 'Spin All-Rounder';
+      case 'fast_bowler': return 'Fast Bowler';
+      case 'spin_bowler': return 'Spin Bowler';
+      default: return 'Cricketer';
     }
   };
 
@@ -695,38 +718,45 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                     <button
                       onClick={() => setSelectedCertPlayer(player)}
                       className="inline-flex items-center gap-1 font-bold text-emerald-800 text-[11px] bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-xl border border-emerald-300 transition-colors"
-                      title="View Official Digital Passport"
+                      title="View Official Player ID"
                     >
                       <FileBadge className="w-3.5 h-3.5 text-emerald-700" />
-                      <span>Passport</span>
+                      <span>Player ID</span>
                     </button>
 
                     <div className="flex items-center gap-1.5">
                       {isAuthorized ? (
                         <>
-                          <button
-                            onClick={() => {
-                              setAuthPlayerModal(player);
-                              setUploadedPhoto(player.photoUrl || '');
-                              setIdProofNum(player.idProofNumber || '');
-                            }}
-                            className="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#CCFF00] text-slate-950 font-black text-[11px] border-2 border-slate-900 flex items-center gap-1 transition-all shadow-[1px_1px_0px_#0f172a]"
+                          <label 
+                            htmlFor={'direct-photo-' + player.id}
+                            className="cursor-pointer px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#CCFF00] text-slate-950 font-black text-[11px] border-2 border-slate-900 flex items-center gap-1 transition-all shadow-[1px_1px_0px_#0f172a]"
+                            title="Upload or change player photo"
                           >
-                            <Camera className="w-3 h-3" />
-                            <span>{player.isAuthenticated ? 'Photo' : 'Auth'}</span>
-                          </button>
+                            <Camera className="w-3.5 h-3.5 text-slate-950" />
+                            <span>Upload Pic</span>
+                            <input
+                              id={'direct-photo-' + player.id}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files && e.target.files[0];
+                                if (file) handleDirectPlayerPhoto(player, file);
+                              }}
+                            />
+                          </label>
 
                           <button
                             onClick={() => startEditPlayer(player)}
-                            className="p-1.5 rounded-xl text-slate-500 hover:text-slate-950 hover:bg-slate-100 border border-transparent hover:border-slate-300"
+                            className="p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-900 transition-all"
                             title="Edit Player Info"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
                           </button>
                         </>
                       ) : (
-                        <span className="text-[10px] font-mono text-slate-400 bg-slate-100 px-2 py-1 rounded-lg border border-slate-200">
-                          {player.isAuthenticated ? '✓ Authenticated' : '⏳ Pending Auth'}
+                        <span className="text-[10px] font-mono text-slate-500 bg-slate-100 px-2.5 py-1 rounded-xl border border-slate-200 font-bold">
+                          {player.isAuthenticated ? 'Verified' : 'Rostered'}
                         </span>
                       )}
                     </div>
@@ -1075,7 +1105,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               {/* ID Proof Number */}
               <div className="space-y-1">
                 <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-700">
-                  2. Tournament ID / Passport Number
+                  2. Tournament Player ID Number
                 </label>
                 <input
                   type="text"
@@ -1143,8 +1173,43 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             </div>
 
             <form onSubmit={handleSavePlayer} className="space-y-3">
+              {/* Photo Upload Section inside modal */}
               <div>
-                <label className="block font-bold mb-1">Player Full Name</label>
+                <label className="block font-bold mb-1">Player Photo / Headshot</label>
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border-2 border-slate-900">
+                  <img
+                    src={playerFormPhoto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80'}
+                    alt="Preview"
+                    className="w-14 h-14 rounded-xl object-cover border-2 border-slate-900 shadow"
+                  />
+                  <div className="flex-1 space-y-1">
+                    <label className="cursor-pointer px-3 py-1.5 rounded-xl bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 font-black text-xs inline-flex items-center gap-1.5 border-2 border-slate-900 shadow-[2px_2px_0px_#0f172a]">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Select Photo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files && e.target.files[0];
+                          if (file) {
+                            try {
+                              const base64 = await processPlayerPhoto(file);
+                              setPlayerFormPhoto(base64);
+                            } catch (err) {
+                              console.error(err);
+                            }
+                          }
+                        }}
+                      />
+                    </label>
+                    <p className="text-[10px] text-slate-500 font-medium">JPEG or PNG from camera or gallery</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold mb-1">Player Full Name *</label>
                 <input
                   type="text"
                   required

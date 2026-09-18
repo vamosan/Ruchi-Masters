@@ -352,7 +352,7 @@ export const TeamList: React.FC = () => {
                     onClick={() => setSelectedTeamId(team.id)}
                     className="w-full py-2.5 rounded-2xl bg-slate-950 group-hover:bg-[#CCFF00] text-white group-hover:text-slate-950 font-black text-xs sport-btn flex items-center justify-center gap-2 transition-all shadow-[3px_3px_0px_#0f172a]"
                   >
-                    <span>{hasEditPermission ? 'Manage Squad & Photos ➔' : 'View Squad & Passports ➔'}</span>
+                    <span>{hasEditPermission ? 'Manage Squad & Photos ➔' : 'View Full Squad ➔'}</span>
                     <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>
