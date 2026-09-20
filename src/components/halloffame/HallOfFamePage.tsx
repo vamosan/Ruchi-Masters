@@ -26,7 +26,8 @@ import {
   Radio,
   Move,
   Sliders,
-  CheckCheck
+  CheckCheck,
+  Play
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { HallOfFameEntry, HallOfFameMedia } from '../../types/cricket';
@@ -36,6 +37,7 @@ export const HallOfFamePage: React.FC = () => {
   const { 
     hallOfFame, 
     addMediaToHallOfFame, 
+    deleteMediaFromHallOfFame,
     addHallOfFameEntry, 
     currentUser, 
     teams, 
@@ -50,6 +52,14 @@ export const HallOfFamePage: React.FC = () => {
   const [showAddChampionModal, setShowAddChampionModal] = useState(false);
   const [isEditingYear, setIsEditingYear] = useState(false);
   const [isCurrentActiveSeason, setIsCurrentActiveSeason] = useState(false);
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
+  const [activeVideoTitle, setActiveVideoTitle] = useState<string>('');
+
+  const getYouTubeId = (url: string): string | null => {
+    if (!url) return null;
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=|shorts\/))([\w-]{11})/);
+    return match ? match[1] : null;
+  };
 
   // New Media State
   const [mediaTitle, setMediaTitle] = useState('');
@@ -883,58 +893,103 @@ export const HallOfFamePage: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {currentEntry.media.map((item) => (
-                  <div 
-                    key={item.id}
-                    className="bg-white rounded-3xl overflow-hidden sport-card border-3 border-slate-950 shadow-[5px_5px_0px_#0f172a] group flex flex-col justify-between"
-                  >
-                    <div className="relative h-52 bg-slate-950 overflow-hidden">
-                      {item.type === 'video' ? (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-white p-4 text-center space-y-2">
-                          <div className="w-12 h-12 rounded-full bg-rose-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                            <Video className="w-6 h-6 text-white" />
-                          </div>
-                          <span className="text-xs font-black text-slate-200">Video Highlight Reel</span>
-                          <a 
-                            href={item.url} 
-                            target="_blank" 
-                            rel="noreferrer"
-                            className="text-[11px] text-cyan-400 hover:underline flex items-center gap-1 font-mono"
-                          >
-                            <span>Open Video Link</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        </div>
-                      ) : (
-                        <>
-                          <img 
-                            src={item.url} 
-                            alt={item.title} 
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                        </>
-                      )}
+                {currentEntry.media.map((item) => {
+                  const ytId = item.type === 'video' ? getYouTubeId(item.url) : null;
+                  return (
+                    <div 
+                      key={item.id}
+                      className="bg-white rounded-3xl overflow-hidden sport-card border-3 border-slate-950 shadow-[5px_5px_0px_#0f172a] group flex flex-col justify-between"
+                    >
+                      <div className="relative h-52 bg-slate-950 overflow-hidden">
+                        {item.type === 'video' ? (
+                          ytId ? (
+                            <div 
+                              onClick={() => {
+                                setActiveVideoUrl(item.url);
+                                setActiveVideoTitle(item.title);
+                              }}
+                              className="relative w-full h-full cursor-pointer group/vid overflow-hidden"
+                            >
+                              <img 
+                                src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} 
+                                alt={item.title} 
+                                className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-500" 
+                              />
+                              <div className="absolute inset-0 bg-black/40 group-hover/vid:bg-black/20 transition-colors flex items-center justify-center">
+                                <div className="w-14 h-14 rounded-full bg-rose-600 group-hover/vid:bg-rose-500 text-white flex items-center justify-center shadow-2xl transition-transform group-hover/vid:scale-110 border-2 border-white/80">
+                                  <Play className="w-7 h-7 fill-white translate-x-0.5" />
+                                </div>
+                              </div>
+                              <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-black/80 text-[10px] font-mono font-black text-white flex items-center gap-1.5 border border-white/20">
+                                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
+                                <span>▶️ Click to Watch Video</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-white p-4 text-center space-y-2">
+                              <div className="w-12 h-12 rounded-full bg-rose-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                                <Video className="w-6 h-6 text-white" />
+                              </div>
+                              <span className="text-xs font-black text-slate-200">Video Highlight Reel</span>
+                              <a 
+                                href={item.url} 
+                                target="_blank" 
+                                rel="noreferrer"
+                                className="text-[11px] text-cyan-400 hover:underline flex items-center gap-1 font-mono"
+                              >
+                                <span>Open Video Link</span>
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            </div>
+                          )
+                        ) : (
+                          <>
+                            <img 
+                              src={item.url} 
+                              alt={item.title} 
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80';
+                              }}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                          </>
+                        )}
 
-                      <div className="absolute top-3 right-3">
-                        <span className="px-2.5 py-0.5 rounded-lg bg-slate-950/80 text-white font-mono text-[10px] font-black border border-white/20">
-                          {item.type === 'video' ? '🎬 VIDEO' : '📸 PHOTO'}
-                        </span>
+                        {/* Top Right Badges & Delete Action */}
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
+                          <span className="px-2.5 py-0.5 rounded-lg bg-slate-950/80 text-white font-mono text-[10px] font-black border border-white/20 backdrop-blur-md">
+                            {item.type === 'video' ? '🎬 VIDEO' : '📸 PHOTO'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Remove "${item.title}" from gallery?`)) {
+                                deleteMediaFromHallOfFame(currentEntry.year, item.id);
+                              }
+                            }}
+                            title="Delete this media"
+                            className="w-6 h-6 rounded-lg bg-slate-950/80 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-white/20 backdrop-blur-md"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-4 space-y-1.5">
+                        <h4 className="font-black text-sm font-cabinet text-slate-950 leading-tight group-hover:text-amber-600 transition-colors">
+                          {item.title}
+                        </h4>
+                        {item.caption && (
+                          <p className="text-xs text-slate-600 font-medium line-clamp-2">
+                            {item.caption}
+                          </p>
+                        )}
                       </div>
                     </div>
-
-                    <div className="p-4 space-y-1.5">
-                      <h4 className="font-black text-sm font-cabinet text-slate-950 leading-tight group-hover:text-amber-600 transition-colors">
-                        {item.title}
-                      </h4>
-                      {item.caption && (
-                        <p className="text-xs text-slate-600 font-medium line-clamp-2">
-                          {item.caption}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -1545,6 +1600,58 @@ export const HallOfFamePage: React.FC = () => {
               </div>
             </form>
 
+          </div>
+        </div>
+      )}
+
+      {/* 7. MODAL: INTERACTIVE VIDEO PLAYER MODAL */}
+      {activeVideoUrl && (
+        <div 
+          className="fixed inset-0 z-[999999] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+          onClick={() => setActiveVideoUrl(null)}
+        >
+          <div 
+            className="relative w-full max-w-4xl bg-black rounded-3xl border-3 border-slate-900 shadow-[10px_10px_0px_#0f172a] overflow-hidden my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-3.5 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="p-1.5 rounded-xl bg-rose-600 text-white flex items-center justify-center">
+                  <Play className="w-4 h-4 fill-white" />
+                </div>
+                <div>
+                  <h4 className="text-sm sm:text-base font-black font-cabinet truncate max-w-sm sm:max-w-lg text-white">
+                    {activeVideoTitle || 'Championship Match Highlights'}
+                  </h4>
+                  <span className="text-[10px] text-slate-400 font-mono">2026 OFFICIAL VIDEO REEL</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveVideoUrl(null)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white flex items-center justify-center font-bold transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="relative w-full aspect-video bg-black">
+              {getYouTubeId(activeVideoUrl) ? (
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${getYouTubeId(activeVideoUrl)}?autoplay=1&rel=0`}
+                  title={activeVideoTitle}
+                  className="w-full h-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  src={activeVideoUrl}
+                  controls
+                  autoPlay
+                  className="w-full h-full"
+                />
+              )}
+            </div>
           </div>
         </div>
       )}

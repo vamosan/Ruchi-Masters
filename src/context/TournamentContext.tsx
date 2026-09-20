@@ -76,6 +76,7 @@ interface TournamentContextType {
   hallOfFame: HallOfFameEntry[];
   addHallOfFameEntry: (entry: HallOfFameEntry) => void;
   addMediaToHallOfFame: (year: number, media: HallOfFameMedia) => void;
+  deleteMediaFromHallOfFame: (year: number, mediaId: string) => void;
   currentUser: AuthUser;
   canEditTeam: (teamId: string) => boolean;
   isAdmin: () => boolean;
@@ -168,6 +169,18 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         return {
           ...e,
           media: [media, ...(e.media || [])]
+        };
+      }
+      return e;
+    }));
+  };
+
+  const deleteMediaFromHallOfFame = (year: number, mediaId: string) => {
+    setHallOfFame(prev => prev.map(e => {
+      if (e.year === year) {
+        return {
+          ...e,
+          media: (e.media || []).filter(m => m.id !== mediaId)
         };
       }
       return e;
@@ -1020,6 +1033,7 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         hallOfFame,
         addHallOfFameEntry,
         addMediaToHallOfFame,
+        deleteMediaFromHallOfFame,
         canEditTeam,
         isAdmin,
         loginAsAdmin,
