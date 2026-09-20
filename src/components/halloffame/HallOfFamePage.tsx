@@ -37,6 +37,7 @@ export const HallOfFamePage: React.FC = () => {
   const { 
     hallOfFame, 
     addMediaToHallOfFame, 
+    updateMediaInHallOfFame,
     deleteMediaFromHallOfFame,
     addHallOfFameEntry, 
     currentUser, 
@@ -49,6 +50,7 @@ export const HallOfFamePage: React.FC = () => {
   });
 
   const [showAddMediaModal, setShowAddMediaModal] = useState(false);
+  const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
   const [showAddChampionModal, setShowAddChampionModal] = useState(false);
   const [isEditingYear, setIsEditingYear] = useState(false);
   const [isCurrentActiveSeason, setIsCurrentActiveSeason] = useState(false);
@@ -61,7 +63,7 @@ export const HallOfFamePage: React.FC = () => {
     return match ? match[1] : null;
   };
 
-  // New Media State
+  // Media Form State
   const [mediaTitle, setMediaTitle] = useState('');
   const [mediaUrl, setMediaUrl] = useState('');
   const [mediaCaption, setMediaCaption] = useState('');
@@ -82,7 +84,7 @@ export const HallOfFamePage: React.FC = () => {
   const [newSecondRunnerUp, setNewSecondRunnerUp] = useState('');
   const [newFinalScore, setNewFinalScore] = useState('');
   const [newMargin, setNewMargin] = useState('');
-  const [newVenue, setNewVenue] = useState('Apex National Stadium');
+  const [newVenue, setNewVenue] = useState('Frankfurt Cricket Ground, Germany');
   const [newCaptain, setNewCaptain] = useState('');
   const [newCaptainBio, setNewCaptainBio] = useState('');
   const [newMvp, setNewMvp] = useState('');
@@ -96,19 +98,47 @@ export const HallOfFamePage: React.FC = () => {
 
   const currentEntry = hallOfFame.find(e => e.year === selectedYear) || hallOfFame[0];
 
-  const handleAddMedia = (e: React.FormEvent) => {
+  const handleOpenAddMedia = () => {
+    setEditingMediaId(null);
+    setMediaType('image');
+    setMediaTitle('');
+    setMediaUrl('');
+    setMediaCaption('');
+    setShowAddMediaModal(true);
+  };
+
+  const handleOpenEditMedia = (item: HallOfFameMedia) => {
+    setEditingMediaId(item.id);
+    setMediaType(item.type);
+    setMediaTitle(item.title);
+    setMediaUrl(item.url);
+    setMediaCaption(item.caption || '');
+    setShowAddMediaModal(true);
+  };
+
+  const handleSaveMedia = (e: React.FormEvent) => {
     e.preventDefault();
     if (!mediaTitle.trim() || !mediaUrl.trim() || !currentEntry) return;
 
-    const newMedia: HallOfFameMedia = {
-      id: 'med-' + Date.now(),
-      title: mediaTitle.trim(),
-      url: mediaUrl.trim(),
-      caption: mediaCaption.trim() || undefined,
-      type: mediaType
-    };
+    if (editingMediaId) {
+      updateMediaInHallOfFame(currentEntry.year, editingMediaId, {
+        title: mediaTitle.trim(),
+        url: mediaUrl.trim(),
+        caption: mediaCaption.trim() || undefined,
+        type: mediaType
+      });
+    } else {
+      const newMedia: HallOfFameMedia = {
+        id: 'med-' + Date.now(),
+        title: mediaTitle.trim(),
+        url: mediaUrl.trim(),
+        caption: mediaCaption.trim() || undefined,
+        type: mediaType
+      };
+      addMediaToHallOfFame(currentEntry.year, newMedia);
+    }
 
-    addMediaToHallOfFame(currentEntry.year, newMedia);
+    setEditingMediaId(null);
     setMediaTitle('');
     setMediaUrl('');
     setMediaCaption('');
@@ -298,19 +328,32 @@ export const HallOfFamePage: React.FC = () => {
     }
   };
 
-  const handleSampleImage = (type: 'trophy' | 'team' | 'celebration') => {
+  const handleSampleImage = (type: 'trophy' | 'presentation' | 'team' | 'celebration' | 'highlights') => {
     if (type === 'trophy') {
-      setMediaUrl('https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?auto=format&fit=crop&w=800&q=80');
-      setMediaTitle('Golden Trophy Presentation Ceremony');
-      setMediaCaption('Lifting the Championship Trophy on the main podium.');
-    } else if (type === 'team') {
+      setMediaType('image');
       setMediaUrl('https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80');
-      setMediaTitle('Official Championship Squad Portrait');
-      setMediaCaption('Players and coaching staff with the championship banner.');
-    } else {
-      setMediaUrl('https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=800&q=80');
-      setMediaTitle('Podium Fireworks & Confetti Blast');
-      setMediaCaption('Victory celebrations after the final ball.');
+      setMediaTitle('5th Edition Grand Trophy Presentation');
+      setMediaCaption('Frankfurt Spartans lifting the 2026 Ruchi Masters 5th Edition Championship Trophy.');
+    } else if (type === 'presentation') {
+      setMediaType('image');
+      setMediaUrl('https://images.unsplash.com/photo-1578269174936-2709b6aeb913?auto=format&fit=crop&w=800&q=80');
+      setMediaTitle('Presentation Ceremony & Individual Honors');
+      setMediaCaption('Chief guests presenting awards to tournament winners, MVP, Orange Cap and Purple Cap champions.');
+    } else if (type === 'team') {
+      setMediaType('image');
+      setMediaUrl('https://images.unsplash.com/photo-1531415074868-036b1c57e3ce?auto=format&fit=crop&w=800&q=80');
+      setMediaTitle('Frankfurt Spartans Championship Squad Photo');
+      setMediaCaption('Winning squad, team management and support staff celebrating the 2026 title.');
+    } else if (type === 'celebration') {
+      setMediaType('image');
+      setMediaUrl('https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80');
+      setMediaTitle('Victory Celebrations & Fireworks');
+      setMediaCaption('Jubilant scenes and victory lap after winning the championship final.');
+    } else if (type === 'highlights') {
+      setMediaType('video');
+      setMediaUrl('https://www.youtube.com/watch?v=dQw4w9WgXcQ');
+      setMediaTitle('2026 Grand Finale Match Highlights & Moments');
+      setMediaCaption('Complete thrilling highlights and key turning points of the final match.');
     }
   };
 
@@ -864,7 +907,7 @@ export const HallOfFamePage: React.FC = () => {
                   if (currentUser.role === 'spectator') {
                     openAuthModal();
                   } else {
-                    setShowAddMediaModal(true);
+                    handleOpenAddMedia();
                   }
                 }}
                 className="h-9 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-black text-xs flex items-center gap-1.5 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]"
@@ -884,7 +927,7 @@ export const HallOfFamePage: React.FC = () => {
                 <button
                   onClick={() => {
                     if (currentUser.role === 'spectator') openAuthModal();
-                    else setShowAddMediaModal(true);
+                    else handleOpenAddMedia();
                   }}
                   className="px-4 py-2 rounded-xl bg-[#CCFF00] text-slate-950 font-black text-xs border-2 border-slate-950 shadow"
                 >
@@ -956,11 +999,22 @@ export const HallOfFamePage: React.FC = () => {
                           </>
                         )}
 
-                        {/* Top Right Badges & Delete Action */}
+                        {/* Top Right Badges & Actions */}
                         <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
                           <span className="px-2.5 py-0.5 rounded-lg bg-slate-950/80 text-white font-mono text-[10px] font-black border border-white/20 backdrop-blur-md">
                             {item.type === 'video' ? '🎬 VIDEO' : '📸 PHOTO'}
                           </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenEditMedia(item);
+                            }}
+                            title="Edit this media / Replace pic"
+                            className="w-6 h-6 rounded-lg bg-slate-950/80 hover:bg-[#FFE600] text-slate-300 hover:text-slate-950 flex items-center justify-center transition-colors border border-white/20 backdrop-blur-md shadow-sm"
+                          >
+                            <Edit3 className="w-3 h-3" />
+                          </button>
                           <button
                             type="button"
                             onClick={(e) => {
@@ -970,22 +1024,53 @@ export const HallOfFamePage: React.FC = () => {
                               }
                             }}
                             title="Delete this media"
-                            className="w-6 h-6 rounded-lg bg-slate-950/80 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-white/20 backdrop-blur-md"
+                            className="w-6 h-6 rounded-lg bg-slate-950/80 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-white/20 backdrop-blur-md shadow-sm"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
                       </div>
 
-                      <div className="p-4 space-y-1.5">
-                        <h4 className="font-black text-sm font-cabinet text-slate-950 leading-tight group-hover:text-amber-600 transition-colors">
-                          {item.title}
-                        </h4>
-                        {item.caption && (
-                          <p className="text-xs text-slate-600 font-medium line-clamp-2">
-                            {item.caption}
-                          </p>
-                        )}
+                      <div className="p-4 space-y-2.5 flex-1 flex flex-col justify-between">
+                        <div className="space-y-1">
+                          <h4 className="font-black text-sm font-cabinet text-slate-950 leading-tight group-hover:text-amber-600 transition-colors">
+                            {item.title}
+                          </h4>
+                          {item.caption && (
+                            <p className="text-xs text-slate-600 font-medium line-clamp-2">
+                              {item.caption}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Bottom Action Row */}
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenEditMedia(item);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-800 hover:text-amber-950 text-[11px] font-black flex items-center gap-1 border border-slate-200 transition-colors shadow-sm"
+                          >
+                            <Edit3 className="w-3 h-3 text-amber-600" />
+                            <span>{item.type === 'video' ? 'Edit Video Link' : 'Edit / Replace Pic'}</span>
+                          </button>
+
+                          {item.type === 'video' && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveVideoUrl(item.url);
+                                setActiveVideoTitle(item.title);
+                              }}
+                              className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-black flex items-center gap-1 border border-rose-200 transition-colors shadow-sm"
+                            >
+                              <Play className="w-3 h-3 fill-rose-600 text-rose-600" />
+                              <span>Play Video</span>
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   );
@@ -997,12 +1082,15 @@ export const HallOfFamePage: React.FC = () => {
         </div>
       )}
 
-      {/* 5. MODAL: UPLOAD PHOTO / VIDEO MEMORY */}
+      {/* 5. MODAL: UPLOAD / EDIT PHOTO & VIDEO MEMORY */}
       {showAddMediaModal && (
         <div 
           className="fixed inset-0 z-[99999] bg-slate-950/85 backdrop-blur-md overflow-y-auto flex items-center justify-center p-4 sm:p-6"
           onClick={(e) => {
-            if (e.target === e.currentTarget) setShowAddMediaModal(false);
+            if (e.target === e.currentTarget) {
+              setShowAddMediaModal(false);
+              setEditingMediaId(null);
+            }
           }}
         >
           <div className="relative w-full max-w-lg bg-white rounded-3xl border-3 border-slate-950 shadow-[10px_10px_0px_#0f172a] text-slate-900 overflow-hidden my-auto">
@@ -1011,26 +1099,31 @@ export const HallOfFamePage: React.FC = () => {
             <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between border-b-2 border-slate-900">
               <div className="flex items-center gap-2.5">
                 <div className="p-2 rounded-xl bg-[#CCFF00] text-slate-950 border border-slate-900">
-                  <Upload className="w-5 h-5" />
+                  {editingMediaId ? <Edit3 className="w-5 h-5 text-slate-950" /> : <Upload className="w-5 h-5" />}
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-black font-cabinet leading-tight">
-                    Upload {selectedYear} Championship Media
+                    {editingMediaId ? 'Edit Championship Media' : `Upload ${selectedYear} Championship Media`}
                   </h3>
-                  <span className="text-[10px] text-slate-400 font-mono tracking-wider">HALL OF FAME ARCHIVE</span>
+                  <span className="text-[10px] text-slate-400 font-mono tracking-wider">
+                    {editingMediaId ? 'UPDATE PHOTO, VIDEO LINK & DETAILS' : 'HALL OF FAME ARCHIVE'}
+                  </span>
                 </div>
               </div>
 
               <button
-                onClick={() => setShowAddMediaModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white flex items-center justify-center font-bold"
+                onClick={() => {
+                  setShowAddMediaModal(false);
+                  setEditingMediaId(null);
+                }}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white flex items-center justify-center font-bold transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Body */}
-            <form onSubmit={handleAddMedia} className="p-5 space-y-4">
+            <form onSubmit={handleSaveMedia} className="p-5 space-y-4">
               
               {/* Media Type Switcher */}
               <div className="flex rounded-xl border-2 border-slate-900 bg-slate-100 p-1 text-xs">
@@ -1058,13 +1151,13 @@ export const HallOfFamePage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                  Memory Title *
+                  Media / Title *
                 </label>
                 <input
                   type="text"
                   value={mediaTitle}
                   onChange={(e) => setMediaTitle(e.target.value)}
-                  placeholder="e.g. Trophy Lift Celebration with Fireworks"
+                  placeholder="e.g. Presentation Ceremony & Trophy Lift"
                   className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
                   required
                 />
@@ -1072,7 +1165,7 @@ export const HallOfFamePage: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                  {mediaType === 'image' ? 'Championship Photo *' : 'Video URL (YouTube / MP4) *'}
+                  {mediaType === 'image' ? 'Championship Photo *' : 'Video URL (YouTube / Direct Link) *'}
                 </label>
 
                 {mediaType === 'image' ? (
@@ -1100,57 +1193,77 @@ export const HallOfFamePage: React.FC = () => {
                             onChange={handleMediaFileUpload} 
                           />
                         </label>
-                        <p className="text-[10px] text-slate-500 font-medium">Supports JPG, PNG, WEBP. Auto-compressed for high speed.</p>
+                        <p className="text-[10px] text-slate-500 font-medium">Upload presentation photos, trophy ceremony, or winning snapshots.</p>
                       </div>
                     </div>
 
                     <div>
-                      <span className="text-[10px] font-mono text-slate-500 block mb-1">Or paste direct image URL:</span>
+                      <span className="text-[10px] font-mono text-slate-500 block mb-1">Or paste direct photo URL:</span>
                       <input
                         type="url"
                         value={mediaUrl}
                         onChange={(e) => setMediaUrl(e.target.value)}
-                        placeholder="https://images.unsplash.com/... or https://..."
+                        placeholder="https://images.unsplash.com/... or image link"
                         className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-mono bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
                       />
                     </div>
                   </div>
                 ) : (
-                  <input
-                    type="url"
-                    value={mediaUrl}
-                    onChange={(e) => setMediaUrl(e.target.value)}
-                    placeholder="https://youtube.com/... or https://..."
-                    className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-mono bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
-                    required
-                  />
+                  <div>
+                    <input
+                      type="url"
+                      value={mediaUrl}
+                      onChange={(e) => setMediaUrl(e.target.value)}
+                      placeholder="https://youtube.com/watch?v=... or https://youtu.be/..."
+                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-mono bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
+                      required
+                    />
+                    <span className="text-[10px] text-slate-500 font-mono mt-1 block">
+                      Supports YouTube match highlights, presentation ceremony videos & live streams.
+                    </span>
+                  </div>
                 )}
               </div>
 
-              {/* Sample Preset Buttons for Quick Demo */}
+              {/* Sample Preset Buttons for Quick Fill */}
               <div className="space-y-1">
                 <span className="text-[10px] font-mono text-slate-500 block">⚡ Quick Sample Fill:</span>
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     type="button"
                     onClick={() => handleSampleImage('trophy')}
-                    className="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-950 text-[10px] font-bold"
+                    className="px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-950 text-[10px] font-bold"
                   >
                     🏆 Trophy Lift
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleSampleImage('team')}
-                    className="px-2.5 py-1 rounded-lg bg-cyan-100 hover:bg-cyan-200 text-cyan-950 text-[10px] font-bold"
+                    onClick={() => handleSampleImage('presentation')}
+                    className="px-2 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-950 text-[10px] font-bold"
                   >
-                    👥 Squad Portrait
+                    🎖️ Presentation Ceremony
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSampleImage('team')}
+                    className="px-2 py-1 rounded-lg bg-cyan-100 hover:bg-cyan-200 text-cyan-950 text-[10px] font-bold"
+                  >
+                    👥 Squad Photo
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSampleImage('celebration')}
-                    className="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-950 text-[10px] font-bold"
+                    className="px-2 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-950 text-[10px] font-bold"
                   >
                     🎆 Confetti Blast
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSampleImage('highlights')}
+                    className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-[#FFE600] text-[10px] font-bold flex items-center gap-1"
+                  >
+                    <Play className="w-2.5 h-2.5 fill-[#FFE600]" />
+                    <span>YouTube Highlights</span>
                   </button>
                 </div>
               </div>
@@ -1162,7 +1275,7 @@ export const HallOfFamePage: React.FC = () => {
                 <textarea
                   value={mediaCaption}
                   onChange={(e) => setMediaCaption(e.target.value)}
-                  placeholder="Share details about this memorable moment from the final match..."
+                  placeholder="Share details about this memorable moment from the presentation ceremony or final match..."
                   rows={2}
                   className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-medium bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
                 />
@@ -1171,7 +1284,10 @@ export const HallOfFamePage: React.FC = () => {
               <div className="pt-2 flex items-center justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setShowAddMediaModal(false)}
+                  onClick={() => {
+                    setShowAddMediaModal(false);
+                    setEditingMediaId(null);
+                  }}
                   className="px-4 py-2 rounded-xl border-2 border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100"
                 >
                   Cancel
@@ -1180,7 +1296,7 @@ export const HallOfFamePage: React.FC = () => {
                   type="submit"
                   className="px-5 py-2 rounded-xl bg-[#CCFF00] hover:bg-[#bdf000] text-slate-950 text-xs font-black border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]"
                 >
-                  Save & Publish Memory
+                  {editingMediaId ? 'Update & Save Changes' : 'Save & Publish Memory'}
                 </button>
               </div>
 

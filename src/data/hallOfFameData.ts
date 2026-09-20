@@ -36,7 +36,7 @@ export const INITIAL_HALL_OF_FAME: HallOfFameEntry[] = [
       {
         "id": "med-2026-2",
         "type": "image",
-        "url": "https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=800&q=80",
+        "url": "https://images.unsplash.com/photo-1531415074868-036b1c57e3ce?auto=format&fit=crop&w=800&q=80",
         "title": "Frankfurt Spartans Championship Squad Photo",
         "caption": "Winning squad and support staff celebrating the 2026 title."
       },
