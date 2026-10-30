@@ -538,7 +538,6 @@ export const HallOfFamePage: React.FC = () => {
                       rel="noopener noreferrer"
                       className="px-4 py-2 rounded-2xl bg-[#00F0FF] hover:bg-[#00d8ea] text-slate-950 font-black text-xs sport-btn flex items-center gap-2 border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] hover:scale-105 transition-all"
                     >
-                      <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping shrink-0" />
                       <span>⚡ CricHeroes Match Scorecard</span>
                       <ExternalLink className="w-3.5 h-3.5 shrink-0" />
                     </a>
@@ -629,7 +628,7 @@ export const HallOfFamePage: React.FC = () => {
                   <div className="p-3 rounded-2xl bg-slate-950 text-white border-2 border-[#FFE600] shadow-xl space-y-2.5 animate-in fade-in slide-in-from-top-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div className="flex items-center gap-2 text-xs font-black text-[#FFE600]">
-                        <Move className="w-4 h-4 animate-bounce" />
+                        <Move className="w-4 h-4 text-amber-400" />
                         <span>✋ Drag image up/down to reposition, or use controls:</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -1017,8 +1016,7 @@ export const HallOfFamePage: React.FC = () => {
                                 </div>
                               </div>
                               <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-black/80 text-[10px] font-mono font-black text-white flex items-center gap-1.5 border border-white/20">
-                                <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                                <span>▶️ Click to Watch Video</span>
+                                <span>▶ Click to Watch Video</span>
                               </div>
                             </div>
                           ) : (
@@ -1863,7 +1861,7 @@ export const HallOfFamePage: React.FC = () => {
               {/* Storage Status Box */}
               <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-300 space-y-2">
                 <div className="flex items-center gap-2 text-xs font-black text-emerald-900">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
                   <span>Local IndexedDB & Cache Storage: Active & Protected</span>
                 </div>
                 <p className="text-xs text-emerald-800 leading-relaxed font-medium">

@@ -44,7 +44,7 @@ export const RuchiNavbar: React.FC<Props> = ({ themeMode, setThemeMode }) => {
       <div className="bg-slate-950 text-white text-[11px] font-black py-1 px-4 flex items-center justify-between overflow-x-auto tracking-wider uppercase whitespace-nowrap">
         <div className="flex items-center gap-3 shrink-0">
           <span className="flex items-center gap-1.5 text-[#CCFF00]">
-            <span className="w-2 h-2 rounded-full bg-[#CCFF00] animate-ping inline-block" />
+            <span className="w-2 h-2 rounded-full bg-[#CCFF00] inline-block" />
             <span className="font-mono font-black">LIVE MATCHDAY</span>
           </span>
           <span className="text-slate-600">|</span>

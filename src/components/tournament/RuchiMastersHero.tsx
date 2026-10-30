@@ -55,7 +55,7 @@ export const RuchiMastersHero: React.FC = () => {
           {/* Fun Sporty Tags & Badges */}
           <div className="flex flex-wrap items-center gap-2.5">
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#CCFF00] sport-badge text-slate-950 text-xs">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping inline-block"></span>
+              <span className="w-2 h-2 rounded-full bg-rose-600 inline-block"></span>
               <span>⚡ 2026 PRO EDITION</span>
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00F0FF] sport-badge text-slate-950 text-xs transform -rotate-1">

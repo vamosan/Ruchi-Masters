@@ -84,7 +84,7 @@ export const TournamentInfo: React.FC = () => {
         >
           <div className="space-y-1">
             <span className="text-xs font-bold uppercase tracking-wider text-rose-400 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+              <span className="w-2 h-2 rounded-full bg-rose-500"></span>
               Live Match Center
             </span>
             <h3 className="text-lg font-bold text-white group-hover:text-rose-300">Ball-by-Ball Live Scoring</h3>

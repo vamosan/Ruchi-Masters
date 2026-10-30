@@ -58,7 +58,7 @@ export const BottomLiveDock: React.FC = () => {
         <div className="hidden lg:flex items-center gap-4 text-xs font-mono border-l border-indigo-800/60 pl-4">
           <div className="space-y-0.5">
             <div className="flex items-center gap-1.5 font-bold text-white">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
               <span className="truncate max-w-[90px]">{striker?.name.split(' ')[0].toUpperCase() || 'STRIKER'}</span>
               <span className="text-cyan-300">{strikerBat?.runs || 0}</span>
               <span className="text-slate-400 text-[10px]">({strikerBat?.balls || 0})</span>

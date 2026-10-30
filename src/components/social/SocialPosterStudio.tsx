@@ -163,7 +163,7 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
           {/* Poster Top Bar */}
           <div className="relative z-10 flex items-center justify-between border-b border-white/20 pb-3">
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#CCFF00] animate-ping" />
+              <span className="w-2.5 h-2.5 rounded-full bg-[#CCFF00]" />
               <span className="text-[10px] font-black font-mono tracking-widest text-[#CCFF00] uppercase">
                 RUCHI MASTERS T20
               </span>

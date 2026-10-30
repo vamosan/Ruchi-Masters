@@ -83,7 +83,6 @@ export const Navbar: React.FC = () => {
         <div className="bg-gradient-to-r from-amber-600 via-emerald-700 to-indigo-900 text-white text-xs font-semibold py-1 px-4 flex items-center justify-between">
           <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
             <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-200 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
             </span>
             <span className="text-amber-200 font-bold uppercase tracking-wider text-[11px]">Tournament Suite</span>
@@ -165,7 +164,7 @@ export const Navbar: React.FC = () => {
                     <Icon className={`w-4 h-4 ${isActive ? 'text-amber-400' : 'text-slate-400'}`} />
                     <span>{tab.label}</span>
                     {tab.badge && (
-                      <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-rose-600 text-white animate-pulse">
+                      <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-rose-600 text-white">
                         {tab.badge}
                       </span>
                     )}

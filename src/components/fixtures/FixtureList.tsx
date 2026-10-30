@@ -156,7 +156,7 @@ export const FixtureList: React.FC = () => {
               : 'text-slate-400 hover:text-rose-400 hover:bg-slate-800/50'
           }`}
         >
-          {liveMatches.length > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>}
+          {liveMatches.length > 0 && <span className="w-2 h-2 rounded-full bg-rose-500"></span>}
           Live ({liveMatches.length})
         </button>
         <button

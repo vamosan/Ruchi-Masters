@@ -70,14 +70,14 @@ export const Sidebar: React.FC = () => {
               >
                 <div className="flex items-center gap-3">
                   {item.dot && (
-                    <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-cyan-400 animate-ping' : 'bg-rose-500'}`} />
+                    <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-cyan-400' : 'bg-rose-500'}`} />
                   )}
                   <Icon className={`w-4 h-4 ${isActive ? 'text-cyan-300' : 'text-indigo-400'}`} />
                   <span>{item.label}</span>
                 </div>
 
                 {item.badge && (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white animate-pulse">
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-rose-600 text-white">
                     {item.badge}
                   </span>
                 )}

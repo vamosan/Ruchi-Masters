@@ -229,7 +229,7 @@ export const LiveScoringConsole: React.FC = () => {
             >
               <span className="font-cabinet font-bold">{tA?.code} vs {tB?.code}</span>
               {m.status === 'live' && (
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-600"></span>
               )}
             </button>
           );
@@ -465,7 +465,7 @@ export const LiveScoringConsole: React.FC = () => {
               {/* Striker */}
               <div className="p-3 rounded-xl bg-slate-900/90 border border-amber-500/30 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" title="On Strike"></span>
+                  <span className="w-2 h-2 rounded-full bg-amber-400" title="On Strike"></span>
                   <div>
                     <div className="font-bold text-white text-sm flex items-center gap-1">
                       <span>{striker?.name || 'Striker (TBD)'}</span>
