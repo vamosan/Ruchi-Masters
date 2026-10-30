@@ -44,7 +44,8 @@ export async function processPlayerPhoto(file: File): Promise<string> {
 }
 
 /**
- * Compresses wider banner and trophy photos up to 1200px
+ * Compresses wider banner and trophy photos up to 960px
+ * Produces crisp retina quality while keeping payload ~60-90KB for safe local storage
  */
 export async function processBannerPhoto(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -53,7 +54,7 @@ export async function processBannerPhoto(file: File): Promise<string> {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const maxDim = 1200;
+        const maxDim = 960;
         let width = img.width;
         let height = img.height;
 
@@ -74,7 +75,7 @@ export async function processBannerPhoto(file: File): Promise<string> {
         const ctx = canvas.getContext('2d');
         if (ctx) {
           ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.82));
+          resolve(canvas.toDataURL('image/jpeg', 0.76));
         } else {
           resolve(e.target?.result as string);
         }

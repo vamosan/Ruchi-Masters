@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Trophy, 
   Sparkles, 
@@ -27,7 +27,11 @@ import {
   Move,
   Sliders,
   CheckCheck,
-  Play
+  Play,
+  Download,
+  Copy,
+  FileText,
+  Database
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { HallOfFameEntry, HallOfFameMedia } from '../../types/cricket';
@@ -52,10 +56,45 @@ export const HallOfFamePage: React.FC = () => {
   const [showAddMediaModal, setShowAddMediaModal] = useState(false);
   const [editingMediaId, setEditingMediaId] = useState<string | null>(null);
   const [showAddChampionModal, setShowAddChampionModal] = useState(false);
+  const [showSyncModal, setShowSyncModal] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const [isEditingYear, setIsEditingYear] = useState(false);
   const [isCurrentActiveSeason, setIsCurrentActiveSeason] = useState(false);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
   const [activeVideoTitle, setActiveVideoTitle] = useState<string>('');
+
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (activeVideoUrl) setActiveVideoUrl(null);
+        if (showAddMediaModal) {
+          setShowAddMediaModal(false);
+          setEditingMediaId(null);
+        }
+        if (showAddChampionModal) setShowAddChampionModal(false);
+        if (showSyncModal) setShowSyncModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeVideoUrl, showAddMediaModal, showAddChampionModal, showSyncModal]);
+
+  const handleCopyJson = () => {
+    navigator.clipboard.writeText(JSON.stringify(hallOfFame, null, 2));
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2500);
+  };
+
+  const handleDownloadJson = () => {
+    const blob = new Blob([JSON.stringify(hallOfFame, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ruchi-masters-hall-of-fame-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const getYouTubeId = (url: string): string | null => {
     if (!url) return null;
@@ -402,13 +441,23 @@ export const HallOfFamePage: React.FC = () => {
                 if (currentUser.role === 'spectator') {
                   openAuthModal();
                 } else {
-                  setShowAddMediaModal(true);
+                  handleOpenAddMedia();
                 }
               }}
               className="h-10 px-5 rounded-xl bg-[#CCFF00] hover:bg-[#bdf000] text-slate-950 font-black text-xs flex items-center gap-2 border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] transition-all"
             >
               <Upload className="w-4 h-4 text-slate-950" />
               <span>Upload Photos & Videos ({selectedYear})</span>
+            </button>
+
+            {/* Sync / Export Updates Button */}
+            <button
+              onClick={() => setShowSyncModal(true)}
+              className="h-10 px-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white font-black text-xs flex items-center gap-2 border-2 border-white/20 shadow-[3px_3px_0px_#0f172a] transition-all hover:scale-102"
+              title="Backup, export, or sync changes to the live site"
+            >
+              <Database className="w-4 h-4 text-[#00F0FF]" />
+              <span>Sync / Export Gallery</span>
             </button>
 
           </div>
@@ -662,6 +711,10 @@ export const HallOfFamePage: React.FC = () => {
                     className={`w-full h-full object-cover transition-transform duration-300 opacity-90 pointer-events-none ${
                       isAdjustingImage ? 'scale-105' : 'group-hover:scale-102'
                     }`}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80';
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent pointer-events-none" />
                   
@@ -991,6 +1044,7 @@ export const HallOfFamePage: React.FC = () => {
                               src={item.url} 
                               alt={item.title} 
                               onError={(e) => {
+                                e.currentTarget.onerror = null;
                                 (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80';
                               }}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -1767,6 +1821,100 @@ export const HallOfFamePage: React.FC = () => {
                   className="w-full h-full"
                 />
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. MODAL: SYNC & EXPORT GALLERY DATA */}
+      {showSyncModal && (
+        <div 
+          className="fixed inset-0 z-[999999] bg-slate-950/85 backdrop-blur-md overflow-y-auto flex items-center justify-center p-4 sm:p-6"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowSyncModal(false);
+          }}
+        >
+          <div className="relative w-full max-w-xl bg-white rounded-3xl border-3 border-slate-950 shadow-[10px_10px_0px_#0f172a] text-slate-900 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between border-b-2 border-slate-900">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-[#00F0FF] text-slate-950 border border-slate-900">
+                  <Database className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black font-cabinet leading-tight">
+                    Sync & Cloud Persistence Manager
+                  </h3>
+                  <span className="text-[10px] text-slate-400 font-mono tracking-wider">HALL OF FAME DATA SYNC</span>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowSyncModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white flex items-center justify-center font-bold transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 space-y-5">
+              
+              {/* Storage Status Box */}
+              <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-300 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-black text-emerald-900">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Local IndexedDB & Cache Storage: Active & Protected</span>
+                </div>
+                <p className="text-xs text-emerald-800 leading-relaxed font-medium">
+                  All photos, recentered alignments, video links, and edited honors you submit are stored locally in your browser using IndexedDB. They persist safely across page refreshes and browser restarts.
+                </p>
+              </div>
+
+              {/* Public Website Sync Note */}
+              <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-2 text-amber-950">
+                <div className="flex items-center gap-2 text-xs font-black text-amber-900">
+                  <span>🌐</span>
+                  <span>How to Publish Changes Live for All Public Visitors</span>
+                </div>
+                <p className="text-xs leading-relaxed font-medium text-amber-900">
+                  Because <strong>ruchimasters.com</strong> is a high-speed static tournament hub on Cloudflare Pages, edits made in a browser stay on that device unless committed to the website repository.
+                </p>
+                <div className="text-[11px] bg-white/80 p-2.5 rounded-xl border border-amber-200 font-medium">
+                  💡 <strong>Tip:</strong> Click <strong>"Copy Full Data JSON"</strong> below and paste it in chat (or download the file) so it can be committed to the site repository and deployed live to every spectator in seconds!
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleCopyJson}
+                  className="w-full py-3 px-4 rounded-2xl bg-[#FFE600] hover:bg-[#ebd300] text-slate-950 font-black text-xs sm:text-sm border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] flex items-center justify-center gap-2 transition-all hover:scale-101"
+                >
+                  {copySuccess ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-800 stroke-[3]" />
+                      <span>Copied Data to Clipboard!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>Copy Full Hall of Fame JSON</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleDownloadJson}
+                  className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-black text-xs sm:text-sm border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] flex items-center justify-center gap-2 transition-all hover:scale-101"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Download Backup JSON File</span>
+                </button>
+              </div>
+
             </div>
           </div>
         </div>

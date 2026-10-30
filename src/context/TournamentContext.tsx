@@ -21,6 +21,7 @@ import { ballsToOversStr, generateCommentary } from '../utils/cricketEngine';
 import { AuthUser, AuthRole } from '../types/auth';
 import { HallOfFameEntry, HallOfFameMedia } from '../types/cricket';
 import { INITIAL_HALL_OF_FAME } from '../data/hallOfFameData';
+import { safeSetLocalStorage, saveToIndexedDB, loadFromIndexedDB } from '../utils/storageUtils';
 
 interface ScoreBallPayload {
   runs: number;
@@ -135,23 +136,36 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [activeTab, setActiveTab] = useState<string>('overview');
 
   // Authentication State
-    const [hallOfFame, setHallOfFame] = useState<HallOfFameEntry[]>(() => {
+  const [hallOfFame, setHallOfFame] = useState<HallOfFameEntry[]>(() => {
     const saved = localStorage.getItem('cricmaster_hall_of_fame_v3');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.some(e => e.year === 2026 && e.bestWicketKeeper)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed;
         }
       } catch (e) {
-        console.error(e);
+        console.warn('Failed to parse localStorage hallOfFame', e);
       }
     }
     return INITIAL_HALL_OF_FAME;
   });
 
+  // Reconcile with IndexedDB on mount (loads any large base64 images that exceeded localStorage)
   useEffect(() => {
-    localStorage.setItem('cricmaster_hall_of_fame_v3', JSON.stringify(hallOfFame));
+    let isMounted = true;
+    loadFromIndexedDB<HallOfFameEntry[]>('cricmaster_hall_of_fame_v3').then(cached => {
+      if (isMounted && cached && Array.isArray(cached) && cached.length > 0) {
+        setHallOfFame(cached);
+      }
+    });
+    return () => { isMounted = false; };
+  }, []);
+
+  // Persist hall of fame changes to both IndexedDB (safe for unlimited photos) & localStorage
+  useEffect(() => {
+    saveToIndexedDB('cricmaster_hall_of_fame_v3', hallOfFame);
+    safeSetLocalStorage('cricmaster_hall_of_fame_v3', JSON.stringify(hallOfFame));
   }, [hallOfFame]);
 
   const addHallOfFameEntry = (entry: HallOfFameEntry) => {
@@ -216,7 +230,7 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [authModalTeamId, setAuthModalTeamId] = useState<string | null>(null);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.AUTH_USER, JSON.stringify(currentUser));
+    safeSetLocalStorage(STORAGE_KEYS.AUTH_USER, JSON.stringify(currentUser));
   }, [currentUser]);
 
   const openAuthModal = (teamId?: string) => {
@@ -299,19 +313,19 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Local storage persistence
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.TOURNAMENT, JSON.stringify(tournament));
+    safeSetLocalStorage(STORAGE_KEYS.TOURNAMENT, JSON.stringify(tournament));
   }, [tournament]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.TEAMS, JSON.stringify(teams));
+    safeSetLocalStorage(STORAGE_KEYS.TEAMS, JSON.stringify(teams));
   }, [teams]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.MATCHES, JSON.stringify(matches));
+    safeSetLocalStorage(STORAGE_KEYS.MATCHES, JSON.stringify(matches));
   }, [matches]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.VIEW_MODE, viewMode);
+    safeSetLocalStorage(STORAGE_KEYS.VIEW_MODE, viewMode);
   }, [viewMode]);
 
   const updateTournament = (updated: Tournament) => {
