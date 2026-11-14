@@ -66,17 +66,17 @@ export const FixtureList: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-6 pb-12">
       {/* Editorial Header */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-[#090909]/15 pb-10">
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 border-b border-[#090909]/15 pb-6">
         <div>
           <div className="rally-eyebrow text-[#736e6e]">
             Season 05 · Frankfurt Cricket Ground
           </div>
-          <h1 className="rally-h2 mt-3 text-[44px] sm:text-[64px] text-[#090909]">
+          <h1 className="rally-h2 mt-1.5 text-[32px] sm:text-[44px] text-[#090909]">
             Schedule
           </h1>
-          <p className="mt-3 text-[17px] text-[#575252] max-w-xl">
+          <p className="mt-1.5 text-[15px] text-[#575252] max-w-xl">
             {matches.length} fixtures across the group stage, quarterfinals, semifinals and the Grand Final.
           </p>
         </div>
@@ -156,12 +156,12 @@ export const FixtureList: React.FC = () => {
           return (
             <div
               key={match.id}
-              className="group grid grid-cols-12 items-center gap-4 py-7 border-b border-[#090909]/15 hover:bg-white/60 transition-colors px-2 -mx-2 rounded-[4px]"
+              className="group grid grid-cols-12 items-center gap-3 py-4 border-b border-[#090909]/15 hover:bg-white/60 transition-colors px-2 -mx-2 rounded-[4px]"
             >
               {/* Col 1: Date & Time / Live Status */}
-              <div className="col-span-12 lg:col-span-3 flex flex-wrap items-center gap-2.5 text-[15px] text-[#575252]">
+              <div className="col-span-12 lg:col-span-3 flex flex-wrap items-center gap-2 text-[14px] text-[#575252]">
                 {isLive && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#ff6a17] text-[#090909] text-[12px] font-bold uppercase tracking-wide">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#ff6a17] text-[#090909] text-[11px] font-bold uppercase tracking-wide">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#090909]" />
                     Live
                   </span>
@@ -171,28 +171,28 @@ export const FixtureList: React.FC = () => {
               </div>
 
               {/* Col 2: Teams & Scores */}
-              <div className="col-span-12 lg:col-span-5 space-y-1">
-                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                  <span className="text-[22px] sm:text-[26px] font-bold tracking-[-0.03em] text-[#090909]">
+              <div className="col-span-12 lg:col-span-5 space-y-0.5">
+                <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5">
+                  <span className="text-[18px] sm:text-[20px] font-bold tracking-[-0.03em] text-[#090909]">
                     {teamA?.name || 'Team 1'}
                   </span>
                   {teamAScore && (
-                    <span className="font-mono text-[16px] font-bold text-[#ff6a17]">
+                    <span className="font-mono text-[15px] font-bold text-[#ff6a17]">
                       {teamAScore.totalRuns}/{teamAScore.totalWickets} ({teamAScore.oversCompletedStr})
                     </span>
                   )}
-                  <span className="text-[15px] text-[#9a9595] font-medium">vs.</span>
-                  <span className="text-[22px] sm:text-[26px] font-bold tracking-[-0.03em] text-[#090909]">
+                  <span className="text-[14px] text-[#9a9595] font-medium">vs.</span>
+                  <span className="text-[18px] sm:text-[20px] font-bold tracking-[-0.03em] text-[#090909]">
                     {teamB?.name || 'Team 2'}
                   </span>
                   {teamBScore && (
-                    <span className="font-mono text-[16px] font-bold text-[#ff6a17]">
+                    <span className="font-mono text-[15px] font-bold text-[#ff6a17]">
                       {teamBScore.totalRuns}/{teamBScore.totalWickets} ({teamBScore.oversCompletedStr})
                     </span>
                   )}
                 </div>
                 {match.winMargin && (
-                  <p className="text-[14px] font-medium text-[#575252]">
+                  <p className="text-[13px] font-medium text-[#575252]">
                     {match.winMargin}
                   </p>
                 )}

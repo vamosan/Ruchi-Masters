@@ -39,7 +39,7 @@ const MainLayout: React.FC = () => {
           <HomePage />
         </main>
       ) : (
-        <div className="flex-1 max-w-[1320px] w-full mx-auto px-5 sm:px-8 py-12 sm:py-16">
+        <div className="flex-1 max-w-[1320px] w-full mx-auto px-5 sm:px-8 py-6 sm:py-8">
           <main className="min-w-0">
             {activeTab === 'halloffame' && <HallOfFamePage />}
             {activeTab === 'pickem' && <MatchdayPickEm />}

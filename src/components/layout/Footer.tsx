@@ -14,20 +14,20 @@ export const Footer: React.FC = () => {
   };
 
   return (
-    <footer className="bg-[#090909] text-[#f6f4f4] mt-20">
+    <footer className="bg-[#090909] text-[#f6f4f4] mt-10">
       {/* Pre-Footer Big Editorial CTA ("Ready to Get in the Game?") */}
       <div className="border-b border-white/12">
-        <div className="max-w-[1320px] mx-auto px-5 sm:px-8 py-24 sm:py-32 text-center flex flex-col items-center">
+        <div className="max-w-[1320px] mx-auto px-5 sm:px-8 py-12 sm:py-16 text-center flex flex-col items-center">
           <span className="rally-eyebrow text-[#ff6a17]">
             Season 05 Invitational — Frankfurt
           </span>
-          <h2 className="rally-display mt-5 text-[52px] sm:text-[84px] lg:text-[112px] max-w-[12ch] text-[#f6f4f4]">
+          <h2 className="rally-display mt-3 text-[36px] sm:text-[56px] lg:text-[72px] max-w-[14ch] text-[#f6f4f4]">
             Ready to get in the game?
           </h2>
-          <p className="mt-6 text-[17px] text-[#f6f4f4]/65 max-w-md leading-relaxed">
+          <p className="mt-3 text-[15px] text-[#f6f4f4]/65 max-w-md leading-relaxed">
             {teams.length} clubs. 20 overs. One pitch that decides it all.
           </p>
-          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <button onClick={() => go('fixtures')} className="rally-btn rally-btn-primary">
               View Schedule
             </button>
@@ -42,8 +42,8 @@ export const Footer: React.FC = () => {
       </div>
 
       {/* Main Footer Columns */}
-      <div className="max-w-[1320px] mx-auto px-5 sm:px-8 py-16 sm:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 pb-16 border-b border-white/12">
+      <div className="max-w-[1320px] mx-auto px-5 sm:px-8 py-10 sm:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 pb-10 border-b border-white/12">
           {/* Brand column */}
           <div className="md:col-span-5 space-y-5">
             <div className="flex items-center gap-2.5">
