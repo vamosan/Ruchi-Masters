@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  Calendar, 
-  MapPin, 
-  Radio, 
-  CheckCircle2, 
-  Clock, 
-  Plus, 
-  Play, 
-  FileText, 
-  Award, 
-  Trash2, 
-  Shuffle
+import {
+  Plus,
+  Play,
+  FileText,
+  Trash2,
+  Shuffle,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { Match } from '../../types/cricket';
@@ -18,14 +13,14 @@ import { ScheduleMatchModal } from './ScheduleMatchModal';
 import { DetailedScorecard } from '../scorecard/DetailedScorecard';
 
 export const FixtureList: React.FC = () => {
-  const { 
-    matches, 
-    teams, 
-    viewMode, 
-    setActiveMatchId, 
-    setActiveTab, 
+  const {
+    matches,
+    teams,
+    viewMode,
+    setActiveMatchId,
+    setActiveTab,
     deleteMatch,
-    autoGenerateRoundRobinFixtures
+    autoGenerateRoundRobinFixtures,
   } = useTournament();
 
   const [activeFilter, setActiveFilter] = useState<'all' | 'live' | 'upcoming' | 'completed' | 'playoffs'>('all');
@@ -37,12 +32,13 @@ export const FixtureList: React.FC = () => {
   const liveMatches = matches.filter(m => m.status === 'live');
   const completedMatches = matches.filter(m => m.status === 'completed');
   const upcomingMatches = matches.filter(m => m.status === 'scheduled' || m.status === 'toss');
-  const playoffMatches = matches.filter(m => 
-    m.stage === 'Quarter Final' || 
-    m.stage === 'Semi Final 1' || 
-    m.stage === 'Semi Final 2' || 
-    m.stage === '3rd Place Playoff' || 
-    m.stage === 'Grand Final'
+  const playoffMatches = matches.filter(
+    m =>
+      m.stage === 'Quarter Final' ||
+      m.stage === 'Semi Final 1' ||
+      m.stage === 'Semi Final 2' ||
+      m.stage === '3rd Place Playoff' ||
+      m.stage === 'Grand Final'
   );
 
   const filteredMatches = matches.filter(m => {
@@ -50,89 +46,78 @@ export const FixtureList: React.FC = () => {
     if (activeFilter === 'completed') return m.status === 'completed';
     if (activeFilter === 'upcoming') return m.status === 'scheduled' || m.status === 'toss';
     if (activeFilter === 'playoffs') {
-      return m.stage === 'Quarter Final' || 
-             m.stage === 'Semi Final 1' || 
-             m.stage === 'Semi Final 2' || 
-             m.stage === '3rd Place Playoff' || 
-             m.stage === 'Grand Final';
+      return (
+        m.stage === 'Quarter Final' ||
+        m.stage === 'Semi Final 1' ||
+        m.stage === 'Semi Final 2' ||
+        m.stage === '3rd Place Playoff' ||
+        m.stage === 'Grand Final'
+      );
     }
     return true;
   });
 
-  const getStatusBadge = (status: Match['status']) => {
-    switch (status) {
-      case 'live':
-        return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 border border-rose-200 text-rose-600 flex items-center gap-1.5 shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
-            LIVE NOW
-          </span>
-        );
-      case 'completed':
-        return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            FINAL
-          </span>
-        );
-      case 'toss':
-        return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-            TOSS DONE
-          </span>
-        );
-      case 'abandoned':
-        return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">
-            ABANDONED
-          </span>
-        );
-      default:
-        return (
-          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 flex items-center gap-1">
-            <Clock className="w-3 h-3 text-slate-400" />
-            UPCOMING
-          </span>
-        );
-    }
-  };
+  const filters: { id: typeof activeFilter; label: string; count: number }[] = [
+    { id: 'all', label: 'All', count: matches.length },
+    { id: 'live', label: 'Live', count: liveMatches.length },
+    { id: 'upcoming', label: 'Upcoming', count: upcomingMatches.length },
+    { id: 'completed', label: 'Completed', count: completedMatches.length },
+    { id: 'playoffs', label: 'Knockouts', count: playoffMatches.length },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Top Header & Filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-4">
+    <div className="space-y-12 pb-20">
+      {/* Editorial Header */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 border-b border-[#090909]/15 pb-10">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="px-2.5 py-0.5 rounded-full bg-slate-900 text-white font-mono text-[10px] uppercase tracking-wider font-semibold">
-              SCHEDULE & FIXTURES
-            </span>
-            <span className="text-xs text-slate-400 font-mono">/ 2026 EDITION</span>
+          <div className="rally-eyebrow text-[#736e6e]">
+            Season 05 · Frankfurt Cricket Ground
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-950 font-cabinet tracking-tight flex items-center gap-2">
-            Match Calendar & Scorecards
-          </h2>
-          <p className="text-xs text-slate-500">
-            {matches.length} tournament matches across group stage, qualifiers and grand final.
+          <h1 className="rally-h2 mt-3 text-[44px] sm:text-[64px] text-[#090909]">
+            Schedule
+          </h1>
+          <p className="mt-3 text-[17px] text-[#575252] max-w-xl">
+            {matches.length} fixtures across the group stage, quarterfinals, semifinals and the Grand Final.
           </p>
         </div>
 
-        {/* Action buttons for Organizer */}
-        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2">
+          {filters.map(f => {
+            const active = activeFilter === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => setActiveFilter(f.id)}
+                className={`h-10 px-4 rounded-full text-[14px] font-medium transition-colors flex items-center gap-2 ${
+                  active
+                    ? 'bg-[#090909] text-[#f6f4f4]'
+                    : 'bg-transparent text-[#575252] border border-[#090909]/15 hover:border-[#090909] hover:text-[#090909]'
+                }`}
+              >
+                {f.id === 'live' && liveMatches.length > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-[#ff6a17]" />
+                )}
+                <span>{f.label}</span>
+                <span className="text-[12px] opacity-60">{f.count}</span>
+              </button>
+            );
+          })}
+
           {viewMode === 'organizer' && (
             <>
               <button
                 onClick={() => autoGenerateRoundRobinFixtures()}
-                className="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
-                title="Automatically generate round-robin match fixtures between all teams"
+                className="rally-btn rally-btn-ghost-dark !h-10 !px-4"
+                title="Auto-generate round-robin fixtures"
               >
-                <Shuffle className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="hidden md:inline">Auto-Generate Fixtures</span>
+                <Shuffle className="w-4 h-4" />
+                Auto-Generate
               </button>
               <button
                 onClick={() => setShowScheduleModal(true)}
-                className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+                className="rally-btn rally-btn-primary !h-10 !px-4"
               >
-                <Plus className="w-4 h-4 text-amber-300" />
+                <Plus className="w-4 h-4" />
                 Schedule Match
               </button>
             </>
@@ -140,261 +125,131 @@ export const FixtureList: React.FC = () => {
         </div>
       </div>
 
-      {/* Filter Tabs (Mobbin Segments) */}
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          onClick={() => setActiveFilter('all')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-            activeFilter === 'all' 
-              ? 'bg-slate-900 text-white shadow-sm' 
-              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
-          }`}
-        >
-          All Fixtures ({matches.length})
-        </button>
-        <button
-          onClick={() => setActiveFilter('live')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
-            activeFilter === 'live' 
-              ? 'bg-rose-600 text-white shadow-sm' 
-              : 'bg-white text-slate-600 hover:text-rose-600 hover:bg-rose-50/50 border border-slate-200/80'
-          }`}
-        >
-          {liveMatches.length > 0 && <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>}
-          Live Matches ({liveMatches.length})
-        </button>
-        <button
-          onClick={() => setActiveFilter('upcoming')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-            activeFilter === 'upcoming' 
-              ? 'bg-slate-900 text-white shadow-sm' 
-              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
-          }`}
-        >
-          Upcoming ({upcomingMatches.length})
-        </button>
-        <button
-          onClick={() => setActiveFilter('completed')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-            activeFilter === 'completed' 
-              ? 'bg-slate-900 text-white shadow-sm' 
-              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
-          }`}
-        >
-          Completed Results ({completedMatches.length})
-        </button>
-        <button
-          onClick={() => setActiveFilter('playoffs')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-            activeFilter === 'playoffs' 
-              ? 'bg-slate-900 text-white shadow-sm' 
-              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
-          }`}
-        >
-          Playoffs & Finals ({playoffMatches.length})
-        </button>
-      </div>
+      {/* Rally Hairline Schedule List */}
+      <div className="border-t border-[#090909]/15">
+        {filteredMatches.length === 0 && (
+          <div className="py-16 text-center text-[#736e6e] text-[16px]">
+            No fixtures match this filter.
+          </div>
+        )}
 
-      {/* Match Cards List */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {filteredMatches.map(match => {
           const teamA = getTeam(match.teamAId);
           const teamB = getTeam(match.teamBId);
 
-          const teamAScore = match.innings1?.battingTeamId === teamA?.id 
-            ? match.innings1 
-            : (match.innings2?.battingTeamId === teamA?.id ? match.innings2 : undefined);
+          const teamAScore =
+            match.innings1?.battingTeamId === teamA?.id
+              ? match.innings1
+              : match.innings2?.battingTeamId === teamA?.id
+              ? match.innings2
+              : undefined;
 
-          const teamBScore = match.innings1?.battingTeamId === teamB?.id 
-            ? match.innings1 
-            : (match.innings2?.battingTeamId === teamB?.id ? match.innings2 : undefined);
+          const teamBScore =
+            match.innings1?.battingTeamId === teamB?.id
+              ? match.innings1
+              : match.innings2?.battingTeamId === teamB?.id
+              ? match.innings2
+              : undefined;
 
-          const isPlayoff = match.stage.includes('Final') || match.stage.includes('Playoff');
+          const isLive = match.status === 'live' || match.status === 'innings_break';
 
           return (
             <div
               key={match.id}
-              className={`rounded-2xl border transition-all overflow-hidden flex flex-col justify-between bg-white shadow-sm hover:shadow-md ${
-                match.status === 'live' 
-                  ? 'border-rose-400 ring-2 ring-rose-500/10' 
-                  : isPlayoff
-                    ? 'border-amber-300 ring-2 ring-amber-500/5'
-                    : 'border-slate-200/80 hover:border-slate-300'
-              }`}
+              className="group grid grid-cols-12 items-center gap-4 py-7 border-b border-[#090909]/15 hover:bg-white/60 transition-colors px-2 -mx-2 rounded-[4px]"
             >
-              {/* Top Card Header */}
-              <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between text-xs bg-slate-50/70">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-slate-900 uppercase tracking-wider text-[11px] font-mono">
-                    {match.title}
+              {/* Col 1: Date & Time / Live Status */}
+              <div className="col-span-12 lg:col-span-3 flex flex-wrap items-center gap-2.5 text-[15px] text-[#575252]">
+                {isLive && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#ff6a17] text-[#090909] text-[12px] font-bold uppercase tracking-wide">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#090909]" />
+                    Live
                   </span>
-                  {match.group && (
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-slate-200 text-slate-700 font-semibold font-mono">
-                      {match.group}
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2">
-                  {getStatusBadge(match.status)}
-                  {viewMode === 'organizer' && (
-                    <button
-                      onClick={() => {
-                        if (window.confirm(`Delete ${match.title}?`)) {
-                          deleteMatch(match.id);
-                        }
-                      }}
-                      className="text-slate-400 hover:text-rose-600 p-1 transition-colors"
-                      title="Delete Match"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
+                )}
+                <span className="font-medium text-[#090909]">{match.date}</span>
+                {match.time && <span className="text-[#736e6e]">· {match.time}</span>}
               </div>
 
-              {/* Main Score Body */}
-              <div className="p-4 sm:p-5 space-y-4">
-                {/* Teams & Scores */}
-                <div className="space-y-3">
-                  {/* Team A */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-sm border border-slate-100"
-                        style={{ backgroundColor: teamA?.primaryColor || '#0f172a' }}
-                      >
-                        {teamA?.logo || '🏏'}
-                      </div>
-                      <div>
-                        <div className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-1.5">
-                          <span>{teamA?.name || 'Team 1'}</span>
-                          {match.winnerTeamId === teamA?.id && (
-                            <span className="text-amber-500 font-bold text-xs" title="Winner">👑 WINNER</span>
-                          )}
-                        </div>
-                        <span className="text-[11px] text-slate-400 font-mono font-semibold">{teamA?.code}</span>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      {teamAScore ? (
-                        <div>
-                          <span className="text-lg font-black text-slate-900 font-mono">
-                            {teamAScore.totalRuns}/{teamAScore.totalWickets}
-                          </span>
-                          <span className="text-xs text-slate-500 ml-1.5 font-mono">
-                            ({teamAScore.oversCompletedStr} ov)
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-slate-400 font-medium">Yet to bat</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Team B */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-sm border border-slate-100"
-                        style={{ backgroundColor: teamB?.primaryColor || '#0f172a' }}
-                      >
-                        {teamB?.logo || '🏏'}
-                      </div>
-                      <div>
-                        <div className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-1.5">
-                          <span>{teamB?.name || 'Team 2'}</span>
-                          {match.winnerTeamId === teamB?.id && (
-                            <span className="text-amber-500 font-bold text-xs" title="Winner">👑 WINNER</span>
-                          )}
-                        </div>
-                        <span className="text-[11px] text-slate-400 font-mono font-semibold">{teamB?.code}</span>
-                      </div>
-                    </div>
-
-                    <div className="text-right">
-                      {teamBScore ? (
-                        <div>
-                          <span className="text-lg font-black text-slate-900 font-mono">
-                            {teamBScore.totalRuns}/{teamBScore.totalWickets}
-                          </span>
-                          <span className="text-xs text-slate-500 ml-1.5 font-mono">
-                            ({teamBScore.oversCompletedStr} ov)
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-slate-400 font-medium">Yet to bat</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Match Result / Status Note */}
-                {match.winMargin ? (
-                  <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs font-semibold text-emerald-900 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                      <span>{match.winMargin}</span>
-                    </div>
-                    {match.playerOfTheMatchId && (
-                      <span className="text-[11px] font-medium text-amber-700 flex items-center gap-1">
-                        <Award className="w-3.5 h-3.5 text-amber-500" />
-                        POTM: {teams.flatMap(t => t.players).find(p => p.id === match.playerOfTheMatchId)?.name || 'Player'}
-                      </span>
-                    )}
-                  </div>
-                ) : match.status === 'live' ? (
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs font-semibold text-rose-900 flex items-center justify-between">
-                    <span className="flex items-center gap-1.5">
-                      <Radio className="w-4 h-4 animate-pulse text-rose-600" />
-                      {match.currentInningsNumber === 2 && match.innings2?.target 
-                        ? `Target: ${match.innings2.target} • Need ${Math.max(0, match.innings2.target - match.innings2.totalRuns)} runs off ${(20 * 6) - match.innings2.legalBallsBowled} balls` 
-                        : '1st Innings in progress'}
+              {/* Col 2: Teams & Scores */}
+              <div className="col-span-12 lg:col-span-5 space-y-1">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <span className="text-[22px] sm:text-[26px] font-bold tracking-[-0.03em] text-[#090909]">
+                    {teamA?.name || 'Team 1'}
+                  </span>
+                  {teamAScore && (
+                    <span className="font-mono text-[16px] font-bold text-[#ff6a17]">
+                      {teamAScore.totalRuns}/{teamAScore.totalWickets} ({teamAScore.oversCompletedStr})
                     </span>
-                  </div>
-                ) : (
-                  <div className="text-xs text-slate-500 flex items-center gap-3 pt-1 border-t border-slate-100">
-                    <span className="flex items-center gap-1 font-medium"><Calendar className="w-3.5 h-3.5 text-slate-400" /> {match.date} at {match.time}</span>
-                    <span>•</span>
-                    <span className="flex items-center gap-1 truncate text-slate-400"><MapPin className="w-3.5 h-3.5" /> {match.venue}</span>
-                  </div>
+                  )}
+                  <span className="text-[15px] text-[#9a9595] font-medium">vs.</span>
+                  <span className="text-[22px] sm:text-[26px] font-bold tracking-[-0.03em] text-[#090909]">
+                    {teamB?.name || 'Team 2'}
+                  </span>
+                  {teamBScore && (
+                    <span className="font-mono text-[16px] font-bold text-[#ff6a17]">
+                      {teamBScore.totalRuns}/{teamBScore.totalWickets} ({teamBScore.oversCompletedStr})
+                    </span>
+                  )}
+                </div>
+                {match.winMargin && (
+                  <p className="text-[14px] font-medium text-[#575252]">
+                    {match.winMargin}
+                  </p>
                 )}
               </div>
 
-              {/* Action Buttons Footer */}
-              <div className="px-4 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
+              {/* Col 3: Stage & Venue */}
+              <div className="col-span-7 lg:col-span-2 text-left lg:text-right">
+                <div className="text-[14px] font-medium text-[#090909]">
+                  {match.stage}
+                  {match.group ? ` · ${match.group}` : ''}
+                </div>
+                <div className="text-[13px] text-[#736e6e] truncate">
+                  {match.venue}
+                </div>
+              </div>
+
+              {/* Col 4: Actions */}
+              <div className="col-span-5 lg:col-span-2 flex items-center justify-end gap-2">
                 <button
                   onClick={() => setInspectScorecardMatch(match)}
-                  className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200 font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
+                  className="h-9 px-3.5 rounded-full border border-[#090909]/20 hover:border-[#090909] text-[13px] font-medium text-[#090909] inline-flex items-center gap-1.5 transition-colors"
+                  title="Full Scorecard"
                 >
-                  <FileText className="w-3.5 h-3.5 text-slate-500" />
-                  Scorecard & Stats
+                  <FileText className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Scorecard</span>
                 </button>
 
-                {match.status === 'live' ? (
+                {(match.status === 'live' || match.status === 'scheduled' || match.status === 'toss') && (
                   <button
                     onClick={() => {
                       setActiveMatchId(match.id);
                       setActiveTab('live');
                     }}
-                    className="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+                    className="w-9 h-9 rounded-full bg-[#090909] text-[#f6f4f4] hover:bg-[#ff6a17] hover:text-[#090909] flex items-center justify-center transition-colors shrink-0"
+                    title={match.status === 'live' ? 'Open Live Scoring' : 'Start Match'}
                   >
-                    <Play className="w-3.5 h-3.5 fill-white" />
-                    Enter Live Scoring Console
+                    {match.status === 'live' ? (
+                      <Play className="w-4 h-4 fill-current translate-x-0.5" />
+                    ) : (
+                      <ArrowUpRight className="w-4 h-4" />
+                    )}
                   </button>
-                ) : match.status === 'scheduled' || match.status === 'toss' ? (
+                )}
+
+                {viewMode === 'organizer' && (
                   <button
                     onClick={() => {
-                      setActiveMatchId(match.id);
-                      setActiveTab('live');
+                      if (window.confirm(`Delete ${match.title}?`)) {
+                        deleteMatch(match.id);
+                      }
                     }}
-                    className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold flex items-center gap-1.5 transition-colors"
+                    className="w-9 h-9 rounded-full border border-[#090909]/15 text-[#736e6e] hover:text-[#090909] flex items-center justify-center transition-colors"
+                    title="Delete Match"
                   >
-                    <Play className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                    Start Toss / Match
+                    <Trash2 className="w-4 h-4" />
                   </button>
-                ) : null}
+                )}
               </div>
             </div>
           );

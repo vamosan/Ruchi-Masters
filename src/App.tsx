@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTournament, TournamentProvider } from './context/TournamentContext';
 import { RuchiNavbar } from './components/layout/RuchiNavbar';
-import { RuchiDashboard } from './components/tournament/RuchiDashboard';
+import { HomePage } from './components/home/HomePage';
 import { HallOfFamePage } from './components/halloffame/HallOfFamePage';
 import { MatchdayPickEm } from './components/predictions/MatchdayPickEm';
 import { SocialPosterStudio } from './components/social/SocialPosterStudio';
@@ -17,38 +17,43 @@ import { AuthModal } from './components/auth/AuthModal';
 import { Footer } from './components/layout/Footer';
 
 const MainLayout: React.FC = () => {
-  const { 
-    activeTab, 
-    isAuthModalOpen, 
-    authModalTeamId, 
-    closeAuthModal 
+  const {
+    activeTab,
+    isAuthModalOpen,
+    authModalTeamId,
+    closeAuthModal,
   } = useTournament();
-  
-  const [themeMode, setThemeMode] = useState<'clean' | 'broadcast'>('clean');
+
   const [showEditTournamentModal, setShowEditTournamentModal] = useState(false);
 
-  return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-900 font-sans selection:bg-amber-400 selection:text-slate-950 flex flex-col">
-      {/* Top Sporty Editorial Navigation Bar */}
-      <RuchiNavbar themeMode={themeMode} setThemeMode={setThemeMode} />
+  const isFullBleed = activeTab === 'overview' || activeTab === 'videos';
 
-      {/* Main Page Container */}
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <main className="min-w-0">
-          {activeTab === 'overview' && <RuchiDashboard />}
-          {activeTab === 'halloffame' && <HallOfFamePage />}
-          {activeTab === 'pickem' && <MatchdayPickEm />}
-          {activeTab === 'social' && <SocialPosterStudio />}
-          {activeTab === 'videos' && <RuchiDashboard />}
-          {activeTab === 'fixtures' && <FixtureList />}
-          {activeTab === 'live' && <LiveScoringConsole />}
-          {activeTab === 'standings' && <PointsTable />}
-          {activeTab === 'teams' && <TeamList />}
-          {activeTab === 'stats' && <Leaderboards />}
-          {activeTab === 'playoffs' && <KnockoutBracket />}
-          {activeTab === 'organizer' && <OrganizerSuite />}
+  return (
+    <div className="min-h-screen bg-[#f6f4f4] text-[#090909] font-sans flex flex-col">
+      {/* Rally Editorial Top Navigation */}
+      <RuchiNavbar />
+
+      {/* Main Content */}
+      {isFullBleed ? (
+        <main className="flex-1 min-w-0">
+          <HomePage />
         </main>
-      </div>
+      ) : (
+        <div className="flex-1 max-w-[1320px] w-full mx-auto px-5 sm:px-8 py-12 sm:py-16">
+          <main className="min-w-0">
+            {activeTab === 'halloffame' && <HallOfFamePage />}
+            {activeTab === 'pickem' && <MatchdayPickEm />}
+            {activeTab === 'social' && <SocialPosterStudio />}
+            {activeTab === 'fixtures' && <FixtureList />}
+            {activeTab === 'live' && <LiveScoringConsole />}
+            {activeTab === 'standings' && <PointsTable />}
+            {activeTab === 'teams' && <TeamList />}
+            {activeTab === 'stats' && <Leaderboards />}
+            {activeTab === 'playoffs' && <KnockoutBracket />}
+            {activeTab === 'organizer' && <OrganizerSuite />}
+          </main>
+        </div>
+      )}
 
       {/* Global Edit Tournament Modal */}
       <TournamentWizardModal
@@ -56,10 +61,10 @@ const MainLayout: React.FC = () => {
         onClose={() => setShowEditTournamentModal(false)}
       />
 
-      {/* Official League Footer */}
+      {/* Pre-Footer CTA & Multi-Column Footer */}
       <Footer />
 
-      {/* Global Auth Modal rendered at Root Level */}
+      {/* Global Auth Modal */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={closeAuthModal}

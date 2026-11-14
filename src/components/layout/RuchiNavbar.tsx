@@ -1,217 +1,135 @@
-import React from 'react';
-import { 
-  ShieldCheck, 
-  Download, 
-  Moon, 
-  Sun, 
-  Calendar, 
-  Users, 
-  Flame, 
-  KeyRound, 
-  Crown, 
-  Trophy,
-  Award
-} from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Menu, X, ArrowUpRight } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
-import { CricketBallIcon } from '../common/CricketIcons';
 
-interface Props {
-  themeMode: 'clean' | 'broadcast';
-  setThemeMode: (mode: 'clean' | 'broadcast') => void;
-}
+/**
+ * Rally-style top navigation.
+ * Ink background, quiet text links, a single orange pill CTA.
+ */
+export const RuchiNavbar: React.FC = () => {
+  const { activeTab, setActiveTab, currentUser, openAuthModal, matches } = useTournament();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-export const RuchiNavbar: React.FC<Props> = ({ themeMode, setThemeMode }) => {
-  const { 
-    activeTab, 
-    setActiveTab, 
-    exportTournamentJson, 
-    currentUser, 
-    openAuthModal, 
-  } = useTournament();
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
-  const navLinks = [
-    { id: 'overview', label: 'Overview', icon: <CricketBallIcon className="w-4 h-4" /> },
-    { id: 'fixtures', label: 'Fixtures', icon: <Calendar className="w-4 h-4" /> },
-    { id: 'teams', label: 'Teams & Squads', icon: <Users className="w-4 h-4" />, badge: '40' },
-    { id: 'standings', label: 'Standings', icon: <Award className="w-4 h-4 text-emerald-500" /> },
-    { id: 'stats', label: 'Stats & Caps', icon: <Award className="w-4 h-4 text-amber-500" /> },
-    { id: 'halloffame', label: 'Hall of Fame', icon: <Trophy className="w-4 h-4 text-amber-500" />, badge: '2022-26' },
-    { id: 'playoffs', label: 'Finals Tree', icon: <Trophy className="w-4 h-4 text-purple-500" /> },
-    { id: 'pickem', label: "Pick'Em", icon: <Flame className="w-4 h-4 text-rose-500" /> },
+  const hasLive = matches.some(m => m.status === 'live' || m.status === 'innings_break');
+
+  const links: { id: string; label: string }[] = [
+    { id: 'fixtures', label: 'Schedule' },
+    { id: 'teams', label: 'Teams' },
+    { id: 'standings', label: 'Standings' },
+    { id: 'stats', label: 'Stats' },
+    { id: 'playoffs', label: 'Bracket' },
+    { id: 'halloffame', label: 'Hall of Fame' },
+    { id: 'pickem', label: "Pick'Em" },
   ];
+  if (currentUser.role === 'admin') links.push({ id: 'organizer', label: 'Admin' });
+
+  const go = (id: string) => {
+    setActiveTab(id);
+    setMobileOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const accountLabel =
+    currentUser.role === 'admin' ? 'Admin' :
+    currentUser.role === 'team' ? (currentUser.teamName || 'My Team') :
+    'Team Login';
 
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-40 shadow-xs">
-      {/* Top Professional Ticker Strip */}
-      <div className="bg-slate-950 text-white text-[11px] font-medium py-1.5 px-4 sm:px-6 flex items-center justify-between overflow-x-auto tracking-wider uppercase whitespace-nowrap">
-        <div className="flex items-center gap-3 shrink-0">
-          <span className="flex items-center gap-1.5 text-amber-400 font-semibold">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse" />
-            <span className="font-mono">CHAMPIONSHIP HUB</span>
+    <header
+      className={`sticky top-0 z-40 bg-[#090909] text-[#f6f4f4] transition-[border-color] duration-300 border-b ${
+        scrolled ? 'border-white/10' : 'border-transparent'
+      }`}
+    >
+      <div className="max-w-[1320px] mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between gap-6">
+        {/* Wordmark */}
+        <button onClick={() => go('overview')} className="flex items-center gap-2.5 shrink-0 group" aria-label="Home">
+          <span className="relative w-8 h-8 rounded-full bg-[#ff6a17] flex items-center justify-center">
+            <span className="absolute inset-[7px] rounded-full border-2 border-[#090909] border-dashed opacity-70" />
           </span>
-          <span className="text-slate-700">•</span>
-          <span className="text-slate-300 font-cabinet font-semibold">RUCHI MASTERS T20 2026</span>
-        </div>
-        <div className="flex items-center gap-4 shrink-0 text-slate-400 font-mono text-[10px] hidden sm:flex">
-          <span className="text-amber-300 font-semibold">🏆 2022-2026 ARCHIVE</span>
-          <span>•</span>
-          <span className="text-cyan-300 font-semibold">⚡ 40 FRANCHISES</span>
-          <span>•</span>
-          <span className="text-emerald-300 font-semibold">📍 FRANKFURT, GERMANY</span>
-        </div>
-      </div>
+          <span className="text-[19px] font-bold tracking-[-0.03em]">
+            Ruchi Masters
+          </span>
+        </button>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between gap-4">
-        
-        {/* Brand Logo & Sponsor */}
-        <div 
-          onClick={() => setActiveTab('overview')}
-          className="flex items-center gap-3 cursor-pointer select-none group shrink-0"
-        >
-          <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-amber-500 via-amber-400 to-amber-600 flex items-center justify-center text-slate-950 shadow-xs group-hover:scale-105 transition-all">
-            <CricketBallIcon className="w-5 h-5 sm:w-6 sm:h-6" />
-          </div>
-
-          <div className="shrink-0">
-            <div className="flex items-center gap-2 whitespace-nowrap">
-              <span className="font-bold text-lg sm:text-xl tracking-tight text-slate-950 font-cabinet">
-                Ruchi Masters
-              </span>
-              <span className="px-2 py-0.5 rounded-full bg-slate-900 text-amber-300 font-bold text-[10px] tracking-wider font-mono">
-                T20
-              </span>
-            </div>
-            <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-widest flex items-center gap-1.5 whitespace-nowrap">
-              <span className="text-emerald-600 font-bold">● 2026 Season</span>
-              <span>•</span>
-              <span className="text-slate-400">Frankfurt Ground</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Center Segmented Navigation (Mobbin-style) */}
-        <nav className="hidden lg:flex items-center gap-1.5 p-1 bg-slate-100/80 rounded-2xl border border-slate-200/80 shrink-0">
-          {navLinks.map((link) => {
-            const isActive = activeTab === link.id;
+        {/* Desktop links */}
+        <nav className="hidden lg:flex items-center gap-1">
+          {links.map(l => {
+            const active = activeTab === l.id;
             return (
               <button
-                key={link.id}
-                onClick={() => setActiveTab(link.id)}
-                className={`h-9 flex items-center gap-1.5 px-3.5 rounded-xl text-xs transition-all duration-200 whitespace-nowrap shrink-0 ${
-                  isActive
-                    ? 'bg-slate-900 text-white shadow-xs font-semibold'
-                    : 'text-slate-600 hover:text-slate-950 hover:bg-white/80 font-medium'
+                key={l.id}
+                onClick={() => go(l.id)}
+                className={`relative px-3.5 py-2 text-[15px] font-medium transition-colors ${
+                  active ? 'text-[#f6f4f4]' : 'text-[#f6f4f4]/55 hover:text-[#f6f4f4]'
                 }`}
               >
-                <span className="shrink-0">{link.icon}</span>
-                <span>{link.label}</span>
-                {link.badge && (
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-semibold ${
-                    isActive ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-600'
-                  }`}>
-                    {link.badge}
-                  </span>
-                )}
+                {l.label}
+                {active && <span className="absolute left-3.5 right-3.5 -bottom-[1px] h-[2px] bg-[#ff6a17]" />}
               </button>
             );
           })}
-
-          {/* Admin Suite for Admin Role */}
-          {currentUser.role === 'admin' && (
-            <button
-              onClick={() => setActiveTab('organizer')}
-              className={`h-9 flex items-center gap-1.5 px-3.5 rounded-xl text-xs transition-all whitespace-nowrap shrink-0 ${
-                activeTab === 'organizer'
-                  ? 'bg-amber-500 text-slate-950 shadow-xs font-bold'
-                  : 'text-amber-800 hover:bg-amber-100/80 font-semibold'
-              }`}
-            >
-              <ShieldCheck className="w-4 h-4 text-amber-700 shrink-0" />
-              <span>Admin Suite</span>
-            </button>
-          )}
         </nav>
 
-        {/* Right Action Controls */}
-        <div className="flex items-center gap-2 shrink-0">
-          
-          {/* User / Team Auth Pill */}
-          {currentUser.role === 'admin' ? (
-            <button
-              onClick={() => openAuthModal()}
-              className="h-9 px-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors whitespace-nowrap shrink-0"
-              title="Super Admin Active"
-            >
-              <ShieldCheck className="w-4 h-4 text-slate-950 shrink-0" />
-              <span>Admin Access</span>
-            </button>
-          ) : currentUser.role === 'team' ? (
-            <button
-              onClick={() => openAuthModal(currentUser.teamId)}
-              className="h-9 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors whitespace-nowrap shrink-0"
-              title={'Logged in as ' + currentUser.teamName}
-            >
-              <Crown className="w-4 h-4 text-amber-400 shrink-0" />
-              <span className="max-w-[140px] truncate">{currentUser.teamName}</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => openAuthModal()}
-              className="h-9 px-3.5 sm:px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors whitespace-nowrap shrink-0"
-            >
-              <KeyRound className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-              <span>Team Login</span>
-            </button>
-          )}
-
-          {/* Backup & Export */}
+        {/* Right actions */}
+        <div className="hidden lg:flex items-center gap-2 shrink-0">
           <button
-            onClick={() => exportTournamentJson()}
-            title="Download Tournament Backup JSON"
-            className="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 transition-colors shrink-0 shadow-xs"
+            onClick={() => openAuthModal(currentUser.role === 'team' ? currentUser.teamId : undefined)}
+            className="px-3 py-2 text-[15px] font-medium text-[#f6f4f4]/70 hover:text-[#f6f4f4] transition-colors max-w-[180px] truncate"
           >
-            <Download className="w-4 h-4 shrink-0" />
+            {accountLabel}
           </button>
-
+          <button onClick={() => go('live')} className="rally-btn rally-btn-primary !h-10 !px-5">
+            {hasLive && <span className="w-1.5 h-1.5 rounded-full bg-[#090909]" />}
+            Live Scores
+          </button>
         </div>
 
+        {/* Mobile toggle */}
+        <button
+          onClick={() => setMobileOpen(o => !o)}
+          className="lg:hidden w-10 h-10 -mr-2 flex items-center justify-center"
+          aria-label="Menu"
+        >
+          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
       </div>
 
-      {/* Mobile Segmented Strip */}
-      <div className="lg:hidden flex items-center gap-1.5 overflow-x-auto px-3 py-2 bg-slate-50 border-t border-slate-200 text-xs no-scrollbar whitespace-nowrap">
-        {navLinks.map((link) => {
-          const isActive = activeTab === link.id;
-          return (
+      {/* Mobile sheet */}
+      {mobileOpen && (
+        <div className="lg:hidden fixed inset-x-0 top-[72px] bottom-0 bg-[#090909] px-5 pt-4 pb-10 overflow-y-auto border-t border-white/10">
+          <div className="flex flex-col">
+            {[{ id: 'overview', label: 'Home' }, ...links].map(l => (
+              <button
+                key={l.id}
+                onClick={() => go(l.id)}
+                className={`flex items-center justify-between py-4 border-b border-white/10 text-left text-[28px] font-bold tracking-[-0.03em] ${
+                  activeTab === l.id ? 'text-[#ff6a17]' : 'text-[#f6f4f4]'
+                }`}
+              >
+                {l.label}
+                <ArrowUpRight className="w-5 h-5 opacity-40" />
+              </button>
+            ))}
+          </div>
+          <div className="mt-8 flex flex-col gap-3">
+            <button onClick={() => go('live')} className="rally-btn rally-btn-primary w-full">Live Scores</button>
             <button
-              key={link.id}
-              onClick={() => setActiveTab(link.id)}
-              className={`h-8 flex items-center gap-1.5 px-3 rounded-lg whitespace-nowrap shrink-0 text-xs transition-all ${
-                isActive
-                  ? 'bg-slate-900 text-white font-semibold shadow-xs'
-                  : 'text-slate-600 bg-white border border-slate-200 hover:text-slate-900'
-              }`}
+              onClick={() => { setMobileOpen(false); openAuthModal(currentUser.role === 'team' ? currentUser.teamId : undefined); }}
+              className="rally-btn rally-btn-ghost-light w-full"
             >
-              <span className="shrink-0">{link.icon}</span>
-              <span>{link.label}</span>
+              {accountLabel}
             </button>
-          );
-        })}
-
-        {currentUser.role === 'admin' && (
-          <button
-            onClick={() => setActiveTab('organizer')}
-            className={`h-8 flex items-center gap-1.5 px-3 rounded-lg whitespace-nowrap shrink-0 text-xs transition-all ${
-              activeTab === 'organizer'
-                ? 'bg-amber-500 text-slate-950 font-bold'
-                : 'text-amber-800 bg-amber-50 border border-amber-200'
-            }`}
-          >
-            <ShieldCheck className="w-3.5 h-3.5 text-amber-700 shrink-0" />
-            <span>Admin</span>
-          </button>
-        )}
-      </div>
-
+          </div>
+        </div>
+      )}
     </header>
   );
 };
