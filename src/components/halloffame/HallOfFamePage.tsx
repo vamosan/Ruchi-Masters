@@ -31,7 +31,10 @@ import {
   Download,
   Copy,
   FileText,
-  Database
+  Database,
+  Medal,
+  ArrowUpRight,
+  Shield
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { HallOfFameEntry, HallOfFameMedia } from '../../types/cricket';
@@ -309,7 +312,7 @@ export const HallOfFamePage: React.FC = () => {
 
     if (isCurrentActiveSeason) {
       if (!entryFinalScore) entryFinalScore = '2026 Championship Tournament In Progress';
-      if (!entryMargin) entryMargin = '🏆 Battle for the Cup Underway';
+      if (!entryMargin) entryMargin = 'Battle for the Cup Underway';
       if (!entryStory) entryStory = 'The ' + newYear + ' edition of Ruchi Masters T20 is currently live with 40 elite franchises battling for the ultimate trophy.';
     } else {
       if (!entryFinalScore) entryFinalScore = champTeam.name + ' won the championship';
@@ -350,7 +353,6 @@ export const HallOfFamePage: React.FC = () => {
     setShowAddChampionModal(false);
   };
 
-  // Direct Trophy Photo Upload Handler
   const handleTrophyPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
     if (!file || !currentEntry) return;
@@ -397,42 +399,43 @@ export const HallOfFamePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-8 pb-20">
       
-      {/* 1. Top Header Banner */}
-      <div className="relative bg-gradient-to-br from-slate-950 via-slate-900 to-amber-950 text-white rounded-3xl p-6 sm:p-10 border-3 border-slate-950 shadow-[6px_6px_0px_#0f172a] overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-[#FFE600]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 w-80 h-80 bg-[#CCFF00]/10 rounded-full blur-2xl pointer-events-none" />
+      {/* 1. Top Editorial Sports Header Banner */}
+      <div className="relative rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-zinc-950 text-white p-7 sm:p-10 border border-slate-800 shadow-xl overflow-hidden">
+        {/* Subtle Ambient Glows */}
+        <div className="absolute right-0 top-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute left-1/4 bottom-0 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl space-y-4">
           <div className="flex flex-wrap items-center gap-2.5">
-            <span className="px-3.5 py-1 rounded-full bg-[#FFE600] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider flex items-center gap-1.5 shadow-[2px_2px_0px_#0f172a]">
-              <Trophy className="w-3.5 h-3.5 text-slate-950" />
-              Tournament Hall of Fame
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-semibold tracking-wider uppercase">
+              <Trophy className="w-3.5 h-3.5 text-amber-400" />
+              Championship Wall of Fame
             </span>
-            <span className="px-3 py-1 rounded-full bg-white/10 text-amber-300 font-mono text-xs font-bold border border-white/20">
-              EST. 2022 - PRESENT
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono text-xs font-medium">
+              EST. 2022 • FRANKFURT, GERMANY
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black font-cabinet tracking-tight text-white leading-tight">
-            Championship <span className="text-[#FFE600] bg-slate-900/80 px-3 py-1 rounded-2xl border border-amber-400/30">Wall of Glory</span>
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white font-cabinet leading-tight">
+            Legacy of <span className="bg-gradient-to-r from-amber-200 via-amber-400 to-amber-200 bg-clip-text text-transparent">Champions</span>
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-300 font-medium max-w-2xl leading-relaxed">
-            Relive the legacy of Ruchi Masters T20 champions year-wise starting from 2022 to the current active season. Administrators can add/crown new years, and teams can upload certified victory photos and videos.
+          <p className="text-sm sm:text-base text-slate-300 font-normal max-w-2xl leading-relaxed">
+            Honoring the dynasties, captains, and unforgettable tournament triumphs of Ruchi Masters T20. Browse past editions, review verified CricHeroes scorecards, and celebrate each championship journey.
           </p>
 
-          {/* Action CTAs */}
+          {/* Action Navigation Buttons */}
           <div className="flex flex-wrap items-center gap-3 pt-2">
             
             {/* Primary Add/Crown Year Button */}
             <button
               onClick={handleOpenAddYear}
-              className="h-10 px-5 rounded-xl bg-[#FFE600] hover:bg-[#ebd300] text-slate-950 font-black text-xs flex items-center gap-2 border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs tracking-wide shadow-sm hover:shadow transition-all duration-200"
             >
-              <Plus className="w-4 h-4 text-slate-950" />
-              <span>➕ Add Year / Crown Champion</span>
+              <Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Crown New Champion</span>
             </button>
 
             {/* Upload Media Button */}
@@ -444,514 +447,565 @@ export const HallOfFamePage: React.FC = () => {
                   handleOpenAddMedia();
                 }
               }}
-              className="h-10 px-5 rounded-xl bg-[#CCFF00] hover:bg-[#bdf000] text-slate-950 font-black text-xs flex items-center gap-2 border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] transition-all"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/15 font-semibold text-xs tracking-wide backdrop-blur-md transition-all duration-200"
             >
-              <Upload className="w-4 h-4 text-slate-950" />
-              <span>Upload Photos & Videos ({selectedYear})</span>
+              <Upload className="w-4 h-4 text-amber-300" />
+              <span>Upload Media ({selectedYear})</span>
             </button>
 
             {/* Sync / Export Updates Button */}
             <button
               onClick={() => setShowSyncModal(true)}
-              className="h-10 px-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white font-black text-xs flex items-center gap-2 border-2 border-white/20 shadow-[3px_3px_0px_#0f172a] transition-all hover:scale-102"
-              title="Backup, export, or sync changes to the live site"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 font-semibold text-xs tracking-wide transition-all duration-200"
+              title="Backup, export, or sync changes"
             >
-              <Database className="w-4 h-4 text-[#00F0FF]" />
-              <span>Sync / Export Gallery</span>
+              <Database className="w-4 h-4 text-cyan-400" />
+              <span>Sync & Export</span>
             </button>
 
           </div>
         </div>
       </div>
 
-      {/* 2. Year Selection Bar with Prominent "➕ Add Year" Button */}
-      <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
-        
-        {/* Add Year Button directly in Timeline */}
-        <button
-          onClick={handleOpenAddYear}
-          className="h-12 px-5 rounded-2xl bg-[#FFE600] hover:bg-[#ebd300] text-slate-950 font-black text-xs shrink-0 flex items-center gap-2 border-3 border-slate-950 shadow-[3px_3px_0px_#0f172a] hover:scale-105 transition-all"
-          title="Add current year or new championship season"
-        >
-          <Plus className="w-4 h-4 text-slate-950" />
-          <span>Add Year</span>
-        </button>
+      {/* 2. Year Timeline Segmented Navigation (Mobbin-style) */}
+      <div className="bg-white p-2 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between gap-3 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={handleOpenAddYear}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 transition-colors shrink-0"
+            title="Add new championship season"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Season</span>
+          </button>
+          
+          <div className="h-6 w-px bg-slate-200 shrink-0" />
+        </div>
 
-        {/* Year Pills */}
-        {hallOfFame.map((entry) => {
-          const isSelected = selectedYear === entry.year;
-          return (
-            <button
-              key={entry.year}
-              onClick={() => setSelectedYear(entry.year)}
-              className={'h-14 px-5 rounded-2xl text-sm font-black shrink-0 flex items-center gap-3 border-3 transition-all ' + (
-                isSelected
-                  ? 'bg-slate-950 text-white border-slate-950 shadow-[4px_4px_0px_#FFE600] scale-105'
-                  : 'bg-white text-slate-800 border-slate-950 hover:bg-amber-50 hover:scale-102 shadow-[2px_2px_0px_#0f172a]'
-              )}
-            >
-              <span className="text-2xl">{entry.championLogo}</span>
-              <div className="text-left">
-                <div className="font-cabinet leading-none text-base">{entry.year}</div>
-                <div className={'text-[11px] font-bold font-cabinet truncate max-w-[170px] ' + (isSelected ? 'text-[#FFE600]' : 'text-slate-600')}>
+        {/* Year Segmented Pills */}
+        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
+          {hallOfFame.map((entry) => {
+            const isSelected = selectedYear === entry.year;
+            return (
+              <button
+                key={entry.year}
+                onClick={() => setSelectedYear(entry.year)}
+                className={`px-4 py-2 rounded-xl text-xs font-medium shrink-0 flex items-center gap-2.5 transition-all duration-200 ${
+                  isSelected
+                    ? 'bg-slate-900 text-white shadow-sm font-semibold'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 border border-transparent hover:border-slate-200'
+                }`}
+              >
+                <span className="text-base">{entry.championLogo}</span>
+                <span className="font-cabinet font-bold text-sm">{entry.year}</span>
+                <span className={`text-[11px] truncate max-w-[140px] hidden sm:inline ${
+                  isSelected ? 'text-amber-300' : 'text-slate-500'
+                }`}>
                   {entry.championTeamName}
-                </div>
-              </div>
-              <Trophy className={'w-4 h-4 ' + (isSelected ? 'text-[#FFE600]' : 'text-amber-500')} />
-            </button>
-          );
-        })}
+                </span>
+                {isSelected && (
+                  <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="hidden lg:flex items-center pr-2 shrink-0">
+          <span className="text-[11px] font-mono text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg">
+            {hallOfFame.length} Seasons Archived
+          </span>
+        </div>
       </div>
 
-      {/* 3. Main Champion Showcase Card for Selected Year */}
+      {/* 3. Main Champion Showcase for Selected Year */}
       {currentEntry && (
-        <div className="space-y-6">
+        <div className="space-y-8">
           
-          {/* Main Gold Trophy Presentation Card */}
-          <div className="bg-white rounded-3xl p-6 sm:p-8 sport-card border-3 border-slate-950 shadow-[8px_8px_0px_#0f172a] space-y-6">
-            
-            {/* Top Ribbon & Podium Summary */}
-            <div className="space-y-4 border-b-2 border-slate-200 pb-5">
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <span className="text-4xl p-2.5 rounded-2xl bg-amber-100 border-2 border-amber-300 shadow-sm">
-                    {currentEntry.championLogo}
-                  </span>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono font-black text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
-                        {currentEntry.year} CHAMPIONS
-                      </span>
-                      <span className="text-xs text-slate-400 font-bold">📍 {currentEntry.venue}</span>
-                    </div>
-                    <h2 className="text-2xl sm:text-4xl font-black font-cabinet text-slate-950 mt-1">
-                      {currentEntry.championTeamName}
-                    </h2>
-                  </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
-                  {currentEntry.cricHeroesMatchUrl && (
-                    <a
-                      href={currentEntry.cricHeroesMatchUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-4 py-2 rounded-2xl bg-[#00F0FF] hover:bg-[#00d8ea] text-slate-950 font-black text-xs sport-btn flex items-center gap-2 border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] hover:scale-105 transition-all"
-                    >
-                      <span>⚡ CricHeroes Match Scorecard</span>
-                      <ExternalLink className="w-3.5 h-3.5 shrink-0" />
-                    </a>
-                  )}
-
-                  <div className="text-right">
-                    <div className="text-xs font-black text-emerald-700 bg-emerald-100 border border-emerald-300 px-3 py-1 rounded-xl inline-block font-mono">
-                      {currentEntry.margin}
-                    </div>
-                    <div className="text-xs font-bold text-slate-500 mt-1">
-                      Score: <strong className="text-slate-800">{currentEntry.finalScore}</strong>
-                    </div>
-                  </div>
-                </div>
+          {/* Official Tournament Podium: 1st, 2nd & 3rd Place (B3X Sports Editorial Style) */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Medal className="w-4 h-4 text-amber-500" />
+                <h3 className="text-sm font-bold tracking-wider uppercase text-slate-900 font-cabinet">
+                  Official {currentEntry.year} Championship Podium
+                </h3>
               </div>
-
-              {/* Official Tournament Podium: 1st, 2nd & 3rd Place */}
-              <div className="space-y-2 pt-2 border-t border-slate-100">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                    <Trophy className="w-3.5 h-3.5 text-amber-500" />
-                    <span>Official Championship Podium</span>
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleOpenEditYear(currentEntry)}
-                    className="px-2.5 py-1 rounded-xl bg-slate-950 hover:bg-slate-800 text-[#FFE600] text-[11px] font-black flex items-center gap-1.5 shadow-sm transition-transform hover:scale-105"
-                  >
-                    <Edit3 className="w-3 h-3" />
-                    <span>✏️ Edit Podium Winners</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div 
-                    onClick={() => handleOpenEditYear(currentEntry)}
-                    className="p-3 rounded-2xl bg-amber-50 hover:bg-amber-100/80 border-2 border-amber-300 flex items-center justify-between gap-2.5 shadow-sm cursor-pointer transition-all group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-2xl">🥇</span>
-                      <div className="min-w-0">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 block">1st Place • Champion</span>
-                        <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet group-hover:text-amber-700">{currentEntry.championTeamName}</strong>
-                      </div>
-                    </div>
-                    <span className="px-1.5 py-0.5 rounded bg-amber-200/80 text-[10px] font-bold text-amber-900 shrink-0">Edit</span>
-                  </div>
-
-                  <div 
-                    onClick={() => handleOpenEditYear(currentEntry)}
-                    className="p-3 rounded-2xl bg-slate-100 hover:bg-slate-200/80 border-2 border-slate-300 flex items-center justify-between gap-2.5 shadow-sm cursor-pointer transition-all group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-2xl">🥈</span>
-                      <div className="min-w-0">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-slate-600 block">2nd Place • Runner Up</span>
-                        <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet group-hover:text-slate-700">{currentEntry.runnerUpTeamName}</strong>
-                      </div>
-                    </div>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-200 text-[10px] font-bold text-slate-700 shrink-0">Edit</span>
-                  </div>
-
-                  <div 
-                    onClick={() => handleOpenEditYear(currentEntry)}
-                    className="p-3 rounded-2xl bg-orange-50 hover:bg-orange-100/80 border-2 border-orange-300 flex items-center justify-between gap-2.5 shadow-sm cursor-pointer transition-all group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <span className="text-2xl">🥉</span>
-                      <div className="min-w-0">
-                        <span className="text-[10px] font-black uppercase tracking-wider text-orange-800 block">3rd Position • 2nd Runner Up</span>
-                        <strong className="text-xs sm:text-sm font-black text-slate-950 truncate block font-cabinet group-hover:text-orange-700">{currentEntry.secondRunnerUpTeamName || 'Semi-Finalists'}</strong>
-                      </div>
-                    </div>
-                    <span className="px-1.5 py-0.5 rounded bg-orange-200/80 text-[10px] font-bold text-orange-900 shrink-0">Edit</span>
-                  </div>
-                </div>
-              </div>
+              <button
+                type="button"
+                onClick={() => handleOpenEditYear(currentEntry)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 hover:text-slate-950 text-xs font-medium border border-slate-200/80 transition-colors"
+              >
+                <Edit3 className="w-3.5 h-3.5 text-slate-500" />
+                <span>Edit Podium Winners</span>
+              </button>
             </div>
 
-            {/* Champion Banner Photo & Story Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               
-              {/* Photo Showcase */}
-              <div className="lg:col-span-2 space-y-4">
-                
-                {/* Repositioning Active Floating Bar */}
-                {isAdjustingImage && (
-                  <div className="p-3 rounded-2xl bg-slate-950 text-white border-2 border-[#FFE600] shadow-xl space-y-2.5 animate-in fade-in slide-in-from-top-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex items-center gap-2 text-xs font-black text-[#FFE600]">
-                        <Move className="w-4 h-4 text-amber-400" />
-                        <span>✋ Drag image up/down to reposition, or use controls:</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={handleSaveAdjustImage}
-                          className="px-3 py-1 rounded-xl bg-[#CCFF00] hover:bg-[#b5e600] text-slate-950 text-xs font-black flex items-center gap-1 shadow"
-                        >
-                          <CheckCheck className="w-3.5 h-3.5" />
-                          <span>Save Position</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setIsAdjustingImage(false)}
-                          className="px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row items-center gap-3">
-                      <div className="flex-1 w-full flex items-center gap-2">
-                        <span className="text-[10px] font-mono text-slate-400 shrink-0">Alignment: {tempPosY}%</span>
-                        <input 
-                          type="range" 
-                          min={0} 
-                          max={100} 
-                          value={tempPosY}
-                          onChange={(e) => setTempPosY(Number(e.target.value))}
-                          className="w-full accent-[#FFE600] cursor-pointer h-2 bg-slate-800 rounded-lg" 
-                        />
-                      </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setTempPosY(15)}
-                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${tempPosY <= 25 ? 'bg-[#FFE600] text-slate-950' : 'bg-slate-800 text-slate-300'}`}
-                        >
-                          🔝 Top Focus
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setTempPosY(50)}
-                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${tempPosY > 25 && tempPosY < 75 ? 'bg-[#FFE600] text-slate-950' : 'bg-slate-800 text-slate-300'}`}
-                        >
-                          🎯 Center
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setTempPosY(85)}
-                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${tempPosY >= 75 ? 'bg-[#FFE600] text-slate-950' : 'bg-slate-800 text-slate-300'}`}
-                        >
-                          🔻 Bottom Focus
-                        </button>
-                      </div>
-                    </div>
+              {/* 1st Place - Champion (Gold) */}
+              <div 
+                onClick={() => handleOpenEditYear(currentEntry)}
+                className="relative rounded-2xl p-5 bg-gradient-to-b from-amber-50/80 via-white to-white border border-amber-300/80 shadow-sm hover:shadow-md transition-all duration-200 group cursor-pointer overflow-hidden"
+              >
+                <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-bl-full pointer-events-none" />
+                <div className="flex items-start justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-700 flex items-center justify-center font-black text-lg border border-amber-300/60 shadow-xs">
+                    🥇
                   </div>
-                )}
-
-                <div 
-                  className={`relative rounded-3xl overflow-hidden border-3 border-slate-950 h-72 sm:h-96 group shadow-lg bg-slate-950 select-none ${
-                    isAdjustingImage ? 'cursor-grab active:cursor-grabbing ring-4 ring-[#FFE600]' : ''
-                  }`}
-                  onMouseDown={handleMouseDownImage}
-                  onMouseMove={handleMouseMoveImage}
-                  onMouseUp={handleMouseUpImage}
-                  onMouseLeave={handleMouseUpImage}
-                  onTouchStart={handleTouchStartImage}
-                  onTouchMove={handleTouchMoveImage}
-                  onTouchEnd={handleTouchEndImage}
-                >
-                  <img 
-                    src={currentEntry.trophyPhotoUrl} 
-                    alt={currentEntry.championTeamName} 
-                    style={{
-                      objectPosition: `center ${isAdjustingImage ? tempPosY : (currentEntry.trophyPhotoPosY ?? 50)}%`
-                    }}
-                    className={`w-full h-full object-cover transition-transform duration-300 opacity-90 pointer-events-none ${
-                      isAdjustingImage ? 'scale-105' : 'group-hover:scale-102'
-                    }`}
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80';
-                    }}
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-transparent pointer-events-none" />
-                  
-                  <div className="absolute bottom-4 left-4 right-4 text-white flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
-                    <div className="space-y-2 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="px-3 py-1 rounded-xl bg-[#FFE600] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider inline-flex items-center gap-1.5 shadow">
-                          <Trophy className="w-3.5 h-3.5" />
-                          {currentEntry.year} Official Trophy Lift
-                        </span>
-                        {currentEntry.cricHeroesMatchUrl && (
-                          <a
-                            href={currentEntry.cricHeroesMatchUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-2.5 py-0.5 rounded-lg bg-slate-900/90 hover:bg-slate-950 text-[#CCFF00] font-black text-[11px] border border-[#CCFF00]/50 inline-flex items-center gap-1 shadow"
-                          >
-                            <span>⚡ Verified CricHeroes Match #{currentEntry.cricHeroesMatchId || '27086324'}</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
-                      </div>
-                      <h3 className="text-lg sm:text-xl font-black font-cabinet text-white">
-                        {currentEntry.editionName}
-                      </h3>
-                      <p className="text-xs text-slate-300 font-medium">
-                        Score: {currentEntry.finalScore}
-                      </p>
-                    </div>
-
-                    {/* Bottom-right Clean Icon Action Buttons */}
-                    <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto bg-slate-950/70 p-1.5 rounded-2xl border border-white/20 backdrop-blur-md shadow-xl">
-                      <button
-                        type="button"
-                        onClick={handleStartAdjustImage}
-                        title="Drag / Recenter Image"
-                        className={`w-8 h-8 rounded-xl border border-white/30 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 ${
-                          isAdjustingImage 
-                            ? 'bg-[#FFE600] text-slate-950 ring-2 ring-white shadow-md' 
-                            : 'bg-slate-900/90 hover:bg-slate-800 text-white'
-                        }`}
-                      >
-                        <Move className="w-4 h-4 text-amber-400" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEditYear(currentEntry)}
-                        title="Edit Season Details"
-                        className="w-8 h-8 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-[#FFE600] border border-white/30 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 shadow-md"
-                      >
-                        <Edit3 className="w-4 h-4" />
-                      </button>
-
-                      <label 
-                        title="Change Image"
-                        className="cursor-pointer w-8 h-8 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-white border border-white/30 backdrop-blur-md flex items-center justify-center transition-all hover:scale-110 shadow-md"
-                      >
-                        <Camera className="w-4 h-4 text-[#CCFF00]" />
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          className="hidden" 
-                          onChange={handleTrophyPhotoUpload} 
-                        />
-                      </label>
-                    </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 text-[10px] font-bold uppercase tracking-wider">
+                      Champion
+                    </span>
+                    <button
+                      type="button"
+                      className="w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-500 hover:text-slate-950 border border-amber-200 flex items-center justify-center shadow-xs transition-colors"
+                      title="Edit 1st Place"
+                    >
+                      <Edit3 className="w-3 h-3 text-amber-700" />
+                    </button>
                   </div>
                 </div>
 
-                {/* Match Story */}
-                <div className="p-5 rounded-2xl bg-slate-50 border-2 border-slate-300 text-slate-800 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-black text-sm font-cabinet text-slate-950 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-amber-500" />
-                      Championship Winning Story
+                <div className="mt-4 space-y-1">
+                  <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider block">1st Place • Winner</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{currentEntry.championLogo}</span>
+                    <h4 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-amber-800 transition-colors font-cabinet">
+                      {currentEntry.championTeamName}
                     </h4>
-                    <button
-                      type="button"
-                      onClick={() => handleOpenEditYear(currentEntry)}
-                      className="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-200 text-slate-900 border border-slate-300 text-[11px] font-bold flex items-center gap-1 shadow-sm transition-all"
-                    >
-                      <Edit3 className="w-3 h-3 text-amber-600" />
-                      <span>Edit Story</span>
-                    </button>
                   </div>
-                  <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium whitespace-pre-line">
-                    {currentEntry.story}
+                  <p className="text-xs text-slate-600 font-medium pt-1">
+                    {currentEntry.margin} • <span className="text-slate-900 font-semibold">{currentEntry.finalScore}</span>
                   </p>
                 </div>
               </div>
 
-              {/* Tournament Accolades & Captain Card */}
-              <div className="space-y-4">
-                
-                {/* Captain Badge */}
-                <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-xs font-black text-amber-900">
-                      <Crown className="w-4 h-4 text-amber-600" />
-                      <span>Winning Captain</span>
-                    </div>
+              {/* 2nd Place - Runner Up (Silver) */}
+              <div 
+                onClick={() => handleOpenEditYear(currentEntry)}
+                className="relative rounded-2xl p-5 bg-gradient-to-b from-slate-100/60 via-white to-white border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-200 group cursor-pointer overflow-hidden"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-slate-200/60 text-slate-700 flex items-center justify-center font-black text-lg border border-slate-300/80 shadow-xs">
+                    🥈
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider">
+                      Finalist
+                    </span>
                     <button
                       type="button"
-                      onClick={() => handleOpenEditYear(currentEntry)}
-                      className="px-2 py-0.5 rounded-lg bg-white/80 hover:bg-white text-slate-900 border border-amber-300 text-[10px] font-black flex items-center gap-1 shadow-sm transition-all"
+                      className="w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-500 hover:text-slate-950 border border-slate-200 flex items-center justify-center shadow-xs transition-colors"
+                      title="Edit 2nd Place"
                     >
-                      <Edit3 className="w-2.5 h-2.5 text-amber-600" />
-                      <span>Edit</span>
+                      <Edit3 className="w-3 h-3 text-slate-600" />
                     </button>
-                  </div>
-                  <div className="text-lg font-black font-cabinet text-slate-950">
-                    {currentEntry.captainName}
-                  </div>
-                  <div className="text-[11px] text-amber-800 font-medium">
-                    {currentEntry.captainBio || ('Led ' + currentEntry.championTeamName + ' to championship glory in ' + currentEntry.year + '.')}
                   </div>
                 </div>
 
-                {/* MVP & Honors */}
-                <div className="p-4 rounded-2xl bg-slate-900 text-white border-2 border-slate-950 space-y-3 shadow-md">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-2">
-                    <div className="text-xs font-black text-[#FFE600] uppercase tracking-wider flex items-center gap-1.5">
-                      <Award className="w-4 h-4 text-[#FFE600]" />
-                      <span>Tournament Honors</span>
+                <div className="mt-4 space-y-1">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">2nd Place • Runner Up</span>
+                  <h4 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-slate-700 transition-colors font-cabinet">
+                    {currentEntry.runnerUpTeamName}
+                  </h4>
+                  <p className="text-xs text-slate-500 font-medium pt-1">
+                    Grand Finalists • {currentEntry.venue}
+                  </p>
+                </div>
+              </div>
+
+              {/* 3rd Place - 2nd Runner Up (Bronze) */}
+              <div 
+                onClick={() => handleOpenEditYear(currentEntry)}
+                className="relative rounded-2xl p-5 bg-gradient-to-b from-orange-50/50 via-white to-white border border-orange-200/80 shadow-sm hover:shadow-md transition-all duration-200 group cursor-pointer overflow-hidden"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="w-10 h-10 rounded-xl bg-orange-200/50 text-amber-800 flex items-center justify-center font-black text-lg border border-orange-300/60 shadow-xs">
+                    🥉
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2 py-0.5 rounded-full bg-orange-100 text-amber-900 text-[10px] font-bold uppercase tracking-wider">
+                      Semi-Finalist
+                    </span>
+                    <button
+                      type="button"
+                      className="w-7 h-7 rounded-full bg-white/90 hover:bg-white text-slate-500 hover:text-slate-950 border border-orange-200 flex items-center justify-center shadow-xs transition-colors"
+                      title="Edit 3rd Place"
+                    >
+                      <Edit3 className="w-3 h-3 text-amber-800" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-4 space-y-1">
+                  <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider block">3rd Position • 2nd Runner Up</span>
+                  <h4 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-orange-800 transition-colors font-cabinet">
+                    {currentEntry.secondRunnerUpTeamName || 'Tournament Semi-Finalists'}
+                  </h4>
+                  <p className="text-xs text-slate-500 font-medium pt-1">
+                    Podium Finishers • Ruchi Masters {currentEntry.year}
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          {/* 4. Champion Banner Photo & Story Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            
+            {/* Left 2 Columns: Framed High-Res Banner & Match Narrative */}
+            <div className="lg:col-span-2 space-y-5">
+              
+              {/* Repositioning Active Floating Control Panel */}
+              {isAdjustingImage && (
+                <div className="p-4 rounded-2xl bg-slate-900/95 backdrop-blur-md text-white border border-slate-700/80 shadow-2xl space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-amber-300">
+                      <Move className="w-4 h-4 text-amber-400" />
+                      <span>Drag photo to recenter or adjust position slider below:</span>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleSaveAdjustImage}
+                        className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-semibold flex items-center gap-1 shadow-sm transition-colors"
+                      >
+                        <CheckCheck className="w-3.5 h-3.5" />
+                        <span>Save Position</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsAdjustingImage(false)}
+                        className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
+                    <div className="flex-1 w-full flex items-center gap-3">
+                      <span className="text-xs font-mono text-slate-400 shrink-0">Vertical: {tempPosY}%</span>
+                      <input 
+                        type="range" 
+                        min={0} 
+                        max={100} 
+                        value={tempPosY}
+                        onChange={(e) => setTempPosY(Number(e.target.value))}
+                        className="w-full accent-amber-400 cursor-pointer h-2 bg-slate-800 rounded-lg" 
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setTempPosY(15)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${tempPosY <= 25 ? 'bg-amber-400 text-slate-950 font-semibold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+                      >
+                        Top
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTempPosY(50)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${tempPosY > 25 && tempPosY < 75 ? 'bg-amber-400 text-slate-950 font-semibold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+                      >
+                        Center
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setTempPosY(85)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${tempPosY >= 75 ? 'bg-amber-400 text-slate-950 font-semibold' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+                      >
+                        Bottom
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* High-Resolution Framed Banner */}
+              <div 
+                className={`relative rounded-2xl overflow-hidden border border-slate-200/90 h-80 sm:h-[420px] bg-slate-950 group shadow-sm select-none ${
+                  isAdjustingImage ? 'cursor-grab active:cursor-grabbing ring-2 ring-amber-400' : ''
+                }`}
+                onMouseDown={handleMouseDownImage}
+                onMouseMove={handleMouseMoveImage}
+                onMouseUp={handleMouseUpImage}
+                onMouseLeave={handleMouseUpImage}
+                onTouchStart={handleTouchStartImage}
+                onTouchMove={handleTouchMoveImage}
+                onTouchEnd={handleTouchEndImage}
+              >
+                <img 
+                  src={currentEntry.trophyPhotoUrl} 
+                  alt={currentEntry.championTeamName} 
+                  style={{
+                    objectPosition: `center ${isAdjustingImage ? tempPosY : (currentEntry.trophyPhotoPosY ?? 50)}%`
+                  }}
+                  className={`w-full h-full object-cover transition-transform duration-500 opacity-90 pointer-events-none ${
+                    isAdjustingImage ? 'scale-105' : 'group-hover:scale-101'
+                  }`}
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80';
+                  }}
+                />
+
+                {/* Editorial Gradient Scrim */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent pointer-events-none" />
+                
+                {/* Banner Caption & Controls */}
+                <div className="absolute bottom-5 left-5 right-5 text-white flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2.5 py-1 rounded-full bg-amber-500 text-slate-950 font-bold text-[11px] uppercase tracking-wider inline-flex items-center gap-1.5 shadow-sm">
+                        <Trophy className="w-3.5 h-3.5" />
+                        {currentEntry.year} Official Trophy Lift
+                      </span>
+                      {currentEntry.cricHeroesMatchUrl && (
+                        <a
+                          href={currentEntry.cricHeroesMatchUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1 rounded-full bg-slate-900/80 hover:bg-slate-950 text-cyan-300 font-semibold text-[11px] border border-cyan-400/30 inline-flex items-center gap-1 backdrop-blur-md transition-colors"
+                        >
+                          <span>CricHeroes Verified</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      )}
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-bold font-cabinet text-white">
+                      {currentEntry.editionName}
+                    </h3>
+                    <p className="text-xs text-slate-300 font-medium">
+                      Venue: {currentEntry.venue} • Final Score: <span className="text-white font-semibold">{currentEntry.finalScore}</span>
+                    </p>
+                  </div>
+
+                  {/* Floating Circular Action Pill (Mobbin-style) */}
+                  <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto bg-slate-900/80 p-1.5 rounded-full border border-white/15 backdrop-blur-md shadow-lg">
+                    <button
+                      type="button"
+                      onClick={handleStartAdjustImage}
+                      title="Drag / Recenter Image"
+                      className={`w-8 h-8 rounded-full border border-white/20 backdrop-blur-md flex items-center justify-center transition-all hover:scale-105 ${
+                        isAdjustingImage 
+                          ? 'bg-amber-400 text-slate-950 ring-2 ring-white shadow-md' 
+                          : 'bg-white/10 hover:bg-white/20 text-white'
+                      }`}
+                    >
+                      <Move className="w-4 h-4 text-amber-300" />
+                    </button>
+
                     <button
                       type="button"
                       onClick={() => handleOpenEditYear(currentEntry)}
-                      className="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-[#CCFF00] border border-slate-700 text-[10px] font-black flex items-center gap-1 shadow-sm transition-all"
+                      title="Edit Season Details"
+                      className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-amber-300 border border-white/20 backdrop-blur-md flex items-center justify-center transition-all hover:scale-105 shadow-md"
                     >
-                      <Edit3 className="w-2.5 h-2.5" />
-                      <span>Edit Honors</span>
+                      <Edit3 className="w-4 h-4" />
                     </button>
-                  </div>
 
+                    <label 
+                      title="Change Trophy Image"
+                      className="cursor-pointer w-8 h-8 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 border border-amber-300 backdrop-blur-md flex items-center justify-center transition-all hover:scale-105 shadow-md"
+                    >
+                      <Camera className="w-4 h-4 text-slate-950" />
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={handleTrophyPhotoUpload} 
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Championship Winning Journey Story */}
+              <div className="p-6 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-500" />
+                    <h4 className="font-bold text-sm text-slate-900 font-cabinet uppercase tracking-wider">
+                      Championship Winning Journey
+                    </h4>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEditYear(currentEntry)}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 hover:text-slate-950 hover:bg-slate-100 transition-colors"
+                  >
+                    <Edit3 className="w-3 h-3 text-amber-600" />
+                    <span>Edit Story</span>
+                  </button>
+                </div>
+                <p className="text-sm text-slate-600 leading-relaxed font-normal whitespace-pre-line">
+                  {currentEntry.story}
+                </p>
+              </div>
+            </div>
+
+            {/* Right Column: Captain & Individual Accolades */}
+            <div className="space-y-5">
+              
+              {/* Winning Captain Spotlight */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 text-white border border-slate-800 shadow-sm space-y-3 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center justify-between">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-bold uppercase tracking-wider">
+                    <Crown className="w-3.5 h-3.5 text-amber-400" />
+                    Winning Captain
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEditYear(currentEntry)}
+                    className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+                    title="Edit Captain"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                  </button>
+                </div>
+                
+                <div>
+                  <h4 className="text-xl font-bold font-cabinet text-white">
+                    {currentEntry.captainName}
+                  </h4>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    {currentEntry.captainBio || (`Led ${currentEntry.championTeamName} to championship glory in ${currentEntry.year}.`)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Tournament Honors & Accolades (Opta / Broadcast Editorial Style) */}
+              <div className="p-5 rounded-2xl bg-white border border-slate-200/80 shadow-sm space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-amber-500" />
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-900 font-cabinet">
+                      Tournament Accolades & Caps
+                    </h4>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEditYear(currentEntry)}
+                    className="inline-flex items-center gap-1 text-[11px] font-semibold text-amber-600 hover:text-amber-700"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    <span>Edit</span>
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {/* MVP */}
                   {currentEntry.playerOfTheTournament && (
-                    <div className="border-b border-slate-800 pb-2">
-                      <div className="text-[10px] text-slate-400 uppercase font-mono flex items-center gap-1">
-                        <span>🌟</span>
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 space-y-0.5">
+                      <div className="text-[10px] text-amber-700 font-semibold uppercase tracking-wider flex items-center gap-1">
+                        <span>⭐</span>
                         <span>Player of the Tournament (MVP)</span>
                       </div>
-                      <div className="text-sm font-black text-[#00F0FF] mt-0.5">{currentEntry.playerOfTheTournament}</div>
+                      <div className="text-sm font-bold text-slate-900">{currentEntry.playerOfTheTournament}</div>
                     </div>
                   )}
 
+                  {/* Orange Cap */}
                   {currentEntry.highestRunScorer && (
-                    <div className="border-b border-slate-800 pb-2">
-                      <div className="text-[10px] text-amber-400 uppercase font-mono flex items-center gap-1">
+                    <div className="p-3 rounded-xl bg-orange-50/60 border border-orange-100 space-y-0.5">
+                      <div className="text-[10px] text-orange-800 font-semibold uppercase tracking-wider flex items-center gap-1">
                         <span>🏏</span>
-                        <span>Orange Cap (Top Batsman)</span>
+                        <span>Orange Cap • Leading Run Scorer</span>
                       </div>
-                      <div className="text-sm font-bold text-white mt-0.5">{currentEntry.highestRunScorer}</div>
+                      <div className="text-sm font-bold text-slate-900">{currentEntry.highestRunScorer}</div>
                     </div>
                   )}
 
+                  {/* Purple Cap */}
                   {currentEntry.highestWicketTaker && (
-                    <div className="border-b border-slate-800 pb-2">
-                      <div className="text-[10px] text-emerald-400 uppercase font-mono flex items-center gap-1">
+                    <div className="p-3 rounded-xl bg-purple-50/60 border border-purple-100 space-y-0.5">
+                      <div className="text-[10px] text-purple-800 font-semibold uppercase tracking-wider flex items-center gap-1">
                         <span>🎯</span>
-                        <span>Purple Cap (Top Bowler)</span>
+                        <span>Purple Cap • Leading Wicket Taker</span>
                       </div>
-                      <div className="text-sm font-bold text-emerald-400 mt-0.5">{currentEntry.highestWicketTaker}</div>
+                      <div className="text-sm font-bold text-slate-900">{currentEntry.highestWicketTaker}</div>
                     </div>
                   )}
 
+                  {/* Best WK */}
                   {currentEntry.bestWicketKeeper && (
-                    <div className="border-b border-slate-800 pb-2">
-                      <div className="text-[10px] text-cyan-400 uppercase font-mono flex items-center gap-1">
+                    <div className="p-3 rounded-xl bg-cyan-50/60 border border-cyan-100 space-y-0.5">
+                      <div className="text-[10px] text-cyan-800 font-semibold uppercase tracking-wider flex items-center gap-1">
                         <span>🧤</span>
                         <span>Best Wicket Keeper (WK)</span>
                       </div>
-                      <div className="text-sm font-bold text-cyan-300 mt-0.5">{currentEntry.bestWicketKeeper}</div>
+                      <div className="text-sm font-bold text-slate-900">{currentEntry.bestWicketKeeper}</div>
                     </div>
                   )}
 
+                  {/* Best Fielder */}
                   {currentEntry.bestFielder && (
-                    <div className="border-b border-slate-800 pb-2">
-                      <div className="text-[10px] text-rose-400 uppercase font-mono flex items-center gap-1">
+                    <div className="p-3 rounded-xl bg-emerald-50/60 border border-emerald-100 space-y-0.5">
+                      <div className="text-[10px] text-emerald-800 font-semibold uppercase tracking-wider flex items-center gap-1">
                         <span>🦅</span>
                         <span>Best Fielder</span>
                       </div>
-                      <div className="text-sm font-bold text-rose-300 mt-0.5">{currentEntry.bestFielder}</div>
+                      <div className="text-sm font-bold text-slate-900">{currentEntry.bestFielder}</div>
                     </div>
                   )}
 
                   {currentEntry.cricHeroesMatchUrl && (
-                    <div className="pt-1">
+                    <div className="pt-2">
                       <a
                         href={currentEntry.cricHeroesMatchUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[11px] font-bold text-[#CCFF00] hover:underline flex items-center gap-1"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-amber-600 transition-colors"
                       >
-                        <span>View Ball-by-Ball Timeline on CricHeroes</span>
-                        <ExternalLink className="w-3 h-3" />
+                        <span>Full Match Scorecard on CricHeroes</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
                       </a>
                     </div>
                   )}
                 </div>
+              </div>
 
-                {/* Quick Add Media Action */}
-                <div className="p-4 rounded-2xl bg-slate-100 border-2 border-slate-300 text-center space-y-2">
-                  <div className="text-xs font-bold text-slate-700">Have photos or videos from {currentEntry.year}?</div>
-                  <button
-                    onClick={() => {
-                      if (currentUser.role === 'spectator') {
-                        openAuthModal();
-                      } else {
-                        setShowAddMediaModal(true);
-                      }
-                    }}
-                    className="w-full py-2.5 rounded-xl bg-slate-950 hover:bg-slate-800 text-white font-black text-xs flex items-center justify-center gap-2 shadow"
-                  >
-                    <Camera className="w-4 h-4 text-[#CCFF00]" />
-                    <span>Upload Memory to {currentEntry.year}</span>
-                  </button>
+              {/* Upload CTA Card */}
+              <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 text-center space-y-3">
+                <div className="w-10 h-10 rounded-xl bg-white border border-slate-200 text-slate-700 flex items-center justify-center mx-auto shadow-xs">
+                  <Camera className="w-5 h-5 text-amber-500" />
                 </div>
-
+                <div className="space-y-1">
+                  <h5 className="text-xs font-bold text-slate-900">Have media from {currentEntry.year}?</h5>
+                  <p className="text-[11px] text-slate-500">Upload high-res team photos or YouTube reels to this gallery.</p>
+                </div>
+                <button
+                  onClick={() => {
+                    if (currentUser.role === 'spectator') {
+                      openAuthModal();
+                    } else {
+                      setShowAddMediaModal(true);
+                    }
+                  }}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors shadow-sm"
+                >
+                  Add Photo / Video Link
+                </button>
               </div>
 
             </div>
 
           </div>
 
-          {/* 4. Photo & Video Memory Gallery */}
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-[#00F0FF] text-slate-950 border border-slate-900 shadow-[2px_2px_0px_#0f172a]">
-                  <Camera className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-xl sm:text-2xl font-black font-cabinet text-slate-950">
-                    {currentEntry.year} Championship Photo & Video Gallery
-                  </h3>
-                  <span className="text-xs text-slate-500 font-medium">Uploaded celebration reels, podium pictures & historic snapshots</span>
-                </div>
+          {/* 5. Photo & Video Memory Gallery (Mobbin-style Grid) */}
+          <div className="space-y-4 pt-4 border-t border-slate-200/80">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-xl sm:text-2xl font-bold font-cabinet text-slate-900">
+                  {currentEntry.year} Championship Gallery
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Celebration reels, presentation ceremony snapshots, and historic highlights ({currentEntry.media.length} items)
+                </p>
               </div>
 
               <button
@@ -962,7 +1016,7 @@ export const HallOfFamePage: React.FC = () => {
                     handleOpenAddMedia();
                   }
                 }}
-                className="h-9 px-3.5 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-black text-xs flex items-center gap-1.5 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Photo / Video</span>
@@ -970,32 +1024,32 @@ export const HallOfFamePage: React.FC = () => {
             </div>
 
             {currentEntry.media.length === 0 ? (
-              <div className="p-12 text-center bg-white rounded-3xl border-3 border-dashed border-slate-300 text-slate-500 space-y-3">
-                <Camera className="w-10 h-10 mx-auto text-slate-400" />
-                <div className="font-bold text-slate-700">No media uploaded yet for {currentEntry.year}</div>
-                <p className="text-xs max-w-sm mx-auto">
-                  Be the first to upload championship victory celebration photos or YouTube highlight links for this season!
+              <div className="p-12 text-center bg-white rounded-2xl border border-dashed border-slate-300 text-slate-500 space-y-3">
+                <Camera className="w-8 h-8 mx-auto text-slate-400" />
+                <div className="font-semibold text-sm text-slate-700">No media uploaded yet for {currentEntry.year}</div>
+                <p className="text-xs max-w-sm mx-auto text-slate-500">
+                  Upload championship victory celebration photos or YouTube highlight links for this season.
                 </p>
                 <button
                   onClick={() => {
                     if (currentUser.role === 'spectator') openAuthModal();
                     else handleOpenAddMedia();
                   }}
-                  className="px-4 py-2 rounded-xl bg-[#CCFF00] text-slate-950 font-black text-xs border-2 border-slate-950 shadow"
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs shadow-sm"
                 >
-                  Upload First Photo
+                  Upload First Memory
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentEntry.media.map((item) => {
                   const ytId = item.type === 'video' ? getYouTubeId(item.url) : null;
                   return (
                     <div 
                       key={item.id}
-                      className="bg-white rounded-3xl overflow-hidden sport-card border-3 border-slate-950 shadow-[5px_5px_0px_#0f172a] group flex flex-col justify-between"
+                      className="bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200 group flex flex-col justify-between"
                     >
-                      <div className="relative h-52 bg-slate-950 overflow-hidden">
+                      <div className="relative aspect-video bg-slate-950 overflow-hidden">
                         {item.type === 'video' ? (
                           ytId ? (
                             <div 
@@ -1009,27 +1063,28 @@ export const HallOfFamePage: React.FC = () => {
                                 src={`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`} 
                                 alt={item.title} 
                                 className="w-full h-full object-cover group-hover/vid:scale-105 transition-transform duration-500" 
+                                onError={(e) => {
+                                  e.currentTarget.onerror = null;
+                                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80';
+                                }}
                               />
-                              <div className="absolute inset-0 bg-black/40 group-hover/vid:bg-black/20 transition-colors flex items-center justify-center">
-                                <div className="w-14 h-14 rounded-full bg-rose-600 group-hover/vid:bg-rose-500 text-white flex items-center justify-center shadow-2xl transition-transform group-hover/vid:scale-110 border-2 border-white/80">
-                                  <Play className="w-7 h-7 fill-white translate-x-0.5" />
+                              <div className="absolute inset-0 bg-slate-950/40 group-hover/vid:bg-slate-950/20 transition-colors flex items-center justify-center">
+                                <div className="w-12 h-12 rounded-full bg-slate-950/80 group-hover/vid:bg-rose-600 text-white flex items-center justify-center shadow-xl border border-white/20 transition-all group-hover/vid:scale-110">
+                                  <Play className="w-5 h-5 fill-white translate-x-0.5" />
                                 </div>
-                              </div>
-                              <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-black/80 text-[10px] font-mono font-black text-white flex items-center gap-1.5 border border-white/20">
-                                <span>▶ Click to Watch Video</span>
                               </div>
                             </div>
                           ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center bg-slate-900 text-white p-4 text-center space-y-2">
-                              <div className="w-12 h-12 rounded-full bg-rose-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                                <Video className="w-6 h-6 text-white" />
+                              <div className="w-10 h-10 rounded-full bg-rose-600 flex items-center justify-center shadow-md">
+                                <Video className="w-5 h-5 text-white" />
                               </div>
-                              <span className="text-xs font-black text-slate-200">Video Highlight Reel</span>
+                              <span className="text-xs font-semibold text-slate-200">Video Highlight Reel</span>
                               <a 
                                 href={item.url} 
                                 target="_blank" 
                                 rel="noreferrer"
-                                className="text-[11px] text-cyan-400 hover:underline flex items-center gap-1 font-mono"
+                                className="text-[11px] text-cyan-400 hover:underline inline-flex items-center gap-1 font-mono"
                               >
                                 <span>Open Video Link</span>
                                 <ExternalLink className="w-3 h-3" />
@@ -1047,25 +1102,29 @@ export const HallOfFamePage: React.FC = () => {
                               }}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                             />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent pointer-events-none" />
                           </>
                         )}
 
-                        {/* Top Right Badges & Actions */}
-                        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
-                          <span className="px-2.5 py-0.5 rounded-lg bg-slate-950/80 text-white font-mono text-[10px] font-black border border-white/20 backdrop-blur-md">
-                            {item.type === 'video' ? '🎬 VIDEO' : '📸 PHOTO'}
+                        {/* Top Left Badge */}
+                        <div className="absolute top-3 left-3 z-10">
+                          <span className="px-2.5 py-1 rounded-full bg-slate-950/70 text-white text-[10px] font-semibold tracking-wider uppercase backdrop-blur-md border border-white/10">
+                            {item.type === 'video' ? '🎬 Video Reel' : '📸 Photo'}
                           </span>
+                        </div>
+
+                        {/* Top Right Floating Action Buttons (Mobbin Umbro style) */}
+                        <div className="absolute top-3 right-3 flex items-center gap-1.5 z-10">
                           <button
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleOpenEditMedia(item);
                             }}
-                            title="Edit this media / Replace pic"
-                            className="w-6 h-6 rounded-lg bg-slate-950/80 hover:bg-[#FFE600] text-slate-300 hover:text-slate-950 flex items-center justify-center transition-colors border border-white/20 backdrop-blur-md shadow-sm"
+                            title="Edit details"
+                            className="w-8 h-8 rounded-full bg-white/90 hover:bg-white text-slate-700 hover:text-slate-950 border border-slate-200/80 shadow-sm backdrop-blur-md flex items-center justify-center transition-all hover:scale-105"
                           >
-                            <Edit3 className="w-3 h-3" />
+                            <Edit3 className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
@@ -1075,27 +1134,27 @@ export const HallOfFamePage: React.FC = () => {
                                 deleteMediaFromHallOfFame(currentEntry.year, item.id);
                               }
                             }}
-                            title="Delete this media"
-                            className="w-6 h-6 rounded-lg bg-slate-950/80 hover:bg-rose-600 text-slate-300 hover:text-white flex items-center justify-center transition-colors border border-white/20 backdrop-blur-md shadow-sm"
+                            title="Delete media"
+                            className="w-8 h-8 rounded-full bg-white/90 hover:bg-rose-50 text-slate-600 hover:text-rose-600 border border-slate-200/80 shadow-sm backdrop-blur-md flex items-center justify-center transition-all hover:scale-105"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
 
-                      <div className="p-4 space-y-2.5 flex-1 flex flex-col justify-between">
+                      <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
                         <div className="space-y-1">
-                          <h4 className="font-black text-sm font-cabinet text-slate-950 leading-tight group-hover:text-amber-600 transition-colors">
+                          <h4 className="font-bold text-sm text-slate-900 font-cabinet group-hover:text-amber-600 transition-colors line-clamp-1">
                             {item.title}
                           </h4>
                           {item.caption && (
-                            <p className="text-xs text-slate-600 font-medium line-clamp-2">
+                            <p className="text-xs text-slate-500 font-normal line-clamp-2 leading-relaxed">
                               {item.caption}
                             </p>
                           )}
                         </div>
 
-                        {/* Bottom Action Row */}
+                        {/* Bottom Row */}
                         <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
                           <button
                             type="button"
@@ -1103,10 +1162,10 @@ export const HallOfFamePage: React.FC = () => {
                               e.stopPropagation();
                               handleOpenEditMedia(item);
                             }}
-                            className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-amber-100 text-slate-800 hover:text-amber-950 text-[11px] font-black flex items-center gap-1 border border-slate-200 transition-colors shadow-sm"
+                            className="text-xs font-semibold text-slate-600 hover:text-slate-900 inline-flex items-center gap-1"
                           >
-                            <Edit3 className="w-3 h-3 text-amber-600" />
-                            <span>{item.type === 'video' ? 'Edit Video Link' : 'Edit / Replace Pic'}</span>
+                            <Edit3 className="w-3 h-3 text-slate-400" />
+                            <span>{item.type === 'video' ? 'Edit Link' : 'Edit Details'}</span>
                           </button>
 
                           {item.type === 'video' && (
@@ -1116,10 +1175,10 @@ export const HallOfFamePage: React.FC = () => {
                                 setActiveVideoUrl(item.url);
                                 setActiveVideoTitle(item.title);
                               }}
-                              className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-black flex items-center gap-1 border border-rose-200 transition-colors shadow-sm"
+                              className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold inline-flex items-center gap-1 transition-colors"
                             >
                               <Play className="w-3 h-3 fill-rose-600 text-rose-600" />
-                              <span>Play Video</span>
+                              <span>Play Reel</span>
                             </button>
                           )}
                         </div>
@@ -1134,10 +1193,10 @@ export const HallOfFamePage: React.FC = () => {
         </div>
       )}
 
-      {/* 5. MODAL: UPLOAD / EDIT PHOTO & VIDEO MEMORY */}
+      {/* 6. MODAL: UPLOAD / EDIT PHOTO & VIDEO MEMORY */}
       {showAddMediaModal && (
         <div 
-          className="fixed inset-0 z-[99999] bg-slate-950/85 backdrop-blur-md overflow-y-auto flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-sm overflow-y-auto flex items-center justify-center p-4 sm:p-6"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowAddMediaModal(false);
@@ -1145,20 +1204,20 @@ export const HallOfFamePage: React.FC = () => {
             }
           }}
         >
-          <div className="relative w-full max-w-lg bg-white rounded-3xl border-3 border-slate-950 shadow-[10px_10px_0px_#0f172a] text-slate-900 overflow-hidden my-auto">
+          <div className="relative w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-2xl text-slate-900 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
             
             {/* Header */}
-            <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between border-b-2 border-slate-900">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-[#CCFF00] text-slate-950 border border-slate-900">
-                  {editingMediaId ? <Edit3 className="w-5 h-5 text-slate-950" /> : <Upload className="w-5 h-5" />}
+            <div className="p-5 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
+                  {editingMediaId ? <Edit3 className="w-5 h-5" /> : <Upload className="w-5 h-5" />}
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-black font-cabinet leading-tight">
-                    {editingMediaId ? 'Edit Championship Media' : `Upload ${selectedYear} Championship Media`}
+                  <h3 className="text-base sm:text-lg font-bold font-cabinet leading-tight">
+                    {editingMediaId ? 'Edit Championship Media' : `Upload ${selectedYear} Media`}
                   </h3>
-                  <span className="text-[10px] text-slate-400 font-mono tracking-wider">
-                    {editingMediaId ? 'UPDATE PHOTO, VIDEO LINK & DETAILS' : 'HALL OF FAME ARCHIVE'}
+                  <span className="text-[11px] text-slate-400 font-medium">
+                    {editingMediaId ? 'Update photo, video reel & caption' : 'Add celebration snapshots & highlights'}
                   </span>
                 </div>
               </div>
@@ -1168,76 +1227,76 @@ export const HallOfFamePage: React.FC = () => {
                   setShowAddMediaModal(false);
                   setEditingMediaId(null);
                 }}
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white flex items-center justify-center font-bold transition-colors"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Body */}
-            <form onSubmit={handleSaveMedia} className="p-5 space-y-4">
+            {/* Form */}
+            <form onSubmit={handleSaveMedia} className="p-6 space-y-4">
               
               {/* Media Type Switcher */}
-              <div className="flex rounded-xl border-2 border-slate-900 bg-slate-100 p-1 text-xs">
+              <div className="flex rounded-xl bg-slate-100 p-1 text-xs">
                 <button
                   type="button"
                   onClick={() => setMediaType('image')}
-                  className={'flex-1 py-1.5 rounded-lg font-black flex items-center justify-center gap-1.5 transition-all ' + (
-                    mediaType === 'image' ? 'bg-white text-slate-950 shadow' : 'text-slate-600'
-                  )}
+                  className={`flex-1 py-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                    mediaType === 'image' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                  }`}
                 >
-                  <Camera className="w-3.5 h-3.5" />
+                  <Camera className="w-3.5 h-3.5 text-amber-600" />
                   <span>Championship Photo</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setMediaType('video')}
-                  className={'flex-1 py-1.5 rounded-lg font-black flex items-center justify-center gap-1.5 transition-all ' + (
-                    mediaType === 'video' ? 'bg-white text-slate-950 shadow' : 'text-slate-600'
-                  )}
+                  className={`flex-1 py-2 rounded-lg font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                    mediaType === 'video' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                  }`}
                 >
                   <Video className="w-3.5 h-3.5 text-rose-500" />
-                  <span>Video Highlight Link</span>
+                  <span>Video Highlight Reel</span>
                 </button>
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                  Media / Title *
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Title *
                 </label>
                 <input
                   type="text"
                   value={mediaTitle}
                   onChange={(e) => setMediaTitle(e.target.value)}
                   placeholder="e.g. Presentation Ceremony & Trophy Lift"
-                  className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium bg-slate-50/50 focus:bg-white focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                  {mediaType === 'image' ? 'Championship Photo *' : 'Video URL (YouTube / Direct Link) *'}
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                  {mediaType === 'image' ? 'Championship Photo *' : 'Video URL (YouTube Reel / Link) *'}
                 </label>
 
                 {mediaType === 'image' ? (
                   <div className="space-y-3">
-                    <div className="p-3 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col sm:flex-row items-center gap-3">
+                    <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-dashed border-slate-300 flex flex-col sm:flex-row items-center gap-3">
                       {mediaUrl ? (
                         <img 
                           src={mediaUrl} 
                           alt="Preview" 
-                          className="w-24 h-16 rounded-xl object-cover border-2 border-slate-900 shadow-sm shrink-0 bg-slate-200" 
+                          className="w-24 h-16 rounded-xl object-cover border border-slate-200 shadow-sm shrink-0 bg-slate-200" 
                         />
                       ) : (
-                        <div className="w-24 h-16 rounded-xl bg-slate-200 border-2 border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
+                        <div className="w-24 h-16 rounded-xl bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
                           <Camera className="w-6 h-6" />
                         </div>
                       )}
                       <div className="flex-1 text-center sm:text-left space-y-1">
-                        <label className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-850 text-[#CCFF00] text-xs font-black border border-slate-900 shadow-sm transition-transform hover:scale-105">
-                          <Upload className="w-3.5 h-3.5" />
-                          <span>📁 Pick Image From Device</span>
+                        <label className="cursor-pointer inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition-colors">
+                          <Upload className="w-3.5 h-3.5 text-amber-300" />
+                          <span>Choose Image From Device</span>
                           <input 
                             type="file" 
                             accept="image/*" 
@@ -1245,18 +1304,18 @@ export const HallOfFamePage: React.FC = () => {
                             onChange={handleMediaFileUpload} 
                           />
                         </label>
-                        <p className="text-[10px] text-slate-500 font-medium">Upload presentation photos, trophy ceremony, or winning snapshots.</p>
+                        <p className="text-[11px] text-slate-500">Auto-compressed & stored locally in your browser storage.</p>
                       </div>
                     </div>
 
                     <div>
-                      <span className="text-[10px] font-mono text-slate-500 block mb-1">Or paste direct photo URL:</span>
+                      <span className="text-[11px] font-medium text-slate-500 block mb-1">Or paste image URL:</span>
                       <input
                         type="url"
                         value={mediaUrl}
                         onChange={(e) => setMediaUrl(e.target.value)}
                         placeholder="https://images.unsplash.com/... or image link"
-                        className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-mono bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono bg-slate-50/50 focus:bg-white focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
                       />
                     </div>
                   </div>
@@ -1267,10 +1326,10 @@ export const HallOfFamePage: React.FC = () => {
                       value={mediaUrl}
                       onChange={(e) => setMediaUrl(e.target.value)}
                       placeholder="https://youtube.com/watch?v=... or https://youtu.be/..."
-                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-mono bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-mono bg-slate-50/50 focus:bg-white focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
                       required
                     />
-                    <span className="text-[10px] text-slate-500 font-mono mt-1 block">
+                    <span className="text-[11px] text-slate-500 mt-1 block">
                       Supports YouTube match highlights, presentation ceremony videos & live streams.
                     </span>
                   </div>
@@ -1278,77 +1337,77 @@ export const HallOfFamePage: React.FC = () => {
               </div>
 
               {/* Sample Preset Buttons for Quick Fill */}
-              <div className="space-y-1">
-                <span className="text-[10px] font-mono text-slate-500 block">⚡ Quick Sample Fill:</span>
+              <div className="space-y-1.5 pt-1">
+                <span className="text-[11px] font-semibold text-slate-500 block">Quick Sample Presets:</span>
                 <div className="flex flex-wrap gap-1.5">
                   <button
                     type="button"
                     onClick={() => handleSampleImage('trophy')}
-                    className="px-2 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-950 text-[10px] font-bold"
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium"
                   >
                     🏆 Trophy Lift
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSampleImage('presentation')}
-                    className="px-2 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-950 text-[10px] font-bold"
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium"
                   >
-                    🎖️ Presentation Ceremony
+                    🎖️ Presentation
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSampleImage('team')}
-                    className="px-2 py-1 rounded-lg bg-cyan-100 hover:bg-cyan-200 text-cyan-950 text-[10px] font-bold"
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium"
                   >
                     👥 Squad Photo
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSampleImage('celebration')}
-                    className="px-2 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-950 text-[10px] font-bold"
+                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium"
                   >
-                    🎆 Confetti Blast
+                    🎆 Celebrations
                   </button>
                   <button
                     type="button"
                     onClick={() => handleSampleImage('highlights')}
-                    className="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-[#FFE600] text-[10px] font-bold flex items-center gap-1"
+                    className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-medium inline-flex items-center gap-1"
                   >
-                    <Play className="w-2.5 h-2.5 fill-[#FFE600]" />
-                    <span>YouTube Highlights</span>
+                    <Play className="w-2.5 h-2.5 fill-rose-600" />
+                    <span>YouTube Highlight</span>
                   </button>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                  Caption / Story (Optional)
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Caption / Details (Optional)
                 </label>
                 <textarea
                   value={mediaCaption}
                   onChange={(e) => setMediaCaption(e.target.value)}
-                  placeholder="Share details about this memorable moment from the presentation ceremony or final match..."
+                  placeholder="Share details about this memorable presentation or match moment..."
                   rows={2}
-                  className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-medium bg-slate-50 focus:outline-none focus:ring-2 focus:ring-[#CCFF00]"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-normal bg-slate-50/50 focus:bg-white focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => {
                     setShowAddMediaModal(false);
                     setEditingMediaId(null);
                   }}
-                  className="px-4 py-2 rounded-xl border-2 border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#CCFF00] hover:bg-[#bdf000] text-slate-950 text-xs font-black border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]"
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-sm transition-all"
                 >
-                  {editingMediaId ? 'Update & Save Changes' : 'Save & Publish Memory'}
+                  {editingMediaId ? 'Save Updates' : 'Publish Memory'}
                 </button>
               </div>
 
@@ -1358,44 +1417,46 @@ export const HallOfFamePage: React.FC = () => {
         </div>
       )}
 
-      {/* 6. MODAL: ADD NEW SEASON CHAMPION (ADMIN ONLY) */}
+      {/* 7. MODAL: ADD / EDIT CHAMPIONSHIP RECORD & PODIUM */}
       {showAddChampionModal && (
         <div 
-          className="fixed inset-0 z-[99999] bg-slate-950/85 backdrop-blur-md overflow-y-auto flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[99999] bg-slate-950/75 backdrop-blur-sm overflow-y-auto flex items-center justify-center p-4 sm:p-6"
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowAddChampionModal(false);
           }}
         >
-          <div className="relative w-full max-w-lg bg-white rounded-3xl border-3 border-slate-950 shadow-[10px_10px_0px_#0f172a] text-slate-900 overflow-hidden my-auto max-h-[90vh] flex flex-col">
+          <div className="relative w-full max-w-xl bg-white rounded-3xl border border-slate-200 shadow-2xl text-slate-900 overflow-hidden my-auto max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
             
-            <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between border-b-2 border-slate-900 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-[#FFE600] text-slate-950 border border-slate-900">
+            <div className="p-5 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center justify-center">
                   <Trophy className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-black font-cabinet leading-tight">
-                    {isEditingYear ? ('Edit ' + newYear + ' Championship Record') : 'Add / Crown Championship Year'}
+                  <h3 className="text-base sm:text-lg font-bold font-cabinet leading-tight">
+                    {isEditingYear ? (`Edit ${newYear} Championship Record`) : 'Crown New Championship Season'}
                   </h3>
-                  <span className="text-[10px] text-slate-400 font-mono tracking-wider">ADMIN MASTER CONTROLS</span>
+                  <span className="text-[11px] text-slate-400 font-medium">
+                    Customize podium winners, captain, and leaderboard honors
+                  </span>
                 </div>
               </div>
 
               <button
                 onClick={() => setShowAddChampionModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white flex items-center justify-center font-bold"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            <form onSubmit={handleAddChampion} className="p-5 space-y-4 overflow-y-auto flex-1">
+            <form onSubmit={handleAddChampion} className="p-6 space-y-4 overflow-y-auto flex-1">
               
-              {/* Year Number & Season Mode */}
+              {/* Year & Season Status */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                    Championship Year (e.g. 2026) *
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Championship Year *
                   </label>
                   <input
                     type="number"
@@ -1403,105 +1464,109 @@ export const HallOfFamePage: React.FC = () => {
                     onChange={(e) => setNewYear(Number(e.target.value))}
                     min={2020}
                     max={2035}
-                    className="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-900 text-sm font-mono font-bold bg-slate-50"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-bold font-mono bg-slate-50/50 focus:bg-white"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                    Season Status *
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Tournament Status *
                   </label>
-                  <div className="flex rounded-xl border-2 border-slate-900 bg-slate-100 p-1 text-xs">
+                  <div className="flex rounded-xl bg-slate-100 p-1 text-xs">
                     <button
                       type="button"
                       onClick={() => setIsCurrentActiveSeason(false)}
-                      className={'flex-1 py-1.5 rounded-lg font-black flex items-center justify-center gap-1 ' + (
-                        !isCurrentActiveSeason ? 'bg-white text-slate-950 shadow' : 'text-slate-600'
-                      )}
+                      className={`flex-1 py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1 transition-all ${
+                        !isCurrentActiveSeason ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'
+                      }`}
                     >
-                      🏆 Crowned Winner
+                      🏆 Crowned
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsCurrentActiveSeason(true)}
-                      className={'flex-1 py-1.5 rounded-lg font-black flex items-center justify-center gap-1 ' + (
-                        isCurrentActiveSeason ? 'bg-[#CCFF00] text-slate-950 shadow' : 'text-slate-600'
-                      )}
+                      className={`flex-1 py-1.5 rounded-lg font-semibold flex items-center justify-center gap-1 transition-all ${
+                        isCurrentActiveSeason ? 'bg-amber-500 text-slate-950 shadow-sm' : 'text-slate-600'
+                      }`}
                     >
-                      ⚡ Active Season
+                      ⚡ In Progress
                     </button>
                   </div>
                 </div>
               </div>
 
-                <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                    Champion Franchise *
-                  </label>
-                  <select
-                    value={newChampionTeamId}
-                    onChange={(e) => setNewChampionTeamId(e.target.value)}
-                    className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50"
-                    required
-                  >
-                    {teams.map(t => (
-                      <option key={t.id} value={t.id}>{t.logo} {t.name}</option>
-                    ))}
-                  </select>
-                </div>
+              {/* Champion Team Selection */}
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                  🥇 1st Place (Champion Franchise) *
+                </label>
+                <select
+                  value={newChampionTeamId}
+                  onChange={(e) => setNewChampionTeamId(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-slate-50/50 focus:bg-white"
+                  required
+                >
+                  {teams.map(t => (
+                    <option key={t.id} value={t.id}>{t.logo} {t.name}</option>
+                  ))}
+                </select>
+              </div>
 
+              {/* Runner Up & 3rd Place */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                    🥈 Runner Up Team *
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                    🥈 2nd Place (Runner Up) *
                   </label>
                   <input
                     type="text"
                     value={newRunnerUp}
                     onChange={(e) => setNewRunnerUp(e.target.value)}
                     placeholder="e.g. Frankfurt Strikers"
-                    className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium bg-slate-50/50 focus:bg-white"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                    🥉 3rd Position Winner (Optional)
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                    🥉 3rd Place (2nd Runner Up)
                   </label>
                   <input
                     type="text"
                     value={newSecondRunnerUp}
                     onChange={(e) => setNewSecondRunnerUp(e.target.value)}
                     placeholder="e.g. Darmstadt Dazzlers"
-                    className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium bg-slate-50/50 focus:bg-white"
                   />
                 </div>
               </div>
 
+              {/* Trophy Photo Upload & Alignment */}
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
                   🏆 Championship Trophy / Squad Photo
                 </label>
-                <div className="p-3 bg-slate-50 rounded-2xl border-2 border-slate-300 space-y-3">
+                <div className="p-3.5 bg-slate-50/80 rounded-2xl border border-slate-200 space-y-3">
                   <div className="flex flex-col sm:flex-row items-center gap-3">
                     {newTrophyPhoto ? (
                       <img 
                         src={newTrophyPhoto} 
                         alt="Trophy preview" 
                         style={{ objectPosition: `center ${newTrophyPhotoPosY}%` }}
-                        className="w-24 h-16 rounded-xl object-cover border-2 border-slate-900 shadow-sm shrink-0 bg-slate-200" 
+                        className="w-24 h-16 rounded-xl object-cover border border-slate-200 shadow-sm shrink-0 bg-slate-200" 
                       />
                     ) : (
-                      <div className="w-24 h-16 rounded-xl bg-slate-200 border-2 border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
+                      <div className="w-24 h-16 rounded-xl bg-slate-200 border border-slate-300 flex items-center justify-center text-slate-400 shrink-0">
                         <Trophy className="w-6 h-6 text-amber-500" />
                       </div>
                     )}
+
                     <div className="flex-1 space-y-1.5 w-full">
-                      <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 hover:bg-slate-850 text-[#FFE600] text-xs font-black border border-slate-900 shadow-sm transition-transform hover:scale-105">
-                        <Upload className="w-3.5 h-3.5" />
-                        <span>📁 Pick Image From Device</span>
+                      <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold shadow-sm transition-colors">
+                        <Upload className="w-3.5 h-3.5 text-amber-300" />
+                        <span>Choose Trophy Picture</span>
                         <input 
                           type="file" 
                           accept="image/*" 
@@ -1523,39 +1588,39 @@ export const HallOfFamePage: React.FC = () => {
                         value={newTrophyPhoto}
                         onChange={(e) => setNewTrophyPhoto(e.target.value)}
                         placeholder="Or paste direct image URL (https://...)"
-                        className="w-full px-3 py-1.5 rounded-xl border-2 border-slate-900 text-[11px] font-mono bg-white"
+                        className="w-full px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-mono bg-white"
                       />
                     </div>
                   </div>
 
-                  {/* Vertical alignment slider & presets */}
+                  {/* Vertical alignment controls */}
                   <div className="pt-2 border-t border-slate-200 space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
+                    <div className="flex items-center justify-between text-xs font-medium text-slate-600">
                       <span className="flex items-center gap-1">
-                        <Move className="w-3 h-3 text-amber-600" />
-                        <span>Vertical Alignment / Center: {newTrophyPhotoPosY}%</span>
+                        <Move className="w-3.5 h-3.5 text-amber-600" />
+                        <span>Vertical Position Alignment: {newTrophyPhotoPosY}%</span>
                       </span>
                       <div className="flex gap-1">
                         <button
                           type="button"
                           onClick={() => setNewTrophyPhotoPosY(15)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${newTrophyPhotoPosY <= 25 ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-700'}`}
+                          className={`px-2 py-0.5 rounded text-[10px] font-medium ${newTrophyPhotoPosY <= 25 ? 'bg-amber-400 text-slate-950 font-semibold' : 'bg-slate-200 text-slate-700'}`}
                         >
-                          🔝 Top
+                          Top
                         </button>
                         <button
                           type="button"
                           onClick={() => setNewTrophyPhotoPosY(50)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${newTrophyPhotoPosY > 25 && newTrophyPhotoPosY < 75 ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-700'}`}
+                          className={`px-2 py-0.5 rounded text-[10px] font-medium ${newTrophyPhotoPosY > 25 && newTrophyPhotoPosY < 75 ? 'bg-amber-400 text-slate-950 font-semibold' : 'bg-slate-200 text-slate-700'}`}
                         >
-                          🎯 Center
+                          Center
                         </button>
                         <button
                           type="button"
                           onClick={() => setNewTrophyPhotoPosY(85)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${newTrophyPhotoPosY >= 75 ? 'bg-amber-400 text-slate-950' : 'bg-slate-200 text-slate-700'}`}
+                          className={`px-2 py-0.5 rounded text-[10px] font-medium ${newTrophyPhotoPosY >= 75 ? 'bg-amber-400 text-slate-950 font-semibold' : 'bg-slate-200 text-slate-700'}`}
                         >
-                          🔻 Bottom
+                          Bottom
                         </button>
                       </div>
                     </div>
@@ -1571,8 +1636,9 @@ export const HallOfFamePage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Match Score & Venue */}
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
                   Final Match Scoreline *
                 </label>
                 <input
@@ -1580,14 +1646,14 @@ export const HallOfFamePage: React.FC = () => {
                   value={newFinalScore}
                   onChange={(e) => setNewFinalScore(e.target.value)}
                   placeholder="e.g. 195/4 (19.4 ov) beat 192/7 (20.0 ov)"
-                  className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium bg-slate-50/50 focus:bg-white"
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
                     Victory Margin *
                   </label>
                   <input
@@ -1595,35 +1661,35 @@ export const HallOfFamePage: React.FC = () => {
                     value={newMargin}
                     onChange={(e) => setNewMargin(e.target.value)}
                     placeholder="e.g. Won by 6 wickets"
-                    className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium bg-slate-50/50 focus:bg-white"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
                     Final Match Venue
                   </label>
                   <input
                     type="text"
                     value={newVenue}
                     onChange={(e) => setNewVenue(e.target.value)}
-                    placeholder="e.g. Apex National Arena"
-                    className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50"
+                    placeholder="e.g. Frankfurt Cricket Ground, Germany"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-medium bg-slate-50/50 focus:bg-white"
                   />
                 </div>
               </div>
 
               {/* Winning Captain Details */}
-              <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-black text-amber-950 uppercase tracking-wider">
+              <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-900 uppercase tracking-wider">
                   <Crown className="w-4 h-4 text-amber-600" />
                   <span>Winning Captain Details</span>
                 </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[11px] font-black uppercase text-amber-900 mb-1">
+                    <label className="block text-[11px] font-semibold uppercase text-amber-900 mb-1">
                       Captain Name *
                     </label>
                     <input
@@ -1631,12 +1697,12 @@ export const HallOfFamePage: React.FC = () => {
                       value={newCaptain}
                       onChange={(e) => setNewCaptain(e.target.value)}
                       placeholder="e.g. Spartans Captain"
-                      className="w-full px-3.5 py-2 rounded-xl border-2 border-amber-300 text-xs font-bold bg-white text-slate-950"
+                      className="w-full px-3.5 py-2 rounded-xl border border-amber-300 text-xs font-semibold bg-white text-slate-900"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-black uppercase text-amber-900 mb-1">
+                    <label className="block text-[11px] font-semibold uppercase text-amber-900 mb-1">
                       Captain Subtitle / Bio
                     </label>
                     <input
@@ -1644,61 +1710,61 @@ export const HallOfFamePage: React.FC = () => {
                       value={newCaptainBio}
                       onChange={(e) => setNewCaptainBio(e.target.value)}
                       placeholder="e.g. Led team to championship glory in 2026."
-                      className="w-full px-3.5 py-2 rounded-xl border-2 border-amber-300 text-xs font-medium bg-white text-slate-950"
+                      className="w-full px-3.5 py-2 rounded-xl border border-amber-300 text-xs font-normal bg-white text-slate-900"
                     />
                   </div>
                 </div>
               </div>
 
-              {/* Tournament Leaderboard & Honors */}
-              <div className="p-4 rounded-2xl bg-slate-900 text-white border-2 border-slate-950 space-y-3">
-                <div className="flex items-center gap-2 text-xs font-black text-[#FFE600] uppercase tracking-wider">
-                  <Award className="w-4 h-4" />
+              {/* Tournament Honors & Leaderboard */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  <Award className="w-4 h-4 text-amber-500" />
                   <span>Tournament Honors & Leaderboard</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="sm:col-span-2">
-                    <label className="block text-[11px] font-black uppercase text-[#00F0FF] mb-1">
-                      🌟 Player of the Tournament (MVP)
+                    <label className="block text-[11px] font-semibold uppercase text-slate-700 mb-1">
+                      ⭐ Player of the Tournament (MVP)
                     </label>
                     <input
                       type="text"
                       value={newMvp}
                       onChange={(e) => setNewMvp(e.target.value)}
-                      placeholder="e.g. Aditya Sharma (Frankfurt Spartans - 340 runs, 12 wkts)"
-                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-700 text-xs font-bold bg-slate-800 text-white"
+                      placeholder="e.g. Aditya Sharma (340 runs, 12 wkts)"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-black uppercase text-amber-400 mb-1">
-                      🏏 Orange Cap (Top Batsman / Runs)
+                    <label className="block text-[11px] font-semibold uppercase text-slate-700 mb-1">
+                      🏏 Orange Cap (Top Batsman)
                     </label>
                     <input
                       type="text"
                       value={newOrangeCap}
                       onChange={(e) => setNewOrangeCap(e.target.value)}
                       placeholder="e.g. Rohit Mehra (412 runs)"
-                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-700 text-xs font-bold bg-slate-800 text-white"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-black uppercase text-emerald-400 mb-1">
-                      🎯 Purple Cap (Top Bowler / Wickets)
+                    <label className="block text-[11px] font-semibold uppercase text-slate-700 mb-1">
+                      🎯 Purple Cap (Top Bowler)
                     </label>
                     <input
                       type="text"
                       value={newPurpleCap}
                       onChange={(e) => setNewPurpleCap(e.target.value)}
                       placeholder="e.g. Karan Patel (18 wkts)"
-                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-700 text-xs font-bold bg-slate-800 text-white"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-black uppercase text-cyan-400 mb-1">
+                    <label className="block text-[11px] font-semibold uppercase text-slate-700 mb-1">
                       🧤 Best Wicket Keeper (WK)
                     </label>
                     <input
@@ -1706,40 +1772,40 @@ export const HallOfFamePage: React.FC = () => {
                       value={newBestWicketKeeper}
                       onChange={(e) => setNewBestWicketKeeper(e.target.value)}
                       placeholder="e.g. Siddharth Rao (15 Dismissals)"
-                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-700 text-xs font-bold bg-slate-800 text-white"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-black uppercase text-rose-400 mb-1">
-                      🦅 Best Fielder (Catches & Run-outs)
+                    <label className="block text-[11px] font-semibold uppercase text-slate-700 mb-1">
+                      🦅 Best Fielder
                     </label>
                     <input
                       type="text"
                       value={newBestFielder}
                       onChange={(e) => setNewBestFielder(e.target.value)}
-                      placeholder="e.g. Manish Tiwari (11 Catches, 4 Run-outs)"
-                      className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-700 text-xs font-bold bg-slate-800 text-white"
+                      placeholder="e.g. Manish Tiwari (11 Catches)"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-white"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
-                  ⚡ CricHeroes Match Scorecard URL (Optional)
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
+                  CricHeroes Match Scorecard URL (Optional)
                 </label>
                 <input
                   type="url"
                   value={newCricHeroesUrl}
                   onChange={(e) => setNewCricHeroesUrl(e.target.value)}
                   placeholder="https://cricheroes.com/scorecard/..."
-                  className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-bold bg-slate-50 text-indigo-900"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-mono bg-slate-50/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black uppercase tracking-wider text-slate-700 mb-1">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700 mb-1.5">
                   Championship Story & Summary
                 </label>
                 <textarea
@@ -1747,23 +1813,23 @@ export const HallOfFamePage: React.FC = () => {
                   onChange={(e) => setNewStory(e.target.value)}
                   placeholder="Brief summary of how the tournament was won..."
                   rows={3}
-                  className="w-full px-3.5 py-2 rounded-xl border-2 border-slate-900 text-xs font-medium bg-slate-50"
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs font-normal bg-slate-50/50"
                 />
               </div>
 
-              <div className="pt-2 flex items-center justify-end gap-2">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowAddChampionModal(false)}
-                  className="px-4 py-2 rounded-xl border-2 border-slate-300 text-slate-700 text-xs font-bold hover:bg-slate-100"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-[#FFE600] hover:bg-[#ebd300] text-slate-950 text-xs font-black border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]"
+                  className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold shadow-sm transition-all"
                 >
-                  {isEditingYear ? 'Save Changes to Hall of Fame' : 'Publish Year to Hall of Fame'}
+                  {isEditingYear ? 'Save Season Updates' : 'Publish Season Record'}
                 </button>
               </div>
             </form>
@@ -1772,31 +1838,31 @@ export const HallOfFamePage: React.FC = () => {
         </div>
       )}
 
-      {/* 7. MODAL: INTERACTIVE VIDEO PLAYER MODAL */}
+      {/* 8. MODAL: INTERACTIVE VIDEO PLAYER */}
       {activeVideoUrl && (
         <div 
-          className="fixed inset-0 z-[999999] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[999999] bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
           onClick={() => setActiveVideoUrl(null)}
         >
           <div 
-            className="relative w-full max-w-4xl bg-black rounded-3xl border-3 border-slate-900 shadow-[10px_10px_0px_#0f172a] overflow-hidden my-auto"
+            className="relative w-full max-w-4xl bg-black rounded-3xl border border-slate-800 shadow-2xl overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-3.5 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
+            <div className="p-4 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
               <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-xl bg-rose-600 text-white flex items-center justify-center">
+                <div className="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center">
                   <Play className="w-4 h-4 fill-white" />
                 </div>
                 <div>
-                  <h4 className="text-sm sm:text-base font-black font-cabinet truncate max-w-sm sm:max-w-lg text-white">
+                  <h4 className="text-sm sm:text-base font-bold font-cabinet truncate max-w-sm sm:max-w-lg text-white">
                     {activeVideoTitle || 'Championship Match Highlights'}
                   </h4>
-                  <span className="text-[10px] text-slate-400 font-mono">2026 OFFICIAL VIDEO REEL</span>
+                  <span className="text-[10px] text-slate-400 font-mono">OFFICIAL VIDEO REEL</span>
                 </div>
               </div>
               <button
                 onClick={() => setActiveVideoUrl(null)}
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white flex items-center justify-center font-bold transition-colors"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1824,75 +1890,72 @@ export const HallOfFamePage: React.FC = () => {
         </div>
       )}
 
-      {/* 8. MODAL: SYNC & EXPORT GALLERY DATA */}
+      {/* 9. MODAL: SYNC & EXPORT GALLERY DATA */}
       {showSyncModal && (
         <div 
-          className="fixed inset-0 z-[999999] bg-slate-950/85 backdrop-blur-md overflow-y-auto flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-[999999] bg-slate-950/75 backdrop-blur-sm overflow-y-auto flex items-center justify-center p-4 sm:p-6"
           onClick={(e) => {
             if (e.target === e.currentTarget) setShowSyncModal(false);
           }}
         >
-          <div className="relative w-full max-w-xl bg-white rounded-3xl border-3 border-slate-950 shadow-[10px_10px_0px_#0f172a] text-slate-900 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-xl bg-white rounded-3xl border border-slate-200 shadow-2xl text-slate-900 overflow-hidden my-auto animate-in fade-in zoom-in-95 duration-200">
             {/* Header */}
-            <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between border-b-2 border-slate-900">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-[#00F0FF] text-slate-950 border border-slate-900">
+            <div className="p-5 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 flex items-center justify-center">
                   <Database className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base sm:text-lg font-black font-cabinet leading-tight">
+                  <h3 className="text-base sm:text-lg font-bold font-cabinet leading-tight">
                     Sync & Cloud Persistence Manager
                   </h3>
-                  <span className="text-[10px] text-slate-400 font-mono tracking-wider">HALL OF FAME DATA SYNC</span>
+                  <span className="text-[11px] text-slate-400 font-medium">HALL OF FAME DATA ARCHIVE</span>
                 </div>
               </div>
 
               <button
                 onClick={() => setShowSyncModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 hover:bg-rose-600 text-white flex items-center justify-center font-bold transition-colors"
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="p-6 space-y-5">
+            <div className="p-6 space-y-4">
               
               {/* Storage Status Box */}
-              <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-300 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-black text-emerald-900">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-                  <span>Local IndexedDB & Cache Storage: Active & Protected</span>
+              <div className="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 space-y-1.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-900">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span>Local IndexedDB & Browser Storage: Active & Protected</span>
                 </div>
-                <p className="text-xs text-emerald-800 leading-relaxed font-medium">
+                <p className="text-xs text-emerald-800 leading-relaxed font-normal">
                   All photos, recentered alignments, video links, and edited honors you submit are stored locally in your browser using IndexedDB. They persist safely across page refreshes and browser restarts.
                 </p>
               </div>
 
               {/* Public Website Sync Note */}
-              <div className="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-2 text-amber-950">
-                <div className="flex items-center gap-2 text-xs font-black text-amber-900">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-slate-700">
+                <div className="flex items-center gap-2 text-xs font-bold text-slate-900">
                   <span>🌐</span>
-                  <span>How to Publish Changes Live for All Public Visitors</span>
+                  <span>Publishing Changes to Cloudflare Static CDN</span>
                 </div>
-                <p className="text-xs leading-relaxed font-medium text-amber-900">
-                  Because <strong>ruchimasters.com</strong> is a high-speed static tournament hub on Cloudflare Pages, edits made in a browser stay on that device unless committed to the website repository.
+                <p className="text-xs leading-relaxed font-normal text-slate-600">
+                  Edits made in a browser stay on that device unless committed to the website repository. You can copy the complete JSON or download the backup file below to commit changes live to all spectators.
                 </p>
-                <div className="text-[11px] bg-white/80 p-2.5 rounded-xl border border-amber-200 font-medium">
-                  💡 <strong>Tip:</strong> Click <strong>"Copy Full Data JSON"</strong> below and paste it in chat (or download the file) so it can be committed to the site repository and deployed live to every spectator in seconds!
-                </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="space-y-3 pt-2">
+              <div className="space-y-2.5 pt-2">
                 <button
                   type="button"
                   onClick={handleCopyJson}
-                  className="w-full py-3 px-4 rounded-2xl bg-[#FFE600] hover:bg-[#ebd300] text-slate-950 font-black text-xs sm:text-sm border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] flex items-center justify-center gap-2 transition-all hover:scale-101"
+                  className="w-full py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-sm"
                 >
                   {copySuccess ? (
                     <>
-                      <Check className="w-4 h-4 text-emerald-800 stroke-[3]" />
+                      <Check className="w-4 h-4 text-emerald-400 stroke-[3]" />
                       <span>Copied Data to Clipboard!</span>
                     </>
                   ) : (
@@ -1906,9 +1969,9 @@ export const HallOfFamePage: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleDownloadJson}
-                  className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-black text-xs sm:text-sm border-2 border-slate-950 shadow-[3px_3px_0px_#0f172a] flex items-center justify-center gap-2 transition-all hover:scale-101"
+                  className="w-full py-3 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all border border-slate-200"
                 >
-                  <Download className="w-4 h-4" />
+                  <Download className="w-4 h-4 text-slate-600" />
                   <span>Download Backup JSON File</span>
                 </button>
               </div>
