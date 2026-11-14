@@ -1,35 +1,55 @@
-import React, { useEffect, useState } from 'react';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Menu,
+  X,
+  KeyRound,
+  ShieldCheck,
+  Radio,
+  ChevronRight,
+  Users,
+  Trophy,
+  Calendar,
+  Award,
+  BarChart3,
+  GitBranch,
+  Flame,
+  LayoutGrid,
+} from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
+import { Match } from '../../types/cricket';
 
 /**
- * Rally-style top navigation.
- * Ink background, quiet text links, a single orange pill CTA.
+ * FotMob × IPL Pro League Navbar + Live Matchday Scoreboard Ticker Strip
  */
 export const RuchiNavbar: React.FC = () => {
-  const { activeTab, setActiveTab, currentUser, openAuthModal, matches } = useTournament();
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const {
+    activeTab,
+    setActiveTab,
+    currentUser,
+    openAuthModal,
+    matches,
+    teams,
+    setActiveMatchId,
+  } = useTournament();
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const hasLive = matches.some(m => m.status === 'live' || m.status === 'innings_break');
+  const getTeam = (id: string) => teams.find(t => t.id === id);
 
-  const links: { id: string; label: string }[] = [
-    { id: 'fixtures', label: 'Schedule' },
-    { id: 'teams', label: 'Teams' },
-    { id: 'standings', label: 'Standings' },
-    { id: 'stats', label: 'Stats' },
-    { id: 'playoffs', label: 'Bracket' },
-    { id: 'halloffame', label: 'Hall of Fame' },
-    { id: 'pickem', label: "Pick'Em" },
+  const links: { id: string; label: string; badge?: string; icon: React.ReactNode }[] = [
+    { id: 'overview', label: 'Match Center', icon: <LayoutGrid className="w-3.5 h-3.5" /> },
+    { id: 'teams', label: 'Teams', badge: String(teams.length), icon: <Users className="w-3.5 h-3.5" /> },
+    { id: 'fixtures', label: 'Fixtures', icon: <Calendar className="w-3.5 h-3.5" /> },
+    { id: 'standings', label: 'Standings', icon: <Award className="w-3.5 h-3.5" /> },
+    { id: 'stats', label: 'Stats & Caps', icon: <BarChart3 className="w-3.5 h-3.5" /> },
+    { id: 'halloffame', label: 'Hall of Fame', icon: <Trophy className="w-3.5 h-3.5" /> },
+    { id: 'playoffs', label: 'Bracket', icon: <GitBranch className="w-3.5 h-3.5" /> },
+    { id: 'pickem', label: "Pick'Em", icon: <Flame className="w-3.5 h-3.5" /> },
   ];
-  if (currentUser.role === 'admin') links.push({ id: 'organizer', label: 'Admin' });
+  if (currentUser.role === 'admin') {
+    links.push({ id: 'organizer', label: 'Admin', icon: <ShieldCheck className="w-3.5 h-3.5" /> });
+  }
 
   const go = (id: string) => {
     setActiveTab(id);
@@ -37,95 +57,273 @@ export const RuchiNavbar: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const accountLabel =
-    currentUser.role === 'admin' ? 'Admin' :
-    currentUser.role === 'team' ? (currentUser.teamName || 'My Team') :
-    'Team Login';
+  // Sort matches: Live first, then scheduled/toss, then completed
+  const sortedMatches = [...matches].sort((a, b) => {
+    const rank = (m: Match) =>
+      m.status === 'live' || m.status === 'innings_break' ? 0 :
+      m.status === 'toss' || m.status === 'scheduled' ? 1 : 2;
+    return rank(a) - rank(b) || a.matchNumber - b.matchNumber;
+  });
+
+  const handleTickerMatchClick = (m: Match) => {
+    setActiveMatchId(m.id);
+    go(m.status === 'scheduled' ? 'fixtures' : 'live');
+  };
 
   return (
-    <header
-      className={`sticky top-0 z-40 bg-[#090909] text-[#f6f4f4] transition-[border-color] duration-300 border-b ${
-        scrolled ? 'border-white/10' : 'border-transparent'
-      }`}
-    >
-      <div className="max-w-[1320px] mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between gap-6">
-        {/* Wordmark */}
-        <button onClick={() => go('overview')} className="flex items-center gap-2.5 shrink-0 group" aria-label="Home">
-          <span className="relative w-8 h-8 rounded-full bg-[#ff6a17] flex items-center justify-center">
-            <span className="absolute inset-[7px] rounded-full border-2 border-[#090909] border-dashed opacity-70" />
-          </span>
-          <span className="text-[19px] font-bold tracking-[-0.03em]">
-            Ruchi Masters
-          </span>
+    <header className="sticky top-0 z-40 bg-[#0b0f19] text-white shadow-md">
+      {/* Row 1: Main League Navigation */}
+      <div className="max-w-[1360px] mx-auto px-4 sm:px-6 h-15 flex items-center justify-between gap-4">
+        {/* Brand Crest */}
+        <button
+          onClick={() => go('overview')}
+          className="flex items-center gap-2.5 shrink-0 group cursor-pointer"
+        >
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#ff6a17] to-amber-500 flex items-center justify-center text-white font-black text-base shadow-sm group-hover:scale-105 transition-transform">
+            🏏
+          </div>
+          <div className="text-left">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[17px] font-black tracking-[-0.03em] text-white leading-none">
+                Ruchi Masters
+              </span>
+              <span className="px-1.5 py-0.5 rounded bg-[#ff6a17] text-white text-[10px] font-extrabold tracking-wider uppercase leading-none">
+                T20
+              </span>
+            </div>
+            <div className="text-[10px] font-semibold text-slate-400 tracking-wider uppercase mt-0.5">
+              Frankfurt Championship Hub
+            </div>
+          </div>
         </button>
 
-        {/* Desktop links */}
-        <nav className="hidden lg:flex items-center gap-1">
+        {/* Desktop Pill Tabs */}
+        <nav className="hidden xl:flex items-center gap-1 bg-white/[0.05] p-1 rounded-xl border border-white/10">
           {links.map(l => {
             const active = activeTab === l.id;
             return (
               <button
                 key={l.id}
                 onClick={() => go(l.id)}
-                className={`relative px-3.5 py-2 text-[15px] font-medium transition-colors ${
-                  active ? 'text-[#f6f4f4]' : 'text-[#f6f4f4]/55 hover:text-[#f6f4f4]'
+                className={`h-8 px-3 rounded-lg text-[13px] font-bold flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap ${
+                  active
+                    ? 'bg-[#ff6a17] text-white shadow-xs'
+                    : 'text-slate-300 hover:text-white hover:bg-white/[0.06]'
                 }`}
               >
-                {l.label}
-                {active && <span className="absolute left-3.5 right-3.5 -bottom-[1px] h-[2px] bg-[#ff6a17]" />}
+                <span className={active ? 'text-white' : 'text-slate-400'}>{l.icon}</span>
+                <span>{l.label}</span>
+                {l.badge && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${
+                      active ? 'bg-black/25 text-white' : 'bg-white/10 text-slate-300'
+                    }`}
+                  >
+                    {l.badge}
+                  </span>
+                )}
               </button>
             );
           })}
         </nav>
 
-        {/* Right actions */}
-        <div className="hidden lg:flex items-center gap-2 shrink-0">
+        {/* Right Controls: Captain Login + Live Scoring Button */}
+        <div className="hidden md:flex items-center gap-2 shrink-0">
+          {currentUser.role === 'team' ? (
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => go('teams')}
+                className="h-9 px-3 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-[12px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                title="Go to your squad management page"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span className="max-w-[140px] truncate">{currentUser.teamName}</span>
+              </button>
+              <button
+                onClick={() => openAuthModal(currentUser.teamId)}
+                className="h-9 px-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-[12px] font-semibold transition-colors cursor-pointer"
+                title="Switch Team or Logout"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : currentUser.role === 'admin' ? (
+            <button
+              onClick={() => openAuthModal()}
+              className="h-9 px-3 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-300 text-[12px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span>Admin Active</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => openAuthModal()}
+              className="h-9 px-3.5 rounded-lg bg-white/10 hover:bg-white/15 border border-white/15 text-white text-[13px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+              <span>Captain Login</span>
+            </button>
+          )}
+
           <button
-            onClick={() => openAuthModal(currentUser.role === 'team' ? currentUser.teamId : undefined)}
-            className="px-3 py-2 text-[15px] font-medium text-[#f6f4f4]/70 hover:text-[#f6f4f4] transition-colors max-w-[180px] truncate"
+            onClick={() => go('live')}
+            className="h-9 px-3.5 rounded-lg bg-[#ff6a17] hover:bg-[#ea580c] text-white text-[13px] font-bold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
           >
-            {accountLabel}
-          </button>
-          <button onClick={() => go('live')} className="rally-btn rally-btn-primary !h-10 !px-5">
-            {hasLive && <span className="w-1.5 h-1.5 rounded-full bg-[#090909]" />}
-            Live Scores
+            <Radio className={`w-3.5 h-3.5 ${hasLive ? 'animate-pulse' : ''}`} />
+            <span>Live Scores</span>
           </button>
         </div>
 
-        {/* Mobile toggle */}
+        {/* Mobile Menu Toggle */}
         <button
           onClick={() => setMobileOpen(o => !o)}
-          className="lg:hidden w-10 h-10 -mr-2 flex items-center justify-center"
+          className="xl:hidden w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center"
           aria-label="Menu"
         >
-          {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
       </div>
 
-      {/* Mobile sheet */}
+      {/* Row 2: FotMob-Style Live Matchday Scoreboard Ticker Strip */}
+      <div className="bg-[#111827] border-t border-b border-white/10">
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 h-10 flex items-center gap-2 overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-1.5 pr-2 border-r border-white/10 shrink-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-300">
+              Matches
+            </span>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {sortedMatches.map(m => {
+              const a = getTeam(m.teamAId);
+              const b = getTeam(m.teamBId);
+              const isLive = m.status === 'live' || m.status === 'innings_break';
+              const isDone = m.status === 'completed';
+
+              const scoreA =
+                a && m.innings1 && m.innings1.battingTeamId === a.id
+                  ? `${m.innings1.totalRuns}/${m.innings1.totalWickets}`
+                  : a && m.innings2 && m.innings2.battingTeamId === a.id
+                  ? `${m.innings2.totalRuns}/${m.innings2.totalWickets}`
+                  : null;
+
+              const scoreB =
+                b && m.innings1 && m.innings1.battingTeamId === b.id
+                  ? `${m.innings1.totalRuns}/${m.innings1.totalWickets}`
+                  : b && m.innings2 && m.innings2.battingTeamId === b.id
+                  ? `${m.innings2.totalRuns}/${m.innings2.totalWickets}`
+                  : null;
+
+              return (
+                <button
+                  key={m.id}
+                  onClick={() => handleTickerMatchClick(m)}
+                  className={`h-7 px-2.5 rounded-md flex items-center gap-2 text-[12px] border transition-colors shrink-0 cursor-pointer ${
+                    isLive
+                      ? 'bg-emerald-950/60 border-emerald-500/40 hover:bg-emerald-900/60'
+                      : 'bg-white/[0.04] border-white/10 hover:bg-white/[0.08]'
+                  }`}
+                >
+                  {/* Status Tag */}
+                  {isLive ? (
+                    <span className="px-1.5 py-0.2 rounded bg-emerald-500 text-slate-950 text-[9px] font-black uppercase tracking-wider">
+                      LIVE
+                    </span>
+                  ) : isDone ? (
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">FT</span>
+                  ) : (
+                    <span className="text-[10px] font-mono text-amber-300">{m.time || m.date}</span>
+                  )}
+
+                  {/* Team A */}
+                  <span className="flex items-center gap-1 font-bold text-white">
+                    <span>{a?.logo || '🏏'}</span>
+                    <span>{a?.code || 'TMA'}</span>
+                    {scoreA && <span className="font-mono text-amber-300">{scoreA}</span>}
+                  </span>
+
+                  <span className="text-slate-500 text-[10px]">vs</span>
+
+                  {/* Team B */}
+                  <span className="flex items-center gap-1 font-bold text-white">
+                    <span>{b?.logo || '🏏'}</span>
+                    <span>{b?.code || 'TMB'}</span>
+                    {scoreB && <span className="font-mono text-amber-300">{scoreB}</span>}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          <button
+            onClick={() => go('fixtures')}
+            className="ml-auto pl-2 text-[11px] font-bold text-[#ff6a17] hover:text-amber-300 flex items-center gap-0.5 shrink-0 cursor-pointer"
+          >
+            <span>All Fixtures</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile / Tablet Quick Tab Strip */}
+      <div className="xl:hidden bg-[#0f172a] border-b border-white/10 px-3 py-1.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        {links.map(l => {
+          const active = activeTab === l.id;
+          return (
+            <button
+              key={l.id}
+              onClick={() => go(l.id)}
+              className={`h-7 px-2.5 rounded-lg text-[12px] font-bold flex items-center gap-1 shrink-0 whitespace-nowrap ${
+                active ? 'bg-[#ff6a17] text-white' : 'bg-white/5 text-slate-300'
+              }`}
+            >
+              {l.icon}
+              <span>{l.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Mobile Drawer */}
       {mobileOpen && (
-        <div className="lg:hidden fixed inset-x-0 top-[72px] bottom-0 bg-[#090909] px-5 pt-4 pb-10 overflow-y-auto border-t border-white/10">
-          <div className="flex flex-col">
-            {[{ id: 'overview', label: 'Home' }, ...links].map(l => (
+        <div className="xl:hidden bg-[#0b0f19] border-b border-white/15 px-4 py-4 space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            {links.map(l => (
               <button
                 key={l.id}
                 onClick={() => go(l.id)}
-                className={`flex items-center justify-between py-4 border-b border-white/10 text-left text-[28px] font-bold tracking-[-0.03em] ${
-                  activeTab === l.id ? 'text-[#ff6a17]' : 'text-[#f6f4f4]'
+                className={`p-3 rounded-xl text-left text-[14px] font-bold flex items-center justify-between border ${
+                  activeTab === l.id
+                    ? 'bg-[#ff6a17] text-white border-[#ff6a17]'
+                    : 'bg-white/5 text-slate-200 border-white/10'
                 }`}
               >
-                {l.label}
-                <ArrowUpRight className="w-5 h-5 opacity-40" />
+                <span className="flex items-center gap-2">
+                  {l.icon}
+                  {l.label}
+                </span>
+                {l.badge && <span className="text-xs opacity-75">{l.badge}</span>}
               </button>
             ))}
           </div>
-          <div className="mt-8 flex flex-col gap-3">
-            <button onClick={() => go('live')} className="rally-btn rally-btn-primary w-full">Live Scores</button>
+          <div className="flex gap-2 pt-2 border-t border-white/10">
             <button
-              onClick={() => { setMobileOpen(false); openAuthModal(currentUser.role === 'team' ? currentUser.teamId : undefined); }}
-              className="rally-btn rally-btn-ghost-light w-full"
+              onClick={() => {
+                setMobileOpen(false);
+                openAuthModal(currentUser.role === 'team' ? currentUser.teamId : undefined);
+              }}
+              className="flex-1 h-10 rounded-xl bg-white/10 text-white font-bold text-xs flex items-center justify-center gap-1.5"
             >
-              {accountLabel}
+              <KeyRound className="w-3.5 h-3.5 text-amber-400" />
+              {currentUser.role === 'team' ? currentUser.teamName : 'Captain Login'}
+            </button>
+            <button
+              onClick={() => go('live')}
+              className="flex-1 h-10 rounded-xl bg-[#ff6a17] text-white font-bold text-xs flex items-center justify-center gap-1.5"
+            >
+              <Radio className="w-3.5 h-3.5" />
+              Live Console
             </button>
           </div>
         </div>
