@@ -51,33 +51,32 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
   };
 
   return (
-    <div className="bg-white rounded-3xl p-6 sm:p-8 sport-card space-y-6 border-3 border-slate-950 shadow-[6px_6px_0px_#0f172a]">
+    <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-6">
       
       {/* Studio Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b-2 border-slate-900 pb-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-xl bg-[#00F0FF] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider flex items-center gap-1.5 shadow-[2px_2px_0px_#0f172a]">
-              <Sparkles className="w-3.5 h-3.5" />
-              Social Studio
+          <div className="flex items-center gap-2 mb-1">
+            <span className="px-2.5 py-0.5 rounded-full bg-slate-900 text-white font-mono text-[10px] uppercase tracking-wider font-semibold">
+              GRAPHIC STUDIO
             </span>
-            <span className="text-xs font-mono font-bold text-slate-500">INSTANT GRAPHIC EXPORTER</span>
+            <span className="text-xs font-mono text-slate-400">/ EXPORTER</span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-black font-cabinet text-slate-950 mt-1">
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-cabinet text-slate-950">
             Matchday Story & Poster Studio
           </h2>
-          <p className="text-xs sm:text-sm text-slate-600 font-medium">
+          <p className="text-xs sm:text-sm text-slate-500 font-normal">
             Export ready-to-share 9:16 Instagram Stories and 1:1 Matchday Posters for WhatsApp, Twitter, and social channels.
           </p>
         </div>
 
         {/* Format Selector Pills */}
-        <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border-2 border-slate-900">
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200">
           <button
             onClick={() => setAspectRatio('story')}
-            className={'px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ' + (
+            className={'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ' + (
               aspectRatio === 'story'
-                ? 'bg-slate-950 text-white shadow-[2px_2px_0px_#CCFF00]'
+                ? 'bg-slate-900 text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-950'
             )}
           >
@@ -85,9 +84,9 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
           </button>
           <button
             onClick={() => setAspectRatio('square')}
-            className={'px-3.5 py-1.5 rounded-xl text-xs font-black transition-all ' + (
+            className={'px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ' + (
               aspectRatio === 'square'
-                ? 'bg-slate-950 text-white shadow-[2px_2px_0px_#CCFF00]'
+                ? 'bg-slate-900 text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-950'
             )}
           >
@@ -97,7 +96,7 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
       </div>
 
       {/* Control Panel: Template Selector & Pickers */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 border-2 border-slate-900 text-xs">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs">
         <div>
           <label className="block font-black uppercase text-slate-700 mb-1">Select Poster Type:</label>
           <select
@@ -143,12 +142,12 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
       </div>
 
       {/* Live Graphic Poster Canvas Preview */}
-      <div className="flex flex-col items-center justify-center p-4 sm:p-8 bg-slate-900 rounded-3xl border-3 border-slate-950 overflow-hidden relative">
+      <div className="flex flex-col items-center justify-center p-4 sm:p-8 bg-slate-900 rounded-3xl border border-slate-800 shadow-xl overflow-hidden relative">
         
         {/* Canvas Wrapper */}
         <div
           ref={posterRef}
-          className={'w-full bg-slate-950 text-white rounded-3xl overflow-hidden border-3 border-white shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative flex flex-col justify-between transition-all duration-300 ' + (
+          className={'w-full bg-slate-950 text-white rounded-3xl overflow-hidden border border-white/20 shadow-2xl relative flex flex-col justify-between transition-all duration-300 ' + (
             aspectRatio === 'story'
               ? 'max-w-sm aspect-[9/16] p-6'
               : 'max-w-md aspect-square p-6'
@@ -158,17 +157,17 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
           }}
         >
           {/* Background Stadium Glow */}
-          <div className="absolute inset-0 bg-radial from-[#CCFF00]/10 via-transparent to-black/80 pointer-events-none" />
+          <div className="absolute inset-0 bg-radial from-amber-500/10 via-transparent to-black/80 pointer-events-none" />
 
           {/* Poster Top Bar */}
           <div className="relative z-10 flex items-center justify-between border-b border-white/20 pb-3">
             <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#CCFF00]" />
-              <span className="text-[10px] font-black font-mono tracking-widest text-[#CCFF00] uppercase">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+              <span className="text-[10px] font-bold font-mono tracking-widest text-amber-300 uppercase">
                 RUCHI MASTERS T20
               </span>
             </div>
-            <span className="px-2 py-0.5 rounded-md bg-white text-slate-950 text-[10px] font-mono font-black">
+            <span className="px-2 py-0.5 rounded-md bg-white text-slate-950 text-[10px] font-mono font-bold">
               2026 CUP
             </span>
           </div>
@@ -199,7 +198,7 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
                 </div>
 
                 <div className="flex flex-col items-center">
-                  <span className="px-2.5 py-1 rounded-xl bg-[#CCFF00] text-slate-950 font-black text-xs font-mono shadow">
+                  <span className="px-2.5 py-1 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs font-mono shadow">
                     VS
                   </span>
                   <span className="text-[10px] font-mono text-cyan-300 font-bold mt-1">T20 CLASH</span>
@@ -238,12 +237,12 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
                 <div className="flex items-center gap-2.5">
                   <span className="text-3xl">{selectedTeam?.logo}</span>
                   <div>
-                    <h3 className="font-black text-lg font-cabinet leading-tight">{selectedTeam?.name}</h3>
-                    <span className="text-[10px] text-[#CCFF00] font-mono font-bold">SQUAD LINEUP 2026</span>
+                    <h3 className="font-bold text-lg font-cabinet leading-tight">{selectedTeam?.name}</h3>
+                    <span className="text-[10px] text-amber-300 font-mono font-bold">SQUAD LINEUP 2026</span>
                   </div>
                 </div>
                 {captain && (
-                  <span className="px-2 py-0.5 rounded bg-amber-400 text-slate-950 font-black text-[9px]">
+                  <span className="px-2 py-0.5 rounded bg-amber-400 text-slate-950 font-bold text-[9px]">
                     (C) {captain.name.split(' ')[0]}
                   </span>
                 )}
@@ -254,7 +253,7 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
                 {selectedTeam?.players.slice(0, 6).map((p, idx) => (
                   <div key={p.id} className="flex items-center justify-between p-1.5 px-2.5 rounded-xl bg-white/10 backdrop-blur border border-white/10">
                     <span className="font-bold flex items-center gap-2">
-                      <span className="font-mono text-[#CCFF00] text-[10px]">#{p.jerseyNumber}</span>
+                      <span className="font-mono text-amber-300 text-[10px]">#{p.jerseyNumber}</span>
                       <span className="truncate max-w-[140px]">{p.name}</span>
                     </span>
                     <span className="text-[9px] font-mono text-slate-300 uppercase">
@@ -269,11 +268,11 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
           {/* TEMPLATE 3: WINNER CELEBRATION */}
           {templateType === 'winner' && (
             <div className="relative z-10 space-y-4 my-auto text-center">
-              <div className="w-16 h-16 rounded-full bg-[#CCFF00] text-slate-950 flex items-center justify-center text-3xl mx-auto shadow-xl">
+              <div className="w-16 h-16 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center text-3xl mx-auto shadow-xl">
                 🏆
               </div>
               <div>
-                <span className="px-3 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-black text-[10px] font-mono">
+                <span className="px-3 py-0.5 rounded-full bg-emerald-500 text-slate-950 font-bold text-[10px] font-mono">
                   MATCH VICTORY
                 </span>
                 <h3 className="text-2xl font-black font-cabinet text-white mt-1">
@@ -284,7 +283,7 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
                 </p>
               </div>
 
-              <div className="p-3 rounded-2xl bg-black/60 border border-white/20 text-xs font-mono text-[#00F0FF] font-bold">
+              <div className="p-3 rounded-2xl bg-black/60 border border-white/20 text-xs font-mono text-cyan-300 font-bold">
                 ⭐ PLAYER OF THE MATCH: {captain?.name || selectedTeam?.players[0]?.name}
               </div>
             </div>
@@ -293,7 +292,7 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
           {/* Poster Bottom Footer */}
           <div className="relative z-10 pt-3 border-t border-white/20 flex items-center justify-between text-[9px] font-mono text-slate-400">
             <span>FOLLOW @RUCHIMASTERST20</span>
-            <span className="text-[#CCFF00]">#RuchiMasters2026</span>
+            <span className="text-amber-300 font-mono">#RuchiMasters2026</span>
           </div>
 
         </div>
@@ -302,16 +301,16 @@ export const SocialPosterStudio: React.FC<Props> = ({ onClose }) => {
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <button
             onClick={handleDownload}
-            className="px-6 py-2.5 rounded-2xl bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 font-black text-xs sport-btn flex items-center gap-2 shadow-[3px_3px_0px_#0f172a]"
+            className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-2 shadow-sm transition-all"
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4 text-amber-300" />
             <span>Download High-Res Graphic</span>
           </button>
           <button
             onClick={handleCopyLink}
-            className="px-4 py-2.5 rounded-2xl bg-white text-slate-950 font-black text-xs sport-btn flex items-center gap-1.5 shadow"
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs border border-slate-200 flex items-center gap-1.5 shadow-2xs transition-colors"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-slate-500" />}
             <span>{copied ? 'Copied!' : 'Copy Share Card'}</span>
           </button>
         </div>

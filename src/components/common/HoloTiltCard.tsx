@@ -74,27 +74,27 @@ export const HoloTiltCard: React.FC<HoloTiltCardProps> = ({
       >
         {children}
 
-        {/* Dynamic Holographic Foil Glare Overlay */}
+        {/* Dynamic Refined Glare Overlay */}
         <div
           style={{
             background: isSpecial
-              ? 'radial-gradient(circle at ' + glare.x + '% ' + glare.y + '%, rgba(255, 230, 0, 0.45) 0%, rgba(0, 240, 255, 0.35) 35%, rgba(255, 51, 102, 0.25) 65%, transparent 80%)'
-              : 'radial-gradient(circle at ' + glare.x + '% ' + glare.y + '%, rgba(204, 255, 0, 0.35) 0%, rgba(0, 240, 255, 0.2) 40%, transparent 75%)',
+              ? 'radial-gradient(circle at ' + glare.x + '% ' + glare.y + '%, rgba(245, 158, 11, 0.25) 0%, rgba(255, 255, 255, 0.15) 40%, transparent 75%)'
+              : 'radial-gradient(circle at ' + glare.x + '% ' + glare.y + '%, rgba(255, 255, 255, 0.2) 0%, transparent 70%)',
             opacity: glare.opacity,
-            mixBlendMode: 'color-dodge',
+            mixBlendMode: 'soft-light',
             pointerEvents: 'none',
           }}
-          className="absolute inset-0 rounded-3xl transition-opacity duration-200 z-20 pointer-events-none"
+          className="absolute inset-0 rounded-2xl transition-opacity duration-200 z-20 pointer-events-none"
         />
 
-        {/* Shimmer Border Light for Captains & Star Players */}
+        {/* Subtle Gold Shimmer Border for Captains */}
         {isSpecial && isHovered && (
           <div
             style={{
-              background: 'linear-gradient(' + (rotation.y * 10 + 45) + 'deg, #CCFF00, #00F0FF, #FF3366, #CCFF00)',
+              background: 'linear-gradient(' + (rotation.y * 10 + 45) + 'deg, #f59e0b, #fbbf24, #d97706, #f59e0b)',
               backgroundSize: '200% 200%',
             }}
-            className="absolute -inset-0.5 rounded-3xl opacity-60 blur-xs -z-10 animate-pulse pointer-events-none"
+            className="absolute -inset-0.5 rounded-2xl opacity-40 blur-xs -z-10 pointer-events-none"
           />
         )}
       </div>

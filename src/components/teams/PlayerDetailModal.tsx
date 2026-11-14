@@ -110,10 +110,10 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, team, onClose }) =>
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in">
-      <div className="bg-white rounded-3xl max-w-2xl w-full sport-card overflow-hidden my-auto border-3 border-slate-950 shadow-[10px_10px_0px_#0f172a] text-slate-900">
+      <div className="bg-white rounded-2xl max-w-2xl w-full border border-slate-200/80 shadow-2xl overflow-hidden my-auto text-slate-900">
         
         {/* Top Header */}
-        <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between border-b-2 border-slate-900">
+        <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-3">
             <div 
               className="w-10 h-10 rounded-xl flex items-center justify-center font-bold font-mono text-xs text-white border border-white/30"
@@ -163,30 +163,30 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, team, onClose }) =>
         <form onSubmit={handleSave} className="p-5 sm:p-7 space-y-6">
           
           {/* Main Photo & Identification Banner */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-slate-50 border-2 border-slate-900">
+          <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-sm">
             
             {/* Player Photo with Camera Overlay (Enlarged by over 50%) */}
             <div className="relative group shrink-0">
               <img
                 src={photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80'}
                 alt={name}
-                className="w-44 h-44 sm:w-48 sm:h-48 rounded-3xl object-cover border-3 border-slate-950 shadow-xl bg-slate-200"
+                className="w-44 h-44 sm:w-48 sm:h-48 rounded-2xl object-cover border border-slate-200 shadow-md bg-slate-200"
               />
 
               {isAuthorized ? (
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="absolute inset-0 bg-slate-950/60 rounded-3xl opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-black gap-1 cursor-pointer"
+                  className="absolute inset-0 bg-slate-950/60 rounded-2xl opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-semibold gap-1 cursor-pointer"
                 >
-                  <Camera className="w-8 h-8 text-[#CCFF00]" />
+                  <Camera className="w-8 h-8 text-amber-300" />
                   <span className="bg-slate-950/80 px-2.5 py-1 rounded-lg border border-white/20">{isUploading ? 'Compressing...' : 'Change Photo'}</span>
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => openAuthModal(team.id)}
-                  className="absolute inset-0 bg-slate-950/60 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-black gap-1"
+                  className="absolute inset-0 bg-slate-950/60 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-semibold gap-1"
                 >
                   <Lock className="w-6 h-6 text-amber-400" />
                   <span>Captain Login</span>
@@ -205,8 +205,8 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, team, onClose }) =>
             {/* Photo Action & Status */}
             <div className="space-y-2 flex-1 text-center sm:text-left">
               <div>
-                <h4 className="text-xl font-black font-cabinet text-slate-950">{name}</h4>
-                <p className="text-xs font-bold text-slate-500">
+                <h4 className="text-xl font-bold font-cabinet text-slate-950">{name}</h4>
+                <p className="text-xs font-medium text-slate-500">
                   {role.replace('_', ' ').toUpperCase()} • #{jerseyNumber}
                 </p>
               </div>
@@ -216,9 +216,9 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, team, onClose }) =>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="px-4 py-2 rounded-xl bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 font-black text-xs flex items-center gap-1.5 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] transition-all"
+                    className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
                   >
-                    <Upload className="w-4 h-4" />
+                    <Upload className="w-4 h-4 text-amber-300" />
                     <span>Upload New Photo</span>
                   </button>
 
@@ -230,7 +230,7 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, team, onClose }) =>
                 <button
                   type="button"
                   onClick={() => openAuthModal(team.id)}
-                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-[#CCFF00] text-slate-950 font-black text-xs inline-flex items-center gap-1.5 border border-slate-300"
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs inline-flex items-center gap-1.5 border border-slate-200"
                 >
                   <Lock className="w-3.5 h-3.5" />
                   <span>Captain Login to Edit Player</span>
@@ -432,9 +432,9 @@ export const PlayerDetailModal: React.FC<Props> = ({ player, team, onClose }) =>
               {isAuthorized && (
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-xl bg-[#00F59B] hover:bg-[#00e08d] text-slate-950 font-black text-xs flex items-center gap-1.5 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] transition-all"
+                  className="px-6 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
                 >
-                  <Save className="w-4 h-4" />
+                  <Save className="w-4 h-4 text-amber-300" />
                   <span>Save Changes</span>
                 </button>
               )}

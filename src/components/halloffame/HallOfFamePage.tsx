@@ -382,7 +382,7 @@ export const HallOfFamePage: React.FC = () => {
       setMediaCaption('Chief guests presenting awards to tournament winners, MVP, Orange Cap and Purple Cap champions.');
     } else if (type === 'team') {
       setMediaType('image');
-      setMediaUrl('https://images.unsplash.com/photo-1531415074868-036b1c57e3ce?auto=format&fit=crop&w=800&q=80');
+      setMediaUrl('https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=800&q=80');
       setMediaTitle('Frankfurt Spartans Championship Squad Photo');
       setMediaCaption('Winning squad, team management and support staff celebrating the 2026 title.');
     } else if (type === 'celebration') {

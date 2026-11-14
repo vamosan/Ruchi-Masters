@@ -14,12 +14,11 @@ import { Player, Team } from '../../types/cricket';
 
 export const Leaderboards: React.FC = () => {
   const { teams, matches } = useTournament();
-  const [activeStatTab, setActiveStatTab] = useState<'orange' | 'purple' | 'sixes' | 'mvp' | 'scores'>('orange');
+  const [activeStatTab, setActiveStatTab] = useState<'orange' | 'purple' | 'sixes' | 'mvp'>('orange');
 
   // Aggregated Player Statistics
   const allPlayersWithStats = teams.flatMap(team => {
     return team.players.map(player => {
-      // Calculate tournament aggregates from all completed / live matches
       let tournamentRuns = player.runsScored;
       let tournamentBalls = 0;
       let tournamentFours = 0;
@@ -29,7 +28,6 @@ export const Leaderboards: React.FC = () => {
       let totalLegalBallsBowled = 0;
       let runsConceded = 0;
 
-      // Extract exact stats from match scorecards
       matches.forEach(m => {
         [m.innings1, m.innings2].forEach(inn => {
           if (!inn) return;
@@ -52,8 +50,6 @@ export const Leaderboards: React.FC = () => {
       const oversBowledDec = totalLegalBallsBowled / 6;
       const calcEconomy = oversBowledDec > 0 ? Number((runsConceded / oversBowledDec).toFixed(2)) : (player.economy || 0);
       const calcStrikeRate = tournamentBalls > 0 ? Number(((tournamentRuns / tournamentBalls) * 100).toFixed(1)) : (player.strikeRate || 0);
-
-      // MVP Index Formula: (Runs * 1) + (Fours * 1) + (Sixes * 2) + (Wickets * 25) + (Dots * 1)
       const mvpPoints = (tournamentRuns * 1) + (tournamentFours * 1) + (tournamentSixes * 2.5) + (tournamentWickets * 20);
 
       return {
@@ -82,172 +78,174 @@ export const Leaderboards: React.FC = () => {
   const topMvp = mvpList[0];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* Top Header */}
       <div>
-        <h2 className="text-2xl font-black text-white flex items-center gap-2">
-          <Award className="w-6 h-6 text-amber-400" />
-          Tournament Player Leaderboards & Honors
+        <h2 className="text-2xl font-bold text-slate-950 font-cabinet flex items-center gap-2">
+          <Award className="w-6 h-6 text-amber-500" />
+          Tournament Player Leaderboards & Caps
         </h2>
-        <p className="text-xs text-slate-400">
-          Orange Cap (Most Runs), Purple Cap (Most Wickets), Maximum Sixes and MVP Index
+        <p className="text-xs text-slate-500 font-normal">
+          Orange Cap (Most Runs), Purple Cap (Most Wickets), Maximum Sixes, and MVP Performance Rating
         </p>
       </div>
 
       {/* Top Cap Spotlight Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        
         {/* Orange Cap Leader */}
-        <div className="glass-panel p-5 rounded-3xl border border-amber-500/40 bg-gradient-to-br from-amber-950/30 via-slate-900 to-slate-900 shadow-glow-gold relative overflow-hidden">
+        <div className="p-5 rounded-3xl border border-amber-200/90 bg-gradient-to-b from-amber-50/70 via-white to-white shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500 text-slate-950 flex items-center gap-1">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-amber-500/20 text-amber-900 border border-amber-300">
               👑 ORANGE CAP
             </span>
-            <span className="text-xs font-bold text-amber-400">Leading Run Scorer</span>
+            <span className="text-xs font-semibold text-amber-700">Leading Run Scorer</span>
           </div>
 
-          <div className="mt-4 flex items-center gap-4">
+          <div className="mt-4 flex items-center gap-3.5">
             <div 
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-lg border-2 border-amber-400"
-              style={{ backgroundColor: topOrange?.team.primaryColor }}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-xs border border-white"
+              style={{ backgroundColor: topOrange?.team.primaryColor || '#ea580c' }}
             >
               {topOrange?.team.logo}
             </div>
             <div>
-              <h3 className="text-lg font-black text-white">{topOrange?.player.name}</h3>
-              <span className="text-xs text-slate-300 font-semibold">{topOrange?.team.name}</span>
+              <h3 className="text-base font-bold text-slate-900 font-cabinet">{topOrange?.player.name}</h3>
+              <span className="text-xs text-slate-500 font-medium">{topOrange?.team.name}</span>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Total Runs</span>
-              <span className="text-2xl font-black text-amber-400 font-mono">{topOrange?.runs}</span>
+              <span className="text-[10px] text-slate-400 uppercase font-semibold block">Total Runs</span>
+              <span className="text-2xl font-bold text-slate-900 font-mono">{topOrange?.runs}</span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Strike Rate / HS</span>
-              <span className="text-xs font-bold text-slate-200 font-mono">{topOrange?.strikeRate} SR • HS {topOrange?.highestScore}</span>
+              <span className="text-[10px] text-slate-400 uppercase font-semibold block">Strike Rate / HS</span>
+              <span className="text-xs font-semibold text-slate-700 font-mono">{topOrange?.strikeRate} SR • HS {topOrange?.highestScore}</span>
             </div>
           </div>
         </div>
 
         {/* Purple Cap Leader */}
-        <div className="glass-panel p-5 rounded-3xl border border-purple-500/40 bg-gradient-to-br from-purple-950/30 via-slate-900 to-slate-900 shadow-lg shadow-purple-950/50 relative overflow-hidden">
+        <div className="p-5 rounded-3xl border border-purple-200/90 bg-gradient-to-b from-purple-50/70 via-white to-white shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-purple-600 text-white flex items-center gap-1">
+            <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-purple-100 text-purple-900 border border-purple-300">
               🎯 PURPLE CAP
             </span>
-            <span className="text-xs font-bold text-purple-300">Leading Wicket Taker</span>
+            <span className="text-xs font-semibold text-purple-700">Leading Wicket Taker</span>
           </div>
 
-          <div className="mt-4 flex items-center gap-4">
+          <div className="mt-4 flex items-center gap-3.5">
             <div 
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-lg border-2 border-purple-400"
-              style={{ backgroundColor: topPurple?.team.primaryColor }}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-xs border border-white"
+              style={{ backgroundColor: topPurple?.team.primaryColor || '#9333ea' }}
             >
               {topPurple?.team.logo}
             </div>
             <div>
-              <h3 className="text-lg font-black text-white">{topPurple?.player.name}</h3>
-              <span className="text-xs text-slate-300 font-semibold">{topPurple?.team.name}</span>
+              <h3 className="text-base font-bold text-slate-900 font-cabinet">{topPurple?.player.name}</h3>
+              <span className="text-xs text-slate-500 font-medium">{topPurple?.team.name}</span>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Total Wickets</span>
-              <span className="text-2xl font-black text-purple-400 font-mono">{topPurple?.wickets}</span>
+              <span className="text-[10px] text-slate-400 uppercase font-semibold block">Total Wickets</span>
+              <span className="text-2xl font-bold text-slate-900 font-mono">{topPurple?.wickets}</span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Economy / Best</span>
-              <span className="text-xs font-bold text-slate-200 font-mono">{topPurple?.economy} Econ • {topPurple?.player.bestBowling}</span>
+              <span className="text-[10px] text-slate-400 uppercase font-semibold block">Economy / Best</span>
+              <span className="text-xs font-semibold text-slate-700 font-mono">{topPurple?.economy} Econ • {topPurple?.player.bestBowling}</span>
             </div>
           </div>
         </div>
 
-        {/* Most Valuable Player (MVP) */}
-        <div className="glass-panel p-5 rounded-3xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/30 via-slate-900 to-slate-900 shadow-glow-emerald relative overflow-hidden">
+        {/* MVP Leader */}
+        <div className="p-5 rounded-3xl border border-emerald-200/90 bg-gradient-to-b from-emerald-50/70 via-white to-white shadow-xs relative overflow-hidden">
           <div className="flex items-center justify-between">
-            <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500 text-slate-950 flex items-center gap-1">
-              ⚡ MVP LEADER
+            <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider bg-emerald-100 text-emerald-900 border border-emerald-300">
+              ⚡ MVP RATING
             </span>
-            <span className="text-xs font-bold text-emerald-300">Tournament Index</span>
+            <span className="text-xs font-semibold text-emerald-700">Tournament Index</span>
           </div>
 
-          <div className="mt-4 flex items-center gap-4">
+          <div className="mt-4 flex items-center gap-3.5">
             <div 
-              className="w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-lg border-2 border-emerald-400"
-              style={{ backgroundColor: topMvp?.team.primaryColor }}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-xs border border-white"
+              style={{ backgroundColor: topMvp?.team.primaryColor || '#059669' }}
             >
               {topMvp?.team.logo}
             </div>
             <div>
-              <h3 className="text-lg font-black text-white">{topMvp?.player.name}</h3>
-              <span className="text-xs text-slate-300 font-semibold">{topMvp?.team.name}</span>
+              <h3 className="text-base font-bold text-slate-900 font-cabinet">{topMvp?.player.name}</h3>
+              <span className="text-xs text-slate-500 font-medium">{topMvp?.team.name}</span>
             </div>
           </div>
 
-          <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
             <div>
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">MVP Rating</span>
-              <span className="text-2xl font-black text-emerald-400 font-mono">{topMvp?.mvpPoints} pts</span>
+              <span className="text-[10px] text-slate-400 uppercase font-semibold block">MVP Index</span>
+              <span className="text-2xl font-bold text-slate-900 font-mono">{topMvp?.mvpPoints} pts</span>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 uppercase font-bold block">Contribution</span>
-              <span className="text-xs font-bold text-slate-200 font-mono">{topMvp?.runs}r & {topMvp?.wickets}w</span>
+              <span className="text-[10px] text-slate-400 uppercase font-semibold block">Contribution</span>
+              <span className="text-xs font-semibold text-slate-700 font-mono">{topMvp?.runs}r • {topMvp?.wickets}w</span>
             </div>
           </div>
         </div>
+
       </div>
 
-      {/* Category Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-800 pb-3">
+      {/* Category Segmented Tabs */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
         <button
           onClick={() => setActiveStatTab('orange')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-            activeStatTab === 'orange' ? 'bg-amber-500 text-slate-950' : 'text-slate-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            activeStatTab === 'orange' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           👑 Most Runs (Orange Cap)
         </button>
         <button
           onClick={() => setActiveStatTab('purple')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-            activeStatTab === 'purple' ? 'bg-purple-600 text-white' : 'text-slate-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            activeStatTab === 'purple' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           🎯 Most Wickets (Purple Cap)
         </button>
         <button
           onClick={() => setActiveStatTab('sixes')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-            activeStatTab === 'sixes' ? 'bg-slate-800 text-amber-400 border border-slate-700' : 'text-slate-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            activeStatTab === 'sixes' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           🚀 Maximum Sixes
         </button>
         <button
           onClick={() => setActiveStatTab('mvp')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-            activeStatTab === 'mvp' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            activeStatTab === 'mvp' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
           }`}
         >
           ⚡ MVP Index
         </button>
       </div>
 
-      {/* Leaderboard Table */}
-      <div className="glass-panel rounded-3xl border border-slate-800 overflow-hidden shadow-xl">
+      {/* Leaderboard Table Card */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
-            <thead className="bg-slate-950/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
+            <thead className="bg-slate-50 text-slate-500 uppercase tracking-wider font-semibold border-b border-slate-200 text-[11px]">
               <tr>
                 <th className="p-4 text-center w-12">#</th>
-                <th className="p-4">Player</th>
+                <th className="p-4">Athlete</th>
                 <th className="p-4">Franchise</th>
                 <th className="p-4 text-right">Matches</th>
                 {activeStatTab === 'orange' && (
                   <>
-                    <th className="p-4 text-right font-bold text-amber-400">Total Runs</th>
+                    <th className="p-4 text-right font-bold text-slate-900">Total Runs</th>
                     <th className="p-4 text-right">Highest</th>
                     <th className="p-4 text-right">Strike Rate</th>
                     <th className="p-4 text-right">4s / 6s</th>
@@ -255,15 +253,15 @@ export const Leaderboards: React.FC = () => {
                 )}
                 {activeStatTab === 'purple' && (
                   <>
-                    <th className="p-4 text-right font-bold text-purple-400">Wickets</th>
+                    <th className="p-4 text-right font-bold text-slate-900">Wickets</th>
                     <th className="p-4 text-right">Best Bowling</th>
                     <th className="p-4 text-right">Economy</th>
-                    <th className="p-4 text-right">Role</th>
+                    <th className="p-4 text-right">Style</th>
                   </>
                 )}
                 {activeStatTab === 'sixes' && (
                   <>
-                    <th className="p-4 text-right font-bold text-amber-400">Sixes</th>
+                    <th className="p-4 text-right font-bold text-slate-900">Sixes</th>
                     <th className="p-4 text-right">Fours</th>
                     <th className="p-4 text-right">Runs</th>
                     <th className="p-4 text-right">Strike Rate</th>
@@ -271,7 +269,7 @@ export const Leaderboards: React.FC = () => {
                 )}
                 {activeStatTab === 'mvp' && (
                   <>
-                    <th className="p-4 text-right font-bold text-emerald-400">MVP Points</th>
+                    <th className="p-4 text-right font-bold text-slate-900">MVP Points</th>
                     <th className="p-4 text-right">Runs</th>
                     <th className="p-4 text-right">Wickets</th>
                     <th className="p-4 text-right">Role</th>
@@ -280,62 +278,62 @@ export const Leaderboards: React.FC = () => {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-800/60 font-medium">
+            <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
               {(activeStatTab === 'orange' ? orangeCapList : activeStatTab === 'purple' ? purpleCapList : activeStatTab === 'sixes' ? sixesList : mvpList).slice(0, 15).map((entry, idx) => (
-                <tr key={entry.player.id} className="hover:bg-slate-800/30 transition-colors">
+                <tr key={entry.player.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 text-center font-bold text-slate-400 font-mono">
-                    {idx === 0 ? <span className="text-amber-400 font-black text-sm">🥇 1</span> : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : idx + 1}
+                    {idx === 0 ? <span className="text-amber-600 font-extrabold text-sm">🥇 1</span> : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : idx + 1}
                   </td>
 
-                  <td className="p-4 font-bold text-white">
+                  <td className="p-4 font-bold text-slate-900">
                     <div className="flex items-center gap-2">
                       <span>{entry.player.name}</span>
-                      {entry.player.isCaptain && <span className="text-[10px] text-amber-400">(C)</span>}
+                      {entry.player.isCaptain && <span className="text-[10px] text-amber-600 font-bold">(C)</span>}
                     </div>
                   </td>
 
-                  <td className="p-4 text-slate-300">
+                  <td className="p-4 text-slate-600">
                     <div className="flex items-center gap-2">
                       <span>{entry.team.logo}</span>
                       <span className="text-xs">{entry.team.name}</span>
                     </div>
                   </td>
 
-                  <td className="p-4 text-right text-slate-400 font-mono">{entry.player.matchesPlayed || 4}</td>
+                  <td className="p-4 text-right text-slate-500 font-mono">{entry.player.matchesPlayed || 4}</td>
 
                   {activeStatTab === 'orange' && (
                     <>
-                      <td className="p-4 text-right font-black text-amber-400 font-mono text-base">{entry.runs}</td>
-                      <td className="p-4 text-right text-slate-200 font-mono font-bold">{entry.highestScore}</td>
-                      <td className="p-4 text-right text-slate-300 font-mono">{entry.strikeRate.toFixed(1)}</td>
-                      <td className="p-4 text-right text-slate-400 font-mono">{entry.fours} / {entry.sixes}</td>
+                      <td className="p-4 text-right font-bold text-slate-900 font-mono text-sm">{entry.runs}</td>
+                      <td className="p-4 text-right text-slate-700 font-mono">{entry.highestScore}</td>
+                      <td className="p-4 text-right text-slate-700 font-mono">{entry.strikeRate.toFixed(1)}</td>
+                      <td className="p-4 text-right text-slate-500 font-mono">{entry.fours} / {entry.sixes}</td>
                     </>
                   )}
 
                   {activeStatTab === 'purple' && (
                     <>
-                      <td className="p-4 text-right font-black text-purple-400 font-mono text-base">{entry.wickets}</td>
-                      <td className="p-4 text-right text-slate-200 font-mono font-bold">{entry.player.bestBowling}</td>
-                      <td className="p-4 text-right text-amber-400 font-mono">{entry.economy.toFixed(2)}</td>
-                      <td className="p-4 text-right text-slate-400">{entry.player.bowlingStyle}</td>
+                      <td className="p-4 text-right font-bold text-slate-900 font-mono text-sm">{entry.wickets}</td>
+                      <td className="p-4 text-right text-slate-700 font-mono">{entry.player.bestBowling}</td>
+                      <td className="p-4 text-right text-slate-700 font-mono">{entry.economy.toFixed(2)}</td>
+                      <td className="p-4 text-right text-slate-500">{entry.player.bowlingStyle}</td>
                     </>
                   )}
 
                   {activeStatTab === 'sixes' && (
                     <>
-                      <td className="p-4 text-right font-black text-amber-400 font-mono text-base">{entry.sixes}</td>
-                      <td className="p-4 text-right text-slate-300 font-mono">{entry.fours}</td>
-                      <td className="p-4 text-right text-slate-200 font-mono font-bold">{entry.runs}</td>
-                      <td className="p-4 text-right text-emerald-400 font-mono">{entry.strikeRate.toFixed(1)}</td>
+                      <td className="p-4 text-right font-bold text-slate-900 font-mono text-sm">{entry.sixes}</td>
+                      <td className="p-4 text-right text-slate-700 font-mono">{entry.fours}</td>
+                      <td className="p-4 text-right text-slate-700 font-mono">{entry.runs}</td>
+                      <td className="p-4 text-right text-slate-500 font-mono">{entry.strikeRate.toFixed(1)}</td>
                     </>
                   )}
 
                   {activeStatTab === 'mvp' && (
                     <>
-                      <td className="p-4 text-right font-black text-emerald-400 font-mono text-base">{entry.mvpPoints}</td>
-                      <td className="p-4 text-right text-slate-200 font-mono font-bold">{entry.runs}</td>
-                      <td className="p-4 text-right text-purple-300 font-mono font-bold">{entry.wickets}</td>
-                      <td className="p-4 text-right text-slate-400 capitalize">{entry.player.role.replace('_', ' ')}</td>
+                      <td className="p-4 text-right font-bold text-slate-900 font-mono text-sm">{entry.mvpPoints}</td>
+                      <td className="p-4 text-right text-slate-700 font-mono">{entry.runs}</td>
+                      <td className="p-4 text-right text-slate-700 font-mono">{entry.wickets}</td>
+                      <td className="p-4 text-right text-slate-500 capitalize">{entry.player.role.replace('_', ' ')}</td>
                     </>
                   )}
                 </tr>

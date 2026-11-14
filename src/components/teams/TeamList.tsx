@@ -17,7 +17,8 @@ import {
   Crown,
   Flame,
   KeyRound,
-  Lock
+  Lock,
+  X
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { Team } from '../../types/cricket';
@@ -54,7 +55,7 @@ export const TeamList: React.FC = () => {
 
   const selectedTeam = teams.find(t => t.id === selectedTeamId) || null;
 
-  // If a team is selected, show its full dedicated page!
+  // If a team is selected, show its full dedicated profile page
   if (selectedTeam) {
     return (
       <TeamProfilePage
@@ -120,20 +121,20 @@ export const TeamList: React.FC = () => {
     <div className="space-y-6 pb-20">
       
       {/* Top Header & Search Bar */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 sport-card flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-3 py-1 rounded-xl bg-[#CCFF00] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider flex items-center gap-1.5 shadow-[2px_2px_0px_#0f172a]">
-              <Shield className="w-3.5 h-3.5" />
-              Tournament Franchises
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-xs font-semibold uppercase tracking-wider border border-slate-200">
+              <Shield className="w-3.5 h-3.5 text-slate-600" />
+              Official Rosters
             </span>
-            <span className="text-xs font-black text-slate-500 font-mono">{teams.length} OFFICIAL SQUADS</span>
+            <span className="text-xs font-mono font-medium text-slate-500">{teams.length} FRANCHISES</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-950 font-cabinet mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-950 font-cabinet mt-2">
             Franchises & Squad Directory
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
-            Browse all verified squads, view player profiles, or login as Team Captain to manage your roster.
+          <p className="text-xs sm:text-sm text-slate-600 mt-1 font-normal leading-relaxed">
+            Browse all certified squads, inspect player profiles, or login as Team Captain to manage your roster.
           </p>
         </div>
 
@@ -144,13 +145,13 @@ export const TeamList: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search teams by name or code (e.g. Dragons, Titans)..."
-            className="w-full pl-10 pr-9 py-2.5 rounded-2xl border-2 border-slate-900 bg-slate-50 text-slate-950 font-bold text-xs focus:outline-none focus:bg-white shadow-[2px_2px_0px_#0f172a]"
+            placeholder="Search teams by name or code..."
+            className="w-full pl-10 pr-9 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-medium text-xs focus:bg-white focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 shadow-xs"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
-              className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-900 font-bold"
+              className="absolute right-3 top-2.5 text-xs text-slate-400 hover:text-slate-900"
             >
               ✕
             </button>
@@ -159,23 +160,23 @@ export const TeamList: React.FC = () => {
       </div>
 
       {/* Role Notice Strip */}
-      <div className="p-4 rounded-2xl bg-slate-950 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-2 border-slate-900 shadow-sm text-xs">
+      <div className="p-4 rounded-2xl bg-slate-950 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border border-slate-800 shadow-sm text-xs">
         <div className="flex items-center gap-2.5">
-          <KeyRound className="w-4 h-4 text-[#CCFF00] shrink-0" />
-          <span>
+          <KeyRound className="w-4 h-4 text-amber-400 shrink-0" />
+          <span className="text-slate-300">
             {currentUser.role === 'admin' ? (
-              <span><strong>Super Admin Mode:</strong> You have full control to edit all 40 franchise rosters and certify players.</span>
+              <span><strong className="text-white">Super Admin Mode:</strong> You have full control to edit all 40 franchise rosters and certify players.</span>
             ) : currentUser.role === 'team' ? (
-              <span><strong>Logged in as {currentUser.teamName} Captain:</strong> You have exclusive permission to edit your squad and upload player photos.</span>
+              <span><strong className="text-white">Logged in as {currentUser.teamName} Captain:</strong> You have exclusive permission to edit your squad and upload player photos.</span>
             ) : (
-              <span><strong>Public View:</strong> Squads are view-only. Team Captains can log in with their secret franchise PIN to edit rosters.</span>
+              <span><strong className="text-white">Public Directory:</strong> Squads are view-only. Team Captains can log in with their secret PIN to manage rosters.</span>
             )}
           </span>
         </div>
 
         <button
           onClick={() => openAuthModal()}
-          className="px-3 py-1.5 rounded-xl bg-[#CCFF00] text-slate-950 font-black text-xs sport-btn shrink-0"
+          className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-xs shadow-xs shrink-0 transition-colors"
         >
           {currentUser.role === 'spectator' ? 'Captain Login' : 'Switch Account'}
         </button>
@@ -183,15 +184,15 @@ export const TeamList: React.FC = () => {
 
       {/* Search Result Stats */}
       {searchQuery && (
-        <div className="text-xs font-bold text-slate-600 px-2 flex items-center justify-between">
+        <div className="text-xs font-medium text-slate-600 px-2 flex items-center justify-between">
           <span>Showing {filteredTeams.length} of {teams.length} teams matching "{searchQuery}"</span>
-          <button onClick={() => setSearchQuery('')} className="text-indigo-600 hover:underline font-black">
+          <button onClick={() => setSearchQuery('')} className="text-amber-600 hover:underline font-semibold">
             Clear Search
           </button>
         </div>
       )}
 
-      {/* Teams Grid (Clean, Professional Sports Cards) */}
+      {/* Teams Grid (Clean Mobbin-style Cards) */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTeams.map((team) => {
           const captain = team.players.find(p => p.isCaptain || p.id === team.captainId);
@@ -200,82 +201,80 @@ export const TeamList: React.FC = () => {
           return (
             <div
               key={team.id}
-              className={'bg-white rounded-3xl sport-card overflow-hidden flex flex-col justify-between hover:-translate-y-1.5 hover:shadow-[6px_6px_0px_#0f172a] transition-all group border-3 ' + (
-                hasEditPermission ? 'border-[#CCFF00] ring-2 ring-[#CCFF00]/60' : 'border-slate-950'
-              )}
+              className={`bg-white rounded-2xl border overflow-hidden flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-md transition-all duration-200 group ${
+                hasEditPermission ? 'border-amber-400 ring-2 ring-amber-400/30' : 'border-slate-200/80 shadow-xs'
+              }`}
             >
-              {/* Card Banner Preview with Stadium Backdrop */}
+              {/* Card Banner Preview */}
               <div 
-                className="relative h-36 w-full overflow-hidden cursor-pointer bg-slate-950"
+                className="relative h-32 w-full overflow-hidden cursor-pointer bg-slate-950"
                 onClick={() => setSelectedTeamId(team.id)}
               >
                 <img
                   src={team.bannerUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80'}
                   alt={team.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 brightness-[0.45]"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-60"
                 />
                 <div 
                   className="absolute inset-0"
                   style={{
-                    background: 'linear-gradient(135deg, ' + (team.primaryColor || '#0284c7') + 'aa, ' + (team.secondaryColor || '#38bdf8') + '30, transparent)'
+                    background: 'linear-gradient(135deg, ' + (team.primaryColor || '#0284c7') + '88, transparent)'
                   }}
                 />
 
                 <div className="absolute top-3 right-3 flex items-center gap-2">
                   {hasEditPermission && (
-                    <span className="px-2.5 py-0.5 rounded-xl text-[10px] font-black bg-[#CCFF00] text-slate-950 sport-badge shadow">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-slate-950 shadow-sm">
                       YOUR SQUAD
                     </span>
                   )}
                 </div>
 
-                {/* Team Monogram Badge sitting inside bottom-left */}
-                <div className="absolute bottom-3 left-3 flex items-center gap-3">
+                {/* Team Monogram Badge */}
+                <div className="absolute bottom-3 left-3 flex items-center gap-2.5">
                   <div 
-                    className="w-11 h-11 rounded-2xl flex items-center justify-center border-2 border-white/40 shadow-xl text-white bg-slate-900/60 backdrop-blur"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-lg border border-white/20 shadow-md text-white bg-slate-950/70 backdrop-blur-md"
                   >
-                    <Shield className="w-5 h-5 text-white" />
+                    {team.logo || '🏏'}
                   </div>
-                  <div className="text-white drop-shadow-md">
-                    <span className="text-lg font-black leading-tight block font-cabinet">{team.name}</span>
+                  <div className="text-white drop-shadow">
+                    <span className="text-base font-bold leading-tight block font-cabinet">{team.name}</span>
+                    <span className="text-[10px] font-mono text-slate-300 font-medium">{team.code}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Card Main Body */}
-              <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
-                <div>
-                  {/* Team Metadata Box */}
-                  <div className="space-y-2 text-xs bg-slate-50 p-3.5 rounded-2xl border-2 border-slate-200">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 font-bold flex items-center gap-1">
-                        <Crown className="w-3.5 h-3.5 text-amber-500" /> Captain
-                      </span>
-                      <span className="font-black text-slate-900">{captain ? captain.name : (team.managerName || 'Assigned')}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 font-bold flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-cyan-600" /> Home Venue
-                      </span>
-                      <span className="font-bold text-slate-800 truncate max-w-[160px]">{team.homeGround || 'Apex Oval Complex'}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 font-bold flex items-center gap-1">
-                        <Users className="w-3.5 h-3.5 text-purple-600" /> Squad Size
-                      </span>
-                      <span className="font-black text-slate-900 font-mono">{team.players.length} Players</span>
-                    </div>
+              {/* Card Body */}
+              <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
+                <div className="space-y-2 text-xs bg-slate-50/80 p-3 rounded-xl border border-slate-100">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                      <Crown className="w-3.5 h-3.5 text-amber-500" /> Captain
+                    </span>
+                    <span className="font-semibold text-slate-900">{captain ? captain.name : (team.managerName || 'Assigned')}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                      <MapPin className="w-3.5 h-3.5 text-slate-400" /> Home Venue
+                    </span>
+                    <span className="font-medium text-slate-700 truncate max-w-[150px]">{team.homeGround || 'Frankfurt Cricket Ground'}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-500 font-medium flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-slate-400" /> Squad Size
+                    </span>
+                    <span className="font-semibold text-slate-900 font-mono">{team.players.length} Athletes</span>
                   </div>
                 </div>
 
-                {/* Card Footer: Navigation CTA */}
-                <div className="space-y-2 pt-2 border-t-2 border-slate-100">
+                {/* Card Action */}
+                <div className="pt-2 border-t border-slate-100">
                   <button
                     onClick={() => setSelectedTeamId(team.id)}
-                    className="w-full py-2.5 rounded-2xl bg-slate-950 group-hover:bg-[#CCFF00] text-white group-hover:text-slate-950 font-black text-xs sport-btn flex items-center justify-center gap-2 transition-all shadow-[3px_3px_0px_#0f172a]"
+                    className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors shadow-xs"
                   >
-                    <span>{hasEditPermission ? 'Manage Squad & Photos ➔' : 'View Full Squad ➔'}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>{hasEditPermission ? 'Manage Squad & Photos' : 'View Full Squad'}</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -286,13 +285,13 @@ export const TeamList: React.FC = () => {
 
       {/* Register Franchise Modal (Admin Only) */}
       {showAddTeamModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl sport-card max-w-md w-full p-6 space-y-4 text-slate-900 text-xs">
-            <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="text-lg font-black font-cabinet">Register New Franchise</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 space-y-4 text-slate-900 text-xs border border-slate-200 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-lg font-bold font-cabinet">Register New Franchise</h3>
               <button 
                 onClick={() => setShowAddTeamModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-100 sport-pill flex items-center justify-center font-bold"
+                className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-900"
               >
                 ✕
               </button>
@@ -300,20 +299,20 @@ export const TeamList: React.FC = () => {
 
             <form onSubmit={handleCreateTeam} className="space-y-3">
               <div>
-                <label className="block font-bold mb-1">Franchise Full Name *</label>
+                <label className="block font-semibold mb-1">Franchise Full Name *</label>
                 <input
                   type="text"
                   required
                   value={teamName}
                   onChange={(e) => setTeamName(e.target.value)}
                   placeholder="e.g. Frankfurt Warriors"
-                  className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 focus:bg-white outline-none font-bold text-xs"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white outline-none font-medium text-xs"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold mb-1">Team Code *</label>
+                  <label className="block font-semibold mb-1">Team Code *</label>
                   <input
                     type="text"
                     required
@@ -321,33 +320,33 @@ export const TeamList: React.FC = () => {
                     value={teamCode}
                     onChange={(e) => setTeamCode(e.target.value)}
                     placeholder="FWX"
-                    className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 uppercase font-mono font-bold text-xs"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 uppercase font-mono font-medium text-xs"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold mb-1">Captain Name</label>
+                  <label className="block font-semibold mb-1">Captain Name</label>
                   <input
                     type="text"
                     value={captainName}
                     onChange={(e) => setCaptainName(e.target.value)}
                     placeholder="Captain Name"
-                    className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 font-bold text-xs"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-medium text-xs"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t">
+              <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setShowAddTeamModal(false)}
-                  className="px-4 py-2 rounded-2xl bg-slate-100 font-bold border border-slate-300"
+                  className="px-4 py-2 rounded-xl bg-slate-100 font-semibold text-slate-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-2xl bg-[#00F59B] sport-btn text-slate-950 font-black"
+                  className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold"
                 >
                   Create Team
                 </button>

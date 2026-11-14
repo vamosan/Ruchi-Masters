@@ -41,7 +41,7 @@ import {
 } from 'lucide-react';
 import { Team, Player, Match, PlayerRole, BattingStyle, BowlingStyle } from '../../types/cricket';
 import { useTournament } from '../../context/TournamentContext';
-import { processPlayerPhoto } from '../../utils/imageUtils';
+import { processPlayerPhoto, processBannerPhoto } from '../../utils/imageUtils';
 import { EditTeamModal } from './EditTeamModal';
 import { HoloTiltCard } from '../common/HoloTiltCard';
 import { PlayerCertificateModal } from './PlayerCertificateModal';
@@ -152,7 +152,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
   const handleDirectTeamPhoto = async (file: File) => {
     try {
-      const base64 = await processPlayerPhoto(file);
+      const base64 = await processBannerPhoto(file);
       updateTeam({
         ...team,
         teamPhotoUrl: base64
@@ -280,26 +280,26 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
     <div className="space-y-6 pb-20 animate-in fade-in duration-300">
       
       {/* Top Navigation & Team Switcher Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-3xl sport-card">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <button
           onClick={onBack}
-          className="px-4 py-2 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-900 font-black text-xs sport-pill flex items-center gap-2 transition-all hover:-translate-x-0.5"
+          className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs flex items-center gap-2 transition-all shadow-2xs"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-4 h-4 text-slate-600" />
           <span>Back to All Squads</span>
         </button>
 
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {/* Direct Team Selector Dropdown */}
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500 font-bold hidden md:inline">Switch Franchise:</span>
+            <span className="text-slate-500 font-medium hidden md:inline">Switch Franchise:</span>
             <select
               value={team.id}
               onChange={(e) => {
                 const found = teams.find(t => t.id === e.target.value);
                 if (found) onSelectTeam(found);
               }}
-              className="px-3.5 py-2 rounded-2xl border-2 border-slate-900 bg-slate-50 text-slate-900 font-black text-xs outline-none cursor-pointer hover:bg-white"
+              className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-semibold text-xs outline-none cursor-pointer hover:bg-white transition-colors"
             >
               {teams.map(t => (
                 <option key={t.id} value={t.id}>
@@ -313,17 +313,17 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
           {isAuthorized ? (
             <button
               onClick={() => setShowEditModal(true)}
-              className="px-4 py-2 rounded-2xl bg-[#FFE600] text-slate-950 font-black text-xs sport-btn flex items-center gap-1.5 shadow-[2px_2px_0px_#0f172a]"
+              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
             >
-              <Edit3 className="w-3.5 h-3.5" />
+              <Edit3 className="w-3.5 h-3.5 text-amber-300" />
               <span>Edit Team Profile & Pic</span>
             </button>
           ) : (
             <button
               onClick={() => openAuthModal(team.id)}
-              className="px-4 py-2 rounded-2xl bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 font-black text-xs sport-btn flex items-center gap-1.5 shadow-[2px_2px_0px_#0f172a]"
+              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
             >
-              <KeyRound className="w-3.5 h-3.5" />
+              <KeyRound className="w-3.5 h-3.5 text-amber-300" />
               <span>Captain Login to Edit</span>
             </button>
           )}
@@ -332,19 +332,19 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
       {/* Role Access Alert Banner */}
       {!isAuthorized && (
-        <div className="p-4 rounded-3xl bg-slate-950 text-white border-3 border-slate-900 shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
+        <div className="p-4 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
           <div className="flex items-start sm:items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-amber-400 text-slate-950 sport-pill shrink-0">
-              <Lock className="w-5 h-5" />
+            <div className="p-2.5 rounded-xl bg-slate-800 text-amber-300 border border-slate-700 shrink-0">
+              <Lock className="w-4 h-4" />
             </div>
             <div>
-              <div className="flex items-center gap-2 font-black text-sm text-[#CCFF00]">
+              <div className="flex items-center gap-2 font-bold text-sm text-white">
                 <span>Read-Only Squad View</span>
-                <span className="text-slate-400">•</span>
-                <span className="text-white">{team.name}</span>
+                <span className="text-slate-500">•</span>
+                <span className="text-slate-300">{team.name}</span>
               </div>
-              <p className="text-slate-300 text-[11px] mt-0.5">
-                You are currently viewing as <strong>{currentUser.role === 'team' ? currentUser.teamName + ' Captain' : 'Spectator'}</strong>. Only <strong>{team.name} Captain</strong> or <strong>Tournament Admin</strong> can modify this squad, upload player photos, and sign digital certificates.
+              <p className="text-slate-400 text-xs mt-0.5">
+                Viewing as <strong>{currentUser.role === 'team' ? currentUser.teamName + ' Captain' : 'Spectator'}</strong>. Only certified <strong>{team.name} Captain</strong> or tournament admins can modify roster data.
               </p>
             </div>
           </div>
@@ -352,9 +352,9 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={() => openAuthModal(team.id)}
-              className="px-4 py-2 rounded-xl bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 font-black text-xs sport-btn flex items-center gap-1.5"
+              className="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
             >
-              <Crown className="w-4 h-4 text-amber-800" />
+              <Crown className="w-4 h-4 text-slate-950" />
               <span>Log In as Team Captain</span>
             </button>
           </div>
@@ -362,7 +362,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
       )}
 
       {isAuthorized && (
-        <div className="p-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-400 text-emerald-950 flex items-center justify-between gap-3 text-xs">
+        <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex items-center justify-between gap-3 text-xs shadow-2xs">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             <span className="font-bold">
@@ -378,7 +378,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
       )}
 
       {/* DYNAMIC FRANCHISE HERO BANNER (Full Height with Elevated Team Pic) */}
-      <div className="relative rounded-3xl overflow-hidden sport-card border-3 border-slate-950 bg-slate-950 text-white shadow-[6px_6px_0px_#0f172a]">
+      <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 text-white shadow-lg">
         
         {/* Stadium Background Banner with Gradient Overlay */}
         <div className="absolute inset-0 z-0">
@@ -386,6 +386,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             src={team.bannerUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1600&q=80'}
             alt={team.name}
             className="w-full h-full object-cover object-center brightness-[0.35]"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1600&q=80';
+            }}
           />
           <div 
             className="absolute inset-0"
@@ -395,16 +399,16 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
           />
         </div>
 
-        {/* Hero Content (Natural flow layout so team picture is fully visible and elevated) */}
+        {/* Hero Content */}
         <div className="relative z-10 p-6 sm:p-8 space-y-6">
           
           {/* Top Row: Group Badge & Edit Action */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="px-3.5 py-1 rounded-xl bg-white/20 backdrop-blur text-white font-mono font-bold text-xs border border-white/20">
+              <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur text-white font-mono font-semibold text-xs border border-white/20">
                 OFFICIAL FRANCHISE
               </span>
-              <span className="px-3 py-1 rounded-xl bg-black/60 backdrop-blur text-white border border-white/20 text-xs font-mono font-bold">
+              <span className="px-3 py-1 rounded-full bg-black/40 backdrop-blur text-slate-300 border border-white/10 text-xs font-mono font-medium">
                 EST. {team.establishedYear || 2022}
               </span>
             </div>
@@ -414,18 +418,18 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                 <>
                   <button
                     onClick={() => setShowEditModal(true)}
-                    className="px-3.5 py-1.5 rounded-xl bg-[#FFE600] hover:bg-[#ebd300] text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-[2px_2px_0px_#0f172a] transition-all"
+                    className="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs flex items-center gap-1.5 border border-white/20 backdrop-blur-md transition-all shadow-sm"
                   >
-                    <Edit3 className="w-3.5 h-3.5" />
+                    <Edit3 className="w-3.5 h-3.5 text-amber-300" />
                     <span>Edit Team Info</span>
                   </button>
 
                   <label 
                     htmlFor="team-direct-photo-upload"
-                    className="cursor-pointer px-3.5 py-1.5 rounded-xl bg-white/20 hover:bg-white text-white hover:text-slate-950 backdrop-blur text-xs font-black transition-all border border-white/30 flex items-center gap-1.5"
+                    className="cursor-pointer px-3.5 py-1.5 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5"
                   >
-                    <Camera className="w-3.5 h-3.5" />
-                    <span>Upload Team Photo</span>
+                    <Camera className="w-3.5 h-3.5 text-slate-900" />
+                    <span>Upload Squad Photo</span>
                     <input
                       id="team-direct-photo-upload"
                       type="file"
@@ -441,10 +445,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               ) : (
                 <button
                   onClick={() => openAuthModal(team.id)}
-                  className="px-3.5 py-1.5 rounded-xl bg-black/50 hover:bg-[#CCFF00] text-slate-300 hover:text-slate-950 backdrop-blur text-xs font-bold transition-all border border-white/20 flex items-center gap-1.5"
+                  className="px-3.5 py-1.5 rounded-xl bg-black/40 hover:bg-black/60 text-slate-200 backdrop-blur text-xs font-semibold transition-all border border-white/20 flex items-center gap-1.5"
                 >
-                  <Lock className="w-3.5 h-3.5" />
-                  <span>Captain Login to Edit Info</span>
+                  <Lock className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Captain Login to Edit</span>
                 </button>
               )}
             </div>
@@ -536,31 +540,35 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                   openAuthModal(team.id);
                 }
               }}
-              className="relative group cursor-pointer shrink-0 rounded-2xl overflow-hidden border-3 border-white shadow-[0_10px_35px_rgba(0,0,0,0.6)] hover:scale-102 transition-all w-full sm:w-80 bg-slate-900"
+              className="relative group cursor-pointer shrink-0 rounded-2xl overflow-hidden border border-white/20 shadow-md hover:scale-[1.02] transition-all w-full sm:w-80 bg-slate-900"
             >
               <div className="h-44 sm:h-48 w-full overflow-hidden">
                 <img
                   src={team.teamPhotoUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80'}
                   alt="Team Squad"
                   className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80';
+                  }}
                 />
               </div>
-              <div className="absolute inset-0 bg-slate-950/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-xs font-black">
+              <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-xs font-semibold backdrop-blur-xs">
                 {isAuthorized ? (
                   <>
-                    <Camera className="w-4 h-4" />
-                    <span>Upload New Team Pic</span>
+                    <Camera className="w-4 h-4 text-amber-300" />
+                    <span>Upload New Squad Pic</span>
                   </>
                 ) : (
                   <>
-                    <Lock className="w-4 h-4" />
+                    <Lock className="w-4 h-4 text-amber-300" />
                     <span>Captain Login to Change Pic</span>
                   </>
                 )}
               </div>
-              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between px-2.5 py-1 rounded-xl bg-slate-950/85 backdrop-blur border border-white/10 text-white text-[11px] font-bold">
-                <span className="flex items-center gap-1"><Users className="w-3 h-3 text-[#00F59B]" /> Team Squad</span>
-                <span className="text-[#CCFF00] text-[10px] font-black font-mono">2026 LINEUP</span>
+              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between px-2.5 py-1 rounded-xl bg-slate-950/85 backdrop-blur border border-white/10 text-white text-[11px] font-semibold">
+                <span className="flex items-center gap-1"><Users className="w-3 h-3 text-emerald-400" /> Official Squad</span>
+                <span className="text-amber-400 text-[10px] font-semibold font-mono">2026 ROSTER</span>
               </div>
             </div>
 
@@ -571,51 +579,51 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
       {/* KEY STATS BAR */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="bg-white p-4 rounded-2xl sport-card flex flex-col justify-between">
-          <span className="text-slate-500 font-bold text-xs uppercase">Squad Size</span>
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Squad Size</span>
           <span className="text-2xl font-black text-slate-900 mt-1 font-mono">{team.players.length}</span>
-          <span className="text-[11px] text-emerald-600 font-bold">25 Player Capacity</span>
+          <span className="text-[11px] text-emerald-600 font-medium">25 Player Capacity</span>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl sport-card flex flex-col justify-between">
-          <span className="text-slate-500 font-bold text-xs uppercase">Verified Players</span>
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Verified Players</span>
           <span className="text-2xl font-black text-emerald-600 mt-1 font-mono">{verifiedCount}/{team.players.length}</span>
-          <span className="text-[11px] text-slate-500 font-bold">Photo ID Certified</span>
+          <span className="text-[11px] text-slate-500 font-medium">Photo ID Certified</span>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl sport-card flex flex-col justify-between">
-          <span className="text-slate-500 font-bold text-xs uppercase">Win Record</span>
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Win Record</span>
           <span className="text-2xl font-black text-slate-900 mt-1 font-mono">{winsCount}W - {lossesCount}L</span>
-          <span className="text-[11px] text-slate-500 font-bold">{teamMatches.length} Matches</span>
+          <span className="text-[11px] text-slate-500 font-medium">{teamMatches.length} Matches</span>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl sport-card flex flex-col justify-between">
-          <span className="text-slate-500 font-bold text-xs uppercase">Total Runs</span>
-          <span className="text-2xl font-black text-cyan-600 mt-1 font-mono">{totalRunsScored}</span>
-          <span className="text-[11px] text-slate-500 font-bold truncate">Top: {topRunScorer?.name?.split(' ')[0]} ({topRunScorer?.runsScored})</span>
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Total Runs</span>
+          <span className="text-2xl font-black text-slate-900 mt-1 font-mono">{totalRunsScored}</span>
+          <span className="text-[11px] text-slate-500 font-medium truncate">Top: {topRunScorer?.name?.split(' ')[0]} ({topRunScorer?.runsScored})</span>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl sport-card flex flex-col justify-between">
-          <span className="text-slate-500 font-bold text-xs uppercase">Total Wickets</span>
-          <span className="text-2xl font-black text-purple-600 mt-1 font-mono">{totalWicketsTaken}</span>
-          <span className="text-[11px] text-slate-500 font-bold truncate">Top: {topWicketTaker?.name?.split(' ')[0]} ({topWicketTaker?.wicketsTaken})</span>
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Total Wickets</span>
+          <span className="text-2xl font-black text-slate-900 mt-1 font-mono">{totalWicketsTaken}</span>
+          <span className="text-[11px] text-slate-500 font-medium truncate">Top: {topWicketTaker?.name?.split(' ')[0]} ({topWicketTaker?.wicketsTaken})</span>
         </div>
 
-        <div className="bg-white p-4 rounded-2xl sport-card flex flex-col justify-between">
-          <span className="text-slate-500 font-bold text-xs uppercase">Captain</span>
-          <span className="text-sm font-black text-slate-900 mt-1 truncate">{captain?.name || 'TBD'}</span>
-          <span className="text-[11px] text-slate-500 font-bold truncate">{team.managerPhone || team.homeGround}</span>
+        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
+          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Captain</span>
+          <span className="text-sm font-bold text-slate-900 mt-1 truncate">{captain?.name || 'TBD'}</span>
+          <span className="text-[11px] text-slate-500 font-medium truncate">{team.managerPhone || team.homeGround}</span>
         </div>
       </div>
 
-      {/* PROFILE NAVIGATION TABS */}
-      <div className="flex items-center gap-2 border-b-2 border-slate-900 pb-2 overflow-x-auto">
+      {/* PROFILE NAVIGATION TABS (Mobbin-style Segmented Pills) */}
+      <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2 overflow-x-auto">
         <button
           onClick={() => setActiveTabKey('squad')}
-          className={'px-5 py-2.5 rounded-2xl font-black text-xs transition-all flex items-center gap-2 shrink-0 sport-pill ' + (
+          className={'px-4 py-2 rounded-xl font-semibold text-xs transition-all flex items-center gap-2 shrink-0 ' + (
             activeTabKey === 'squad'
-              ? 'bg-slate-950 text-white shadow-[3px_3px_0px_#CCFF00]'
-              : 'bg-white text-slate-700 hover:bg-slate-100'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
           )}
         >
           <Users className="w-4 h-4" />
@@ -624,10 +632,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
         <button
           onClick={() => setActiveTabKey('overview')}
-          className={'px-5 py-2.5 rounded-2xl font-black text-xs transition-all flex items-center gap-2 shrink-0 sport-pill ' + (
+          className={'px-4 py-2 rounded-xl font-semibold text-xs transition-all flex items-center gap-2 shrink-0 ' + (
             activeTabKey === 'overview'
-              ? 'bg-slate-950 text-white shadow-[3px_3px_0px_#FFE600]'
-              : 'bg-white text-slate-700 hover:bg-slate-100'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
           )}
         >
           <Info className="w-4 h-4" />
@@ -636,10 +644,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
         <button
           onClick={() => setActiveTabKey('matches')}
-          className={'px-5 py-2.5 rounded-2xl font-black text-xs transition-all flex items-center gap-2 shrink-0 sport-pill ' + (
+          className={'px-4 py-2 rounded-xl font-semibold text-xs transition-all flex items-center gap-2 shrink-0 ' + (
             activeTabKey === 'matches'
-              ? 'bg-slate-950 text-white shadow-[3px_3px_0px_#00F0FF]'
-              : 'bg-white text-slate-700 hover:bg-slate-100'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
           )}
         >
           <Calendar className="w-4 h-4" />
@@ -648,10 +656,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
         <button
           onClick={() => setActiveTabKey('media')}
-          className={'px-5 py-2.5 rounded-2xl font-black text-xs transition-all flex items-center gap-2 shrink-0 sport-pill ' + (
+          className={'px-4 py-2 rounded-xl font-semibold text-xs transition-all flex items-center gap-2 shrink-0 ' + (
             activeTabKey === 'media'
-              ? 'bg-slate-950 text-white shadow-[3px_3px_0px_#FF3366]'
-              : 'bg-white text-slate-700 hover:bg-slate-100'
+              ? 'bg-slate-900 text-white shadow-sm'
+              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
           )}
         >
           <Camera className="w-4 h-4" />
@@ -664,7 +672,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
         <div className="space-y-6">
           
           {/* Squad Header & Search/Filter Controls */}
-          <div className="bg-white rounded-3xl p-6 sport-card flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
@@ -672,7 +680,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                 placeholder="Search player by name, jersey #, or tournament ID..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-2xl border-2 border-slate-900 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none font-bold text-xs"
+                className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none font-medium text-xs transition-colors"
               />
             </div>
 
@@ -680,7 +688,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               <select
                 value={roleFilter}
                 onChange={e => setRoleFilter(e.target.value)}
-                className="border-2 border-slate-900 bg-slate-50 rounded-2xl px-3.5 py-2 text-slate-900 font-bold outline-none cursor-pointer"
+                className="border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-slate-800 font-medium outline-none cursor-pointer hover:bg-white transition-colors"
               >
                 <option value="all">All Roles ({team.players.length})</option>
                 <option value="pure_batter">Pure Batters</option>
@@ -694,7 +702,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               <select
                 value={authFilter}
                 onChange={e => setAuthFilter(e.target.value as any)}
-                className="border-2 border-slate-900 bg-slate-50 rounded-2xl px-3.5 py-2 text-slate-900 font-bold outline-none cursor-pointer"
+                className="border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-slate-800 font-medium outline-none cursor-pointer hover:bg-white transition-colors"
               >
                 <option value="all">All Verification Status</option>
                 <option value="verified">Verified Real Players</option>
@@ -708,24 +716,24 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                     setPlayerName('');
                     setShowAddPlayer(true);
                   }}
-                  className="px-4 py-2 rounded-2xl bg-[#00F59B] text-slate-950 font-black text-xs sport-btn flex items-center gap-1.5 shadow-[2px_2px_0px_#0f172a]"
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-4 h-4 text-amber-300" />
                   <span>Add Squad Player</span>
                 </button>
               ) : (
                 <button
                   onClick={() => openAuthModal(team.id)}
-                  className="px-4 py-2 rounded-2xl bg-slate-100 hover:bg-[#CCFF00] text-slate-950 font-black text-xs sport-btn flex items-center gap-1.5 border border-slate-300"
+                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs flex items-center gap-1.5 border border-slate-200 transition-colors"
                 >
-                  <Lock className="w-4 h-4" />
+                  <Lock className="w-4 h-4 text-slate-500" />
                   <span>Captain Auth to Add</span>
                 </button>
               )}
             </div>
           </div>
 
-          {/* Player Cards Grid (3D Holographic Tilt Cards) */}
+          {/* Player Cards Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filteredPlayers.map((player) => (
               <HoloTiltCard
@@ -735,21 +743,25 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                 onClick={() => setEnlargedPlayer(player)}
               >
                 <div
-                  className={'bg-white rounded-3xl border-3 border-slate-950 p-5 flex flex-col justify-between space-y-4 transition-all h-full relative overflow-hidden group-hover:border-cyan-500 group-hover:shadow-[6px_6px_0px_#00F0FF] ' + (
+                  className={'bg-white rounded-2xl border p-5 flex flex-col justify-between space-y-4 transition-all h-full relative overflow-hidden group-hover:border-slate-300 group-hover:shadow-md ' + (
                     player.isAuthenticated 
-                      ? 'shadow-[4px_4px_0px_#0f172a]' 
-                      : 'bg-amber-50/40 border-dashed border-amber-500 shadow'
+                      ? 'border-slate-200/80 shadow-sm' 
+                      : 'bg-amber-50/20 border-dashed border-amber-300 shadow-2xs'
                   )}
                 >
                   <div className="flex items-start gap-4">
-                    {/* Enlarged Player Photo Avatar (+50% larger: w-24 h-24 sm:w-26 sm:h-26) */}
+                    {/* Enlarged Player Photo Avatar */}
                     <div className="relative shrink-0">
                       <img
                         src={player.photoUrl || player.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80'}
                         alt={player.name}
-                        className="w-24 h-24 sm:w-26 sm:h-26 rounded-2xl object-cover border-3 border-slate-950 shadow-md bg-slate-100 group-hover:scale-103 transition-transform"
+                        className="w-20 h-20 rounded-xl object-cover border border-slate-200 shadow-sm bg-slate-100 group-hover:scale-105 transition-transform"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80';
+                        }}
                       />
-                      <span className="absolute -bottom-1 -right-1 px-2.5 py-0.5 rounded-lg bg-slate-950 text-[#CCFF00] text-xs font-mono font-black border border-slate-700 shadow">
+                      <span className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-md bg-slate-900 text-amber-300 text-[11px] font-mono font-bold shadow-xs">
                         #{player.jerseyNumber}
                       </span>
                     </div>
@@ -757,13 +769,13 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                     {/* Player Details */}
                     <div className="space-y-1 flex-1 min-w-0">
                       <div className="flex items-center gap-1.5 flex-wrap">
-                        <h3 className="font-black text-base text-slate-900 font-cabinet truncate">{player.name}</h3>
-                        {player.isCaptain && <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-[#FFE600] text-slate-950 sport-badge">(C)</span>}
-                        {player.isViceCaptain && <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-slate-200 text-slate-800">(VC)</span>}
-                        {player.isWicketKeeper && <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-100 text-cyan-800 border border-cyan-300">(WK)</span>}
+                        <h3 className="font-bold text-base text-slate-900 font-cabinet truncate">{player.name}</h3>
+                        {player.isCaptain && <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-900 border border-amber-200">(C)</span>}
+                        {player.isViceCaptain && <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">(VC)</span>}
+                        {player.isWicketKeeper && <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">(WK)</span>}
                       </div>
 
-                      <p className="text-xs font-bold text-slate-600">
+                      <p className="text-xs font-medium text-slate-500">
                         {getRoleLabel(player.role)}
                       </p>
 
@@ -774,37 +786,37 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                   </div>
 
                   {/* Player Performance Stats Strip */}
-                  <div className="grid grid-cols-4 gap-1 p-2.5 bg-slate-50 rounded-2xl border-2 border-slate-200 text-center font-mono">
+                  <div className="grid grid-cols-4 gap-1 p-2 bg-slate-50 rounded-xl border border-slate-100 text-center font-mono">
                     <div>
-                      <span className="text-[9px] text-slate-500 font-bold block">RUNS</span>
-                      <span className="text-xs font-black text-slate-900">{player.runsScored || 0}</span>
+                      <span className="text-[9px] text-slate-400 font-semibold block">RUNS</span>
+                      <span className="text-xs font-bold text-slate-900">{player.runsScored || 0}</span>
                     </div>
                     <div>
-                      <span className="text-[9px] text-slate-500 font-bold block">WKTS</span>
-                      <span className="text-xs font-black text-purple-700">{player.wicketsTaken || 0}</span>
+                      <span className="text-[9px] text-slate-400 font-semibold block">WKTS</span>
+                      <span className="text-xs font-bold text-slate-900">{player.wicketsTaken || 0}</span>
                     </div>
                     <div>
-                      <span className="text-[9px] text-slate-500 font-bold block">HS</span>
-                      <span className="text-xs font-black text-slate-900">{player.highestScore || 0}</span>
+                      <span className="text-[9px] text-slate-400 font-semibold block">HS</span>
+                      <span className="text-xs font-bold text-slate-900">{player.highestScore || 0}</span>
                     </div>
                     <div>
-                      <span className="text-[9px] text-slate-500 font-bold block">SR</span>
-                      <span className="text-xs font-black text-emerald-700">{player.strikeRate || 135}</span>
+                      <span className="text-[9px] text-slate-400 font-semibold block">SR</span>
+                      <span className="text-xs font-bold text-slate-900">{player.strikeRate || 135}</span>
                     </div>
                   </div>
 
                   {/* Captain Verification Bar & Actions */}
-                  <div className="pt-2 border-t-2 border-slate-100 flex items-center justify-between text-xs gap-2">
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
                     {/* View Certificate / Passport button */}
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedCertPlayer(player);
                       }}
-                      className="inline-flex items-center gap-1 font-bold text-emerald-800 text-[11px] bg-emerald-100 hover:bg-emerald-200 px-2.5 py-1 rounded-xl border border-emerald-300 transition-colors"
+                      className="inline-flex items-center gap-1 font-semibold text-emerald-800 text-[11px] bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors"
                       title="View Official Player ID"
                     >
-                      <FileBadge className="w-3.5 h-3.5 text-emerald-700" />
+                      <FileBadge className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Player ID</span>
                     </button>
 
@@ -813,10 +825,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                         <>
                           <label 
                             htmlFor={'direct-photo-' + player.id}
-                            className="cursor-pointer px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-[#CCFF00] text-slate-950 font-black text-[11px] border-2 border-slate-900 flex items-center gap-1 transition-all shadow-[1px_1px_0px_#0f172a]"
+                            className="cursor-pointer px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold text-[11px] border border-slate-200 flex items-center gap-1 transition-all shadow-2xs"
                             title="Upload or change player photo"
                           >
-                            <Camera className="w-3.5 h-3.5 text-slate-950" />
+                            <Camera className="w-3.5 h-3.5 text-slate-700" />
                             <span>Upload Pic</span>
                             <input
                               id={'direct-photo-' + player.id}
@@ -835,7 +847,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                               e.stopPropagation();
                               setEnlargedPlayer(player);
                             }}
-                            className="p-1.5 rounded-xl text-slate-700 hover:text-slate-950 hover:bg-slate-100 border-2 border-slate-300 hover:border-slate-900 transition-all"
+                            className="p-1.5 rounded-lg text-slate-600 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 transition-all"
                             title="Edit Player Info"
                           >
                             <Edit3 className="w-3.5 h-3.5" />
@@ -848,7 +860,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                                 deletePlayer(team.id, player.id);
                               }
                             }}
-                            className="p-1.5 rounded-xl text-rose-600 hover:text-white hover:bg-rose-600 border-2 border-rose-200 hover:border-rose-600 transition-all"
+                            className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 transition-all"
                             title="Delete Player from Squad"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -860,9 +872,9 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                             e.stopPropagation();
                             setEnlargedPlayer(player);
                           }}
-                          className="text-[10px] font-mono text-slate-700 hover:text-slate-950 bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-xl border border-slate-300 font-bold flex items-center gap-1"
+                          className="text-[10px] font-mono text-slate-600 hover:text-slate-950 bg-slate-50 hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-semibold flex items-center gap-1 transition-colors"
                         >
-                          <span>View Profile ➔</span>
+                          <span>Profile ➔</span>
                         </button>
                       )}
                     </div>
@@ -878,38 +890,38 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
       {activeTabKey === 'overview' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Bio & Story */}
-          <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 sport-card space-y-5">
+          <div className="lg:col-span-2 bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-5">
             <div>
-              <span className="px-3 py-1 rounded-xl bg-[#FFE600] text-slate-950 font-black text-xs sport-badge uppercase tracking-wider">
+              <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-800 font-semibold text-xs uppercase tracking-wider">
                 Franchise Story
               </span>
-              <h2 className="text-2xl font-black font-cabinet mt-2">About {team.name}</h2>
-              <p className="text-sm text-slate-600 mt-2 leading-relaxed font-medium">
+              <h2 className="text-2xl font-bold font-cabinet mt-3 text-slate-900">About {team.name}</h2>
+              <p className="text-sm text-slate-600 mt-2 leading-relaxed font-normal">
                 {team.description || (team.name + ' is one of the premier franchise members of Ruchi Masters T20. Led by Captain ' + (captain?.name || 'TBD') + '.')}
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-slate-50 border-2 border-slate-900 space-y-3">
-              <h3 className="font-black text-sm uppercase tracking-wider text-slate-900 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-cyan-600" />
-                Home Fortress & Stadium Information
+            <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+              <h3 className="font-bold text-xs uppercase tracking-wider text-slate-900 flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-slate-600" />
+                Home Ground & Fortress Information
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <span className="text-slate-500 font-bold block">Venue Name:</span>
-                  <span className="font-black text-slate-900 text-sm">{team.homeGround}</span>
+                  <span className="text-slate-400 font-medium block">Venue:</span>
+                  <span className="font-semibold text-slate-900 text-sm">{team.homeGround}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 font-bold block">Tournament Format:</span>
-                  <span className="font-black text-slate-900 text-sm">T20 Championship</span>
+                  <span className="text-slate-400 font-medium block">Format:</span>
+                  <span className="font-semibold text-slate-900 text-sm">T20 Championship</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 font-bold block">Established:</span>
-                  <span className="font-black text-slate-900 text-sm font-mono">{team.establishedYear || 2022}</span>
+                  <span className="text-slate-400 font-medium block">Established:</span>
+                  <span className="font-semibold text-slate-900 text-sm font-mono">{team.establishedYear || 2022}</span>
                 </div>
                 <div>
-                  <span className="text-slate-500 font-bold block">Mascot & Tagline:</span>
-                  <span className="font-black text-slate-900 text-sm">{team.logo} "{team.slogan || 'Play Bold'}"</span>
+                  <span className="text-slate-400 font-medium block">Mascot & Tagline:</span>
+                  <span className="font-semibold text-slate-900 text-sm">{team.logo} "{team.slogan || 'Play Bold'}"</span>
                 </div>
               </div>
             </div>
@@ -917,48 +929,48 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
           {/* Captain & Staff Column */}
           <div className="space-y-4">
-            <div className="bg-white rounded-3xl p-6 sport-card space-y-4">
-              <h3 className="font-black text-base font-cabinet flex items-center gap-2">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+              <h3 className="font-bold text-base font-cabinet text-slate-900 flex items-center gap-2">
                 <Crown className="w-4 h-4 text-amber-500" />
-                Franchise Captain & Staff
+                Franchise Captain & Management
               </h3>
 
               <div className="space-y-3 text-xs">
-                <div className="p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-400 space-y-1">
+                <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase text-amber-800 font-mono">FRANCHISE CAPTAIN</span>
+                    <span className="text-[10px] font-bold uppercase text-amber-800 font-mono">FRANCHISE CAPTAIN</span>
                     <Crown className="w-3.5 h-3.5 text-amber-600" />
                   </div>
-                  <h4 className="font-black text-base text-slate-950 font-cabinet">{captain?.name || 'Captain TBD'}</h4>
+                  <h4 className="font-bold text-base text-slate-950 font-cabinet">{captain?.name || 'Captain TBD'}</h4>
                   {captain && (
-                    <p className="text-slate-700 font-medium text-xs">
+                    <p className="text-slate-600 font-medium text-xs">
                       #{captain.jerseyNumber} • {getRoleLabel(captain.role)}
                     </p>
                   )}
                   {team.managerEmail && (
-                    <p className="text-slate-600 font-mono text-[11px] pt-1 flex items-center gap-1">
-                      <Mail className="w-3 h-3 text-cyan-600" /> {team.managerEmail}
+                    <p className="text-slate-500 font-mono text-[11px] pt-1 flex items-center gap-1">
+                      <Mail className="w-3 h-3 text-slate-400" /> {team.managerEmail}
                     </p>
                   )}
                 </div>
 
                 {viceCaptain && (
-                  <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                    <span className="text-[10px] font-black uppercase text-slate-500 font-mono">Vice Captain</span>
-                    <h4 className="font-black text-sm text-slate-900">{viceCaptain.name}</h4>
-                    <p className="text-slate-600 text-xs">#{viceCaptain.jerseyNumber} • {getRoleLabel(viceCaptain.role)}</p>
+                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[10px] font-semibold uppercase text-slate-400 font-mono">Vice Captain</span>
+                    <h4 className="font-bold text-sm text-slate-900">{viceCaptain.name}</h4>
+                    <p className="text-slate-500 text-xs">#{viceCaptain.jerseyNumber} • {getRoleLabel(viceCaptain.role)}</p>
                   </div>
                 )}
 
-                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                  <span className="text-[10px] font-black uppercase text-slate-500 font-mono">Head Coach</span>
-                  <h4 className="font-black text-sm text-slate-900">{team.coach || 'Head Coach TBD'}</h4>
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[10px] font-semibold uppercase text-slate-400 font-mono">Head Coach</span>
+                  <h4 className="font-bold text-sm text-slate-900">{team.coach || 'Head Coach TBD'}</h4>
                 </div>
 
                 {team.supportStaff && team.supportStaff.map((staff, idx) => (
-                  <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
-                    <span className="text-[10px] font-black uppercase text-slate-500 font-mono">{staff.role}</span>
-                    <h4 className="font-black text-sm text-slate-900">{staff.name}</h4>
+                  <div key={idx} className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <span className="text-[10px] font-semibold uppercase text-slate-400 font-mono">{staff.role}</span>
+                    <h4 className="font-bold text-sm text-slate-900">{staff.name}</h4>
                   </div>
                 ))}
               </div>
@@ -966,16 +978,16 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               {isAuthorized ? (
                 <button
                   onClick={() => setShowEditModal(true)}
-                  className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 font-black text-xs text-slate-900 sport-pill"
+                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-semibold text-xs text-slate-900 transition-colors"
                 >
                   Edit Captain & Staff Info
                 </button>
               ) : (
                 <button
                   onClick={() => openAuthModal(team.id)}
-                  className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-[#CCFF00] font-black text-xs text-slate-900 sport-pill flex items-center justify-center gap-1"
+                  className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-semibold text-xs text-slate-800 transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <Lock className="w-3.5 h-3.5" />
+                  <Lock className="w-3.5 h-3.5 text-slate-500" />
                   <span>Captain Login to Edit Staff</span>
                 </button>
               )}
@@ -986,17 +998,17 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
       {/* TAB 3: SCHEDULE & RESULTS */}
       {activeTabKey === 'matches' && (
-        <div className="bg-white rounded-3xl p-6 sm:p-8 sport-card space-y-4">
-          <div className="flex items-center justify-between border-b pb-4">
+        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-sm space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
             <div>
-              <h2 className="text-2xl font-black font-cabinet">Tournament Fixtures & Results</h2>
-              <p className="text-xs text-slate-600 mt-0.5">All scheduled and completed matches for {team.name}</p>
+              <h2 className="text-xl sm:text-2xl font-bold font-cabinet text-slate-900">Tournament Fixtures & Results</h2>
+              <p className="text-xs text-slate-500 mt-0.5">All scheduled and completed matches for {team.name}</p>
             </div>
           </div>
 
           <div className="space-y-3 pt-2">
             {teamMatches.length === 0 ? (
-              <p className="text-xs text-slate-500 py-8 text-center">No fixtures scheduled yet for this franchise.</p>
+              <p className="text-xs text-slate-400 py-8 text-center font-medium">No fixtures scheduled yet for this franchise.</p>
             ) : (
               teamMatches.map((match) => {
                 const opponentId = match.teamAId === team.id ? match.teamBId : match.teamAId;
@@ -1006,37 +1018,37 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                 return (
                   <div
                     key={match.id}
-                    className="p-4 rounded-2xl border-2 border-slate-900 bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                    className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors"
                   >
                     <div className="space-y-1">
                       <div className="flex items-center gap-2 text-xs">
-                        <span className="font-black px-2 py-0.5 rounded-md bg-slate-200 text-slate-800 font-mono">
+                        <span className="font-semibold px-2 py-0.5 rounded text-[11px] bg-slate-200 text-slate-800 font-mono">
                           {match.title}
                         </span>
-                        <span className="text-slate-500 font-medium">📅 {match.date} • ⏰ {match.time}</span>
-                        <span className="text-slate-500 font-medium hidden md:inline">📍 {match.venue}</span>
+                        <span className="text-slate-500 font-medium">{match.date} • {match.time}</span>
+                        <span className="text-slate-400 font-medium hidden md:inline">/ {match.venue}</span>
                       </div>
 
                       <div className="flex items-center gap-3 pt-1">
-                        <div className="flex items-center gap-2 font-black text-base">
+                        <div className="flex items-center gap-2 font-bold text-base text-slate-900">
                           <span>{team.name}</span>
-                          <span className="text-slate-400 font-bold">vs</span>
+                          <span className="text-slate-400 text-xs font-normal">vs</span>
                           <span>{opponent?.name || 'Opponent'}</span>
                         </div>
                       </div>
 
                       {match.winMargin && (
-                        <p className="text-xs font-black text-cyan-700">
+                        <p className="text-xs font-semibold text-emerald-700">
                           {match.winMargin}
                         </p>
                       )}
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className={'px-3 py-1 rounded-xl text-xs font-black sport-badge ' + (
+                      <span className={'px-3 py-1 rounded-full text-xs font-semibold ' + (
                         match.status === 'completed'
-                          ? (isWinner ? 'bg-[#00F59B] text-slate-950' : 'bg-slate-200 text-slate-800')
-                          : (match.status === 'live' ? 'bg-[#FF3366] text-white animate-pulse' : 'bg-[#FFE600] text-slate-950')
+                          ? (isWinner ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-600 border border-slate-200')
+                          : (match.status === 'live' ? 'bg-rose-50 text-rose-600 border border-rose-200 animate-pulse' : 'bg-slate-100 text-slate-700 border border-slate-200')
                       )}>
                         {match.status === 'completed' ? (isWinner ? '🏆 Won' : 'Defeat') : match.status.toUpperCase()}
                       </span>
@@ -1046,7 +1058,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                           setActiveMatchId(match.id);
                           setActiveTab('live');
                         }}
-                        className="px-3.5 py-1.5 rounded-xl bg-slate-950 text-white font-black text-xs sport-btn"
+                        className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors shadow-2xs"
                       >
                         Match Center ➔
                       </button>
@@ -1063,53 +1075,57 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
       {activeTabKey === 'media' && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Team Photograph Full View */}
-          <div className="bg-white rounded-3xl p-6 sport-card space-y-4">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-black font-cabinet flex items-center gap-2">
-                <Camera className="w-4 h-4 text-cyan-600" />
+              <h3 className="text-base font-bold font-cabinet text-slate-900 flex items-center gap-2">
+                <Camera className="w-4 h-4 text-slate-600" />
                 Team Squad Photograph
               </h3>
               {isAuthorized && (
                 <button
                   onClick={() => setShowEditModal(true)}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#00F59B] text-slate-950 font-black text-xs sport-btn"
+                  className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-2xs transition-colors"
                 >
                   Upload / Change
                 </button>
               )}
             </div>
 
-            <div className="rounded-2xl overflow-hidden border-2 border-slate-900 shadow-[4px_4px_0px_#0f172a]">
+            <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm">
               <img
                 src={team.teamPhotoUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1000&q=80'}
                 alt={team.name}
                 className="w-full h-64 object-cover"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1000&q=80';
+                }}
               />
             </div>
-            <p className="text-xs text-slate-600 font-medium">
-              Squad group photograph for {team.name} 2026 Championship.
+            <p className="text-xs text-slate-500 font-medium">
+              Official roster squad photograph for {team.name} 2026 Championship.
             </p>
           </div>
 
           {/* Brand Colors & Kit Swatches */}
-          <div className="bg-white rounded-3xl p-6 sport-card space-y-4">
+          <div className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-black font-cabinet flex items-center gap-2">
-                <Layers className="w-4 h-4 text-amber-600" />
+              <h3 className="text-base font-bold font-cabinet text-slate-900 flex items-center gap-2">
+                <Layers className="w-4 h-4 text-amber-500" />
                 Brand Identity & Kit Colors
               </h3>
               {isAuthorized && (
                 <button
                   onClick={() => setShowEditModal(true)}
-                  className="px-3.5 py-1.5 rounded-xl bg-[#FFE600] text-slate-950 font-black text-xs sport-btn"
+                  className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs transition-colors shadow-2xs"
                 >
-                  Customize Theme
+                  Customize Colors
                 </button>
               )}
             </div>
 
             <div 
-              className="p-6 rounded-2xl border-2 border-slate-900 shadow-[4px_4px_0px_#0f172a] text-white space-y-4"
+              className="p-6 rounded-xl border border-slate-200 shadow-sm text-white space-y-4"
               style={{
                 background: 'linear-gradient(135deg, ' + (team.primaryColor || '#2563eb') + ', ' + (team.secondaryColor || '#f59e0b') + ')'
               }}
@@ -1174,14 +1190,14 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
       {/* CAPTAIN AUTHENTICATION & IMAGE UPLOAD MODAL */}
       {authPlayerModal && isAuthorized && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl sport-card max-w-md w-full p-6 space-y-4 text-xs text-slate-900">
-            <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="text-base font-black font-cabinet flex items-center gap-2">
-                <Camera className="w-5 h-5 text-cyan-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 space-y-4 text-xs text-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-base font-bold font-cabinet flex items-center gap-2">
+                <Camera className="w-5 h-5 text-amber-500" />
                 Authenticate Player: {authPlayerModal.name}
               </h3>
-              <button onClick={() => setAuthPlayerModal(null)} className="w-7 h-7 rounded-full bg-slate-100 sport-pill flex items-center justify-center font-bold">
+              <button onClick={() => setAuthPlayerModal(null)} className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600">
                 ✕
               </button>
             </div>
@@ -1189,18 +1205,22 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             <form onSubmit={handleConfirmAuthentication} className="space-y-4">
               {/* Photo Upload Box */}
               <div className="space-y-2">
-                <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-700">
+                <label className="block font-semibold uppercase tracking-wider text-[11px] text-slate-600">
                   1. Upload Player Photograph / Headshot
                 </label>
-                <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border-2 border-slate-900">
+                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
                   <img 
                     src={uploadedPhoto || authPlayerModal.photoUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80"}
                     alt="Player Preview"
-                    className="w-16 h-16 rounded-2xl object-cover border-2 border-slate-900 shadow"
+                    className="w-16 h-16 rounded-xl object-cover border border-slate-200 shadow-sm"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80';
+                    }}
                   />
                   <div className="space-y-1.5 flex-1">
-                    <label className="cursor-pointer px-3.5 py-1.5 rounded-2xl bg-[#00F59B] text-slate-950 font-black text-xs inline-flex items-center gap-2 sport-btn">
-                      <Upload className="w-3.5 h-3.5" />
+                    <label className="cursor-pointer px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs inline-flex items-center gap-2 shadow-2xs transition-colors">
+                      <Upload className="w-3.5 h-3.5 text-amber-300" />
                       Choose Photo
                       <input 
                         type="file" 
@@ -1218,7 +1238,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
               {/* ID Proof Number */}
               <div className="space-y-1">
-                <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-700">
+                <label className="block font-semibold uppercase tracking-wider text-[11px] text-slate-600">
                   2. Tournament Player ID Number
                 </label>
                 <input
@@ -1227,13 +1247,13 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                   placeholder="e.g. CRIC-2026-IND-8849"
                   value={idProofNum}
                   onChange={e => setIdProofNum(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 font-mono font-bold outline-none"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono font-medium outline-none focus:bg-white focus:border-amber-500"
                 />
               </div>
 
               {/* Captain Signature Name */}
               <div className="space-y-1">
-                <label className="block font-bold uppercase tracking-wider text-[11px] text-slate-700">
+                <label className="block font-semibold uppercase tracking-wider text-[11px] text-slate-600">
                   3. Authenticating Captain Name
                 </label>
                 <input
@@ -1241,28 +1261,28 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                   required
                   value={captainSignName}
                   onChange={e => setCaptainSignName(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 font-bold outline-none"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold outline-none focus:bg-white focus:border-amber-500"
                 />
               </div>
 
-              <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-300 text-[11px] text-emerald-800 flex items-center gap-2">
+              <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-[11px] text-emerald-800 flex items-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                 <span>
                   Confirming authenticates that this player is eligible and rostered in compliance with tournament rules.
                 </span>
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t">
+              <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setAuthPlayerModal(null)}
-                  className="px-4 py-2 rounded-2xl bg-slate-100 font-bold border border-slate-300"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-semibold text-slate-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-2xl bg-[#00F59B] sport-btn text-slate-950 font-black"
+                  className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold shadow-sm transition-colors"
                 >
                   Verify & Authenticate
                 </button>
@@ -1274,14 +1294,14 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
       {/* ADD / EDIT PLAYER MODAL */}
       {showAddPlayer && isAuthorized && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl sport-card max-w-md w-full p-5 space-y-4 text-xs text-slate-900">
-            <div className="flex items-center justify-between border-b pb-3">
-              <h4 className="font-black text-base font-cabinet flex items-center gap-2">
-                <Plus className="w-4 h-4 text-cyan-600" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl border border-slate-200/80 shadow-2xl max-w-md w-full p-6 space-y-4 text-xs text-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h4 className="font-bold text-base font-cabinet flex items-center gap-2">
+                <Plus className="w-4 h-4 text-amber-500" />
                 {editingPlayer ? 'Edit Squad Player' : 'Register New Squad Player'}
               </h4>
-              <button onClick={() => setShowAddPlayer(false)} className="w-7 h-7 rounded-full bg-slate-100 sport-pill flex items-center justify-center font-bold">
+              <button onClick={() => setShowAddPlayer(false)} className="w-7 h-7 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600">
                 ✕
               </button>
             </div>
@@ -1289,16 +1309,20 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             <form onSubmit={handleSavePlayer} className="space-y-3">
               {/* Photo Upload Section inside modal */}
               <div>
-                <label className="block font-bold mb-1">Player Photo / Headshot</label>
-                <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border-2 border-slate-900">
+                <label className="block font-semibold mb-1 text-slate-700">Player Photo / Headshot</label>
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">
                   <img
                     src={playerFormPhoto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80'}
                     alt="Preview"
-                    className="w-14 h-14 rounded-xl object-cover border-2 border-slate-900 shadow"
+                    className="w-14 h-14 rounded-xl object-cover border border-slate-200 shadow-sm"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&h=200&q=80';
+                    }}
                   />
                   <div className="flex-1 space-y-1">
-                    <label className="cursor-pointer px-3 py-1.5 rounded-xl bg-[#CCFF00] hover:bg-[#b8e600] text-slate-950 font-black text-xs inline-flex items-center gap-1.5 border-2 border-slate-900 shadow-[2px_2px_0px_#0f172a]">
-                      <Upload className="w-3.5 h-3.5" />
+                    <label className="cursor-pointer px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs inline-flex items-center gap-1.5 shadow-2xs transition-colors">
+                      <Upload className="w-3.5 h-3.5 text-amber-300" />
                       <span>Select Photo</span>
                       <input
                         type="file"
@@ -1317,42 +1341,42 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                         }}
                       />
                     </label>
-                    <p className="text-[10px] text-slate-500 font-medium">JPEG or PNG from camera or gallery</p>
+                    <p className="text-[10px] text-slate-500 font-medium">JPEG or PNG portrait from camera or gallery</p>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block font-bold mb-1">Player Full Name *</label>
+                <label className="block font-semibold mb-1 text-slate-700">Player Full Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Jasprit Bumrah"
                   value={playerName}
                   onChange={e => setPlayerName(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 font-bold outline-none"
+                  className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold outline-none focus:bg-white focus:border-amber-500"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold mb-1">Jersey Number</label>
+                  <label className="block font-semibold mb-1 text-slate-700">Jersey Number</label>
                   <input
                     type="number"
                     min={0}
                     max={999}
                     value={jerseyNum}
                     onChange={e => setJerseyNum(parseInt(e.target.value, 10) || 0)}
-                    className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 font-mono font-bold outline-none"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-mono font-semibold outline-none focus:bg-white focus:border-amber-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold mb-1">Player Role</label>
+                  <label className="block font-semibold mb-1 text-slate-700">Player Role</label>
                   <select
                     value={role}
                     onChange={e => setRole(e.target.value as PlayerRole)}
-                    className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 font-bold outline-none"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold outline-none focus:bg-white focus:border-amber-500 cursor-pointer"
                   >
                     <option value="pure_batter">Pure Batter</option>
                     <option value="wk_batter">Wicketkeeper Batter</option>
@@ -1366,11 +1390,11 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold mb-1">Batting Style</label>
+                  <label className="block font-semibold mb-1 text-slate-700">Batting Style</label>
                   <select
                     value={battingStyle}
                     onChange={e => setBattingStyle(e.target.value as BattingStyle)}
-                    className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 font-bold outline-none"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold outline-none focus:bg-white focus:border-amber-500 cursor-pointer"
                   >
                     <option value="Right-hand Bat">Right-hand Bat</option>
                     <option value="Left-hand Bat">Left-hand Bat</option>
@@ -1378,11 +1402,11 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                 </div>
 
                 <div>
-                  <label className="block font-bold mb-1">Bowling Style</label>
+                  <label className="block font-semibold mb-1 text-slate-700">Bowling Style</label>
                   <select
                     value={bowlingStyle}
                     onChange={e => setBowlingStyle(e.target.value as BowlingStyle)}
-                    className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 font-bold outline-none"
+                    className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 font-semibold outline-none focus:bg-white focus:border-amber-500 cursor-pointer"
                   >
                     <option value="Right-arm fast">Right-arm fast</option>
                     <option value="Right-arm fast-medium">Right-arm fast-medium</option>
@@ -1396,27 +1420,27 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               </div>
 
               <div className="flex flex-wrap gap-4 pt-2">
-                <label className="flex items-center gap-1.5 cursor-pointer font-bold">
+                <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-slate-800">
                   <input
                     type="checkbox"
                     checked={isCaptain}
                     onChange={e => setIsCaptain(e.target.checked)}
-                    className="rounded text-cyan-600"
+                    className="rounded text-amber-500"
                   />
                   <span>Captain (C)</span>
                 </label>
 
-                <label className="flex items-center gap-1.5 cursor-pointer font-bold">
+                <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-slate-800">
                   <input
                     type="checkbox"
                     checked={isViceCaptain}
                     onChange={e => setIsViceCaptain(e.target.checked)}
-                    className="rounded text-cyan-600"
+                    className="rounded text-amber-500"
                   />
                   <span>Vice Captain (VC)</span>
                 </label>
 
-                <label className="flex items-center gap-1.5 cursor-pointer font-bold">
+                <label className="flex items-center gap-1.5 cursor-pointer font-semibold text-slate-800">
                   <input
                     type="checkbox"
                     checked={isWK}
@@ -1431,13 +1455,13 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                 <button
                   type="button"
                   onClick={() => setShowAddPlayer(false)}
-                  className="px-4 py-2 rounded-2xl bg-slate-100 font-bold border border-slate-300"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 font-semibold text-slate-700"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-2xl bg-[#00F59B] sport-btn text-slate-950 font-black"
+                  className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold shadow-sm transition-colors"
                 >
                   Save Player
                 </button>

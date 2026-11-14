@@ -40,36 +40,36 @@ export const PlayerCertificateModal: React.FC<Props> = ({ player, team, onClose 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-2xl w-full sport-card overflow-hidden my-auto border-3 border-slate-950 shadow-[10px_10px_0px_#0f172a] text-slate-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm overflow-y-auto">
+      <div className="bg-white rounded-2xl max-w-2xl w-full border border-slate-200/80 shadow-2xl overflow-hidden my-auto text-slate-900">
         
         {/* Top Header Controls */}
-        <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between border-b-2 border-slate-900">
+        <div className="p-4 sm:p-5 bg-slate-950 text-white flex items-center justify-between border-b border-slate-800">
           <div className="flex items-center gap-2.5">
-            <span className="p-2 rounded-xl bg-[#CCFF00] text-slate-950 sport-pill text-xs font-black">
+            <span className="px-2.5 py-1 rounded-full bg-slate-800 text-amber-300 text-xs font-semibold font-mono">
               OFFICIAL PLAYER ID
             </span>
             <div>
-              <h3 className="text-base sm:text-lg font-black font-cabinet leading-tight">
-                Official Player Registration Credential
+              <h3 className="text-base sm:text-lg font-bold font-cabinet leading-tight">
+                Player Registration Credential
               </h3>
-              <span className="text-xs text-slate-400 font-mono">RUCHI MASTERS T20 CREDENTIAL</span>
+              <span className="text-xs text-slate-400 font-mono">RUCHI MASTERS T20 2026</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-black flex items-center gap-1.5 border border-slate-700 transition-colors"
+              className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-1.5 border border-slate-700 transition-colors"
             >
               <Printer className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Print</span>
             </button>
             <button
               onClick={handleDownload}
-              className="px-3.5 py-1.5 rounded-xl bg-[#00F59B] text-slate-950 text-xs font-black flex items-center gap-1.5 sport-btn"
+              className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 text-amber-300" />
               <span>Download</span>
             </button>
             <button
@@ -111,7 +111,7 @@ export const PlayerCertificateModal: React.FC<Props> = ({ player, team, onClose 
             </div>
 
             {/* Verification Seal Badge */}
-            <div className="hidden sm:flex flex-col items-center justify-center w-20 h-20 rounded-full border-3 border-emerald-600 bg-emerald-50 text-emerald-900 text-center p-1 shadow-md">
+            <div className="hidden sm:flex flex-col items-center justify-center w-20 h-20 rounded-full border-2 border-emerald-600/60 bg-emerald-50 text-emerald-900 text-center p-1 shadow-sm">
               <ShieldCheck className="w-6 h-6 text-emerald-600 mb-0.5" />
               <span className="text-[8px] font-black uppercase tracking-tight">CAPTAIN</span>
               <span className="text-[7px] font-bold text-emerald-700">AUTHENTICATED</span>
@@ -127,45 +127,49 @@ export const PlayerCertificateModal: React.FC<Props> = ({ player, team, onClose 
                 <img
                   src={player.photoUrl || player.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80'}
                   alt={player.name}
-                  className="w-32 h-32 sm:w-36 sm:h-36 rounded-2xl object-cover border-3 border-slate-950 shadow-[4px_4px_0px_#0f172a]"
+                  className="w-32 h-32 sm:w-36 sm:h-36 rounded-xl object-cover border border-slate-200 shadow-sm"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80';
+                  }}
                 />
-                <span className="absolute -bottom-2 -right-2 px-2.5 py-0.5 rounded-xl bg-slate-950 text-[#CCFF00] text-xs font-mono font-black border-2 border-slate-800 shadow">
+                <span className="absolute -bottom-2 -right-2 px-2.5 py-0.5 rounded-lg bg-slate-900 text-amber-300 text-xs font-mono font-bold shadow-sm">
                   #{player.jerseyNumber}
                 </span>
               </div>
-              <span className="text-[10px] font-black text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-300">
-                ● Live Match Verified
+              <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                ● Match Certified
               </span>
             </div>
 
             {/* Player Credential Details */}
             <div className="sm:col-span-2 space-y-3">
               <div>
-                <span className="text-[10px] font-black uppercase text-slate-500 font-mono">PLAYER FULL NAME</span>
+                <span className="text-[10px] font-semibold uppercase text-slate-400 font-mono">PLAYER FULL NAME</span>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-2xl font-black font-cabinet text-slate-950">{player.name}</h3>
-                  {player.isCaptain && <span className="px-2 py-0.5 rounded bg-[#FFE600] text-slate-950 text-[10px] font-black">(C)</span>}
-                  {player.isViceCaptain && <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-800 text-[10px] font-bold">(VC)</span>}
-                  {player.isWicketKeeper && <span className="px-2 py-0.5 rounded bg-cyan-100 text-cyan-800 text-[10px] font-bold">(WK)</span>}
+                  <h3 className="text-2xl font-bold font-cabinet text-slate-950">{player.name}</h3>
+                  {player.isCaptain && <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-bold border border-amber-200">(C)</span>}
+                  {player.isViceCaptain && <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-800 text-[10px] font-semibold border border-slate-200">(VC)</span>}
+                  {player.isWicketKeeper && <span className="px-2 py-0.5 rounded bg-blue-50 text-blue-800 text-[10px] font-semibold border border-blue-200">(WK)</span>}
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 text-xs">
-                <div className="bg-slate-100/80 p-2.5 rounded-xl border border-slate-300">
-                  <span className="text-slate-500 font-bold block text-[10px]">DESIGNATED ROLE</span>
-                  <span className="font-black text-slate-900">{player.role.replace('_', ' ').toUpperCase()}</span>
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  <span className="text-slate-400 font-medium block text-[10px]">DESIGNATED ROLE</span>
+                  <span className="font-bold text-slate-900">{player.role.replace('_', ' ').toUpperCase()}</span>
                 </div>
-                <div className="bg-slate-100/80 p-2.5 rounded-xl border border-slate-300">
-                  <span className="text-slate-500 font-bold block text-[10px]">BATTING / BOWLING</span>
-                  <span className="font-black text-slate-900 truncate block">{player.battingStyle}</span>
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  <span className="text-slate-400 font-medium block text-[10px]">BATTING / BOWLING</span>
+                  <span className="font-bold text-slate-900 truncate block">{player.battingStyle}</span>
                 </div>
-                <div className="bg-slate-100/80 p-2.5 rounded-xl border border-slate-300">
-                  <span className="text-slate-500 font-bold block text-[10px]">TOURNAMENT ID NUMBER</span>
-                  <span className="font-mono font-black text-slate-900">{player.idProofNumber || ('RUCHI-' + team.code + '-1099')}</span>
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  <span className="text-slate-400 font-medium block text-[10px]">TOURNAMENT ID NUMBER</span>
+                  <span className="font-mono font-bold text-slate-900">{player.idProofNumber || ('RUCHI-' + team.code + '-1099')}</span>
                 </div>
-                <div className="bg-slate-100/80 p-2.5 rounded-xl border border-slate-300">
-                  <span className="text-slate-500 font-bold block text-[10px]">AUTHENTICATED DATE</span>
-                  <span className="font-mono font-bold text-slate-900">{certDate}</span>
+                <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                  <span className="text-slate-400 font-medium block text-[10px]">AUTHENTICATED DATE</span>
+                  <span className="font-mono font-medium text-slate-900">{certDate}</span>
                 </div>
               </div>
             </div>
@@ -173,14 +177,14 @@ export const PlayerCertificateModal: React.FC<Props> = ({ player, team, onClose 
           </div>
 
           {/* Performance Summary Strip */}
-          <div className="grid grid-cols-4 gap-2 p-3 rounded-2xl bg-slate-950 text-white font-mono text-center border-2 border-slate-900">
+          <div className="grid grid-cols-4 gap-2 p-3 rounded-xl bg-slate-900 text-white font-mono text-center border border-slate-800">
             <div>
-              <span className="text-[9px] text-slate-400 font-bold block">RUNS</span>
-              <span className="text-sm font-black text-[#CCFF00]">{player.runsScored || 0}</span>
+              <span className="text-[9px] text-slate-400 font-medium block">RUNS</span>
+              <span className="text-sm font-bold text-amber-300">{player.runsScored || 0}</span>
             </div>
             <div>
-              <span className="text-[9px] text-slate-400 font-bold block">WICKETS</span>
-              <span className="text-sm font-black text-[#00F0FF]">{player.wicketsTaken || 0}</span>
+              <span className="text-[9px] text-slate-400 font-medium block">WICKETS</span>
+              <span className="text-sm font-bold text-cyan-300">{player.wicketsTaken || 0}</span>
             </div>
             <div>
               <span className="text-[9px] text-slate-400 font-bold block">HIGHEST SCORE</span>

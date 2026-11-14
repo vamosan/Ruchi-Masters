@@ -24,6 +24,7 @@ export const Sidebar: React.FC = () => {
     { id: 'fixtures', label: 'Series', icon: Calendar },
     { id: 'teams', label: 'Teams', icon: Users },
     { id: 'overview', label: 'Features', icon: Sparkles },
+    { id: 'halloffame', label: 'Hall of Fame', icon: Trophy, badge: '2022-26' },
     { id: 'videos', label: 'Videos', icon: Video },
     { id: 'stats', label: 'Stats', icon: Award },
     { id: 'playoffs', label: `${tournament.season || '2026'} Finals`, icon: Trophy },

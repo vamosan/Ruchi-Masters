@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { Team, Player } from '../../types/cricket';
 import { useTournament } from '../../context/TournamentContext';
-import { processPlayerPhoto } from '../../utils/imageUtils';
+import { processPlayerPhoto, processBannerPhoto } from '../../utils/imageUtils';
 
 interface Props {
   team: Team;
@@ -83,7 +83,7 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
       try {
-        const compressed = await processPlayerPhoto(file);
+        const compressed = await processBannerPhoto(file);
         setTeamPhotoUrl(compressed);
       } catch (err) {
         console.error(err);
@@ -95,7 +95,7 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
     const file = e.target.files && e.target.files[0];
     if (file) {
       try {
-        const compressed = await processPlayerPhoto(file);
+        const compressed = await processBannerPhoto(file);
         setBannerUrl(compressed);
       } catch (err) {
         console.error(err);
@@ -147,11 +147,11 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in">
-      <div className="bg-white text-slate-900 border-3 border-slate-950 shadow-[10px_10px_0px_#0f172a] rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md overflow-y-auto animate-in fade-in">
+      <div className="bg-white text-slate-900 border border-slate-200 shadow-2xl rounded-3xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden my-auto">
         
         {/* Modal Top Header */}
-        <div className="p-5 sm:p-6 bg-slate-950 text-white flex items-center justify-between gap-4 border-b-2 border-slate-900 shrink-0">
+        <div className="p-5 sm:p-6 bg-slate-950 text-white flex items-center justify-between gap-4 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
             <div 
               className="w-12 h-12 rounded-2xl flex items-center justify-center border-2 border-white/20 text-white shadow"
@@ -186,7 +186,7 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
                 : 'text-slate-700 hover:bg-slate-200'
             }`}
           >
-            <Building2 className="w-3.5 h-3.5 text-[#CCFF00]" />
+            <Building2 className="w-3.5 h-3.5 text-amber-400" />
             <span>Venue, Estd & Address</span>
           </button>
 
@@ -402,8 +402,8 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
                   />
 
                   <div className="space-y-2 flex-1 w-full">
-                    <label className="cursor-pointer px-4 py-2 rounded-xl bg-[#00F59B] hover:bg-[#00e08c] text-slate-950 font-black text-xs inline-flex items-center gap-2 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]">
-                      <Upload className="w-3.5 h-3.5" />
+                    <label className="cursor-pointer px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs inline-flex items-center gap-2 shadow-sm transition-colors">
+                      <Upload className="w-3.5 h-3.5 text-amber-300" />
                       <span>Upload New Squad Photo</span>
                       <input 
                         type="file" 
@@ -424,12 +424,12 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
                         key={idx}
                         type="button"
                         onClick={() => setTeamPhotoUrl(preset.url)}
-                        className={`p-1 rounded-xl border-2 transition-all text-left overflow-hidden ${
-                          teamPhotoUrl === preset.url ? 'border-emerald-600 ring-2 ring-emerald-400' : 'border-slate-300 hover:border-slate-800'
+                        className={`p-1 rounded-xl border transition-all text-left overflow-hidden ${
+                          teamPhotoUrl === preset.url ? 'border-amber-500 ring-2 ring-amber-400/30' : 'border-slate-200 hover:border-slate-400'
                         }`}
                       >
                         <img src={preset.url} alt={preset.label} className="w-full h-10 object-cover rounded-lg" />
-                        <span className="text-[9px] font-bold text-slate-700 block truncate mt-0.5 text-center">
+                        <span className="text-[9px] font-semibold text-slate-700 block truncate mt-0.5 text-center">
                           {preset.label}
                         </span>
                       </button>
@@ -439,18 +439,18 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
               </div>
 
               {/* 2. Team Stadium Banner */}
-              <div className="p-4 rounded-2xl bg-slate-50 border-2 border-slate-900 space-y-3">
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4 text-amber-600" />
-                    <span className="font-black text-xs uppercase tracking-wider text-slate-900">
+                    <ImageIcon className="w-4 h-4 text-slate-600" />
+                    <span className="font-semibold text-xs uppercase tracking-wider text-slate-900">
                       Team Cover Banner (Stadium Backdrop)
                     </span>
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <div className="relative w-full h-24 rounded-2xl overflow-hidden border-2 border-slate-900 shadow">
+                  <div className="relative w-full h-24 rounded-xl overflow-hidden border border-slate-200 shadow-sm">
                     <img
                       src={bannerUrl || PRESET_BANNERS[0].url}
                       alt="Banner Preview"
@@ -458,8 +458,8 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
                     />
                   </div>
 
-                  <label className="cursor-pointer px-4 py-2 rounded-xl bg-[#FFE600] hover:bg-[#ebd300] text-slate-950 font-black text-xs inline-flex items-center gap-2 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a]">
-                    <Upload className="w-3.5 h-3.5" />
+                  <label className="cursor-pointer px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs inline-flex items-center gap-2 shadow-sm transition-colors">
+                    <Upload className="w-3.5 h-3.5 text-amber-300" />
                     <span>Upload Banner Image</span>
                     <input 
                       type="file" 
@@ -619,9 +619,9 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
 
             <button
               type="submit"
-              className="px-7 py-2.5 rounded-2xl bg-[#00F59B] hover:bg-[#00e08c] text-slate-950 font-black text-xs flex items-center gap-2 border-2 border-slate-950 shadow-[2px_2px_0px_#0f172a] transition-all"
+              className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-2 shadow-sm transition-all"
             >
-              <Save className="w-4 h-4" />
+              <Save className="w-4 h-4 text-amber-300" />
               <span>Save Franchise Info</span>
             </button>
           </div>

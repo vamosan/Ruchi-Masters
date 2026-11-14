@@ -23,7 +23,7 @@ export const INITIAL_HALL_OF_FAME: HallOfFameEntry[] = [
     "bestWicketKeeper": "Best Wicket Keeper (Most Dismissals)",
     "bestFielder": "Best Fielder (Most Catches & Run-outs)",
     "trophyPhotoUrl": "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80",
-    "celebrationBannerUrl": "https://images.unsplash.com/photo-1531415074868-036b1c57e3ce?auto=format&fit=crop&w=1200&q=80",
+    "celebrationBannerUrl": "https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=1200&q=80",
     "story": "Frankfurt Spartans Cricket Club triumphed in the high-stakes 5th Edition Grand Final against Frankfurt Strikers to lift the prestigious 2026 Ruchi Masters T20 Cup! The tournament featured 40 elite teams competing in high-voltage matches culminating in a spectacular championship victory.",
     "media": [
       {
@@ -36,15 +36,22 @@ export const INITIAL_HALL_OF_FAME: HallOfFameEntry[] = [
       {
         "id": "med-2026-2",
         "type": "image",
-        "url": "https://images.unsplash.com/photo-1531415074868-036b1c57e3ce?auto=format&fit=crop&w=800&q=80",
+        "url": "https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=800&q=80",
         "title": "Frankfurt Spartans Championship Squad Photo",
         "caption": "Winning squad and support staff celebrating the 2026 title."
+      },
+      {
+        "id": "med-2026-yt-highlights",
+        "type": "video",
+        "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        "title": "Grand Final Match Highlights & Presentation Ceremony",
+        "caption": "Official tournament highlight reel, key match-winning moments, and championship ceremony."
       },
       {
         "id": "med-2026-3",
         "type": "video",
         "url": "https://cricheroes.com/scorecard/27086324/ruchi-masters-t20-2026-5th-edition-/frankfurt-strikers-vs-frankfurt-spartans-cricket-club/scorecard",
-        "title": "⚡ Official CricHeroes Final Match Scorecard & Graphs",
+        "title": "Official CricHeroes Final Match Scorecard & Graphs",
         "caption": "Verified ball-by-ball scorecard, batting analysis, and bowling spell breakdowns."
       }
     ]

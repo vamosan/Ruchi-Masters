@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { 
   Tournament, 
   Team, 
@@ -135,7 +135,7 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
   const [activeTab, setActiveTab] = useState<string>('overview');
 
-  // Authentication State
+  // Hall of Fame State with Guaranteed Persistence & Initialization Guard
   const [hallOfFame, setHallOfFame] = useState<HallOfFameEntry[]>(() => {
     const saved = localStorage.getItem('cricmaster_hall_of_fame_v3');
     if (saved) {
@@ -151,21 +151,158 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return INITIAL_HALL_OF_FAME;
   });
 
-  // Reconcile with IndexedDB on mount (loads any large base64 images that exceeded localStorage)
+  // Guard refs to PREVENT overwriting IndexedDB/storage on initial mount/hydration!
+  const isHofLoadedRef = useRef(false);
+  const isTeamsLoadedRef = useRef(false);
+
+  // Reconcile Teams with IndexedDB & Cloudflare API on mount
   useEffect(() => {
     let isMounted = true;
-    loadFromIndexedDB<HallOfFameEntry[]>('cricmaster_hall_of_fame_v3').then(cached => {
-      if (isMounted && cached && Array.isArray(cached) && cached.length > 0) {
-        setHallOfFame(cached);
+
+    const initTeams = async () => {
+      // 1. Try remote Cloudflare Pages function if deployed
+      try {
+        const remoteRes = await fetch('/api/teams').catch(() => null);
+        if (remoteRes && remoteRes.ok) {
+          const remoteData = await remoteRes.json();
+          if (Array.isArray(remoteData) && remoteData.length >= 40 && isMounted) {
+            setTeams(remoteData);
+            saveToIndexedDB('cricmaster_teams_v4', remoteData);
+            isTeamsLoadedRef.current = true;
+            return;
+          }
+        }
+      } catch (_) {
+        // Fallback to IndexedDB
       }
-    });
+
+      // 2. Load from client IndexedDB safely
+      try {
+        const cached = await loadFromIndexedDB<Team[]>('cricmaster_teams_v4');
+        if (isMounted && cached && Array.isArray(cached) && cached.length > 0) {
+          setTeams(prev => {
+            // Merge cached teams with initial data so custom uploaded squad photos & player photos NEVER vanish
+            const merged = INITIAL_TEAMS.map(initTeam => {
+              const cachedTeam = cached.find(c => c.id === initTeam.id);
+              if (!cachedTeam) return initTeam;
+              return {
+                ...initTeam,
+                ...cachedTeam,
+                teamPhotoUrl: cachedTeam.teamPhotoUrl || initTeam.teamPhotoUrl,
+                bannerUrl: cachedTeam.bannerUrl || initTeam.bannerUrl,
+                logo: cachedTeam.logo || initTeam.logo,
+                players: cachedTeam.players && cachedTeam.players.length > 0 ? cachedTeam.players : initTeam.players
+              };
+            });
+
+            // Retain any new teams added by organizers
+            cached.forEach(c => {
+              if (!merged.some(m => m.id === c.id)) {
+                merged.push(c);
+              }
+            });
+
+            return merged;
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to load teams from IndexedDB:', err);
+      } finally {
+        if (isMounted) {
+          isTeamsLoadedRef.current = true;
+        }
+      }
+    };
+
+    initTeams();
     return () => { isMounted = false; };
   }, []);
 
-  // Persist hall of fame changes to both IndexedDB (safe for unlimited photos) & localStorage
+  // Reconcile with IndexedDB & Cloudflare API on mount
   useEffect(() => {
+    let isMounted = true;
+
+    const initHallOfFame = async () => {
+      // 1. Try remote Cloudflare Pages function if deployed
+      try {
+        const remoteRes = await fetch('/api/halloffame').catch(() => null);
+        if (remoteRes && remoteRes.ok) {
+          const remoteData = await remoteRes.json();
+          if (Array.isArray(remoteData) && remoteData.length > 0 && isMounted) {
+            setHallOfFame(remoteData);
+            saveToIndexedDB('cricmaster_hall_of_fame_v3', remoteData);
+            isHofLoadedRef.current = true;
+            return;
+          }
+        }
+      } catch (_) {
+        // Fallback to IndexedDB
+      }
+
+      // 2. Load from client IndexedDB safely
+      try {
+        const cached = await loadFromIndexedDB<HallOfFameEntry[]>('cricmaster_hall_of_fame_v3');
+        if (isMounted && cached && Array.isArray(cached) && cached.length > 0) {
+          setHallOfFame(prev => {
+            // Intelligently merge cached records with INITIAL_HALL_OF_FAME so user uploads NEVER vanish
+            const merged = INITIAL_HALL_OF_FAME.map(initEntry => {
+              const cachedEntry = cached.find(c => c.year === initEntry.year);
+              if (!cachedEntry) return initEntry;
+              return {
+                ...initEntry,
+                ...cachedEntry,
+                // Prioritize user-uploaded media (photos, video highlights, etc.)
+                media: (cachedEntry.media && cachedEntry.media.length > 0) 
+                  ? cachedEntry.media.map(m => {
+                      if (m.url && m.url.includes('1531415074868-036b1c57e3ce')) {
+                        return { ...m, url: 'https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=800&q=80' };
+                      }
+                      return m;
+                    })
+                  : initEntry.media,
+                trophyPhotoUrl: (cachedEntry.trophyPhotoUrl && !cachedEntry.trophyPhotoUrl.includes('1531415074868-036b1c57e3ce')) ? cachedEntry.trophyPhotoUrl : initEntry.trophyPhotoUrl,
+                celebrationBannerUrl: (cachedEntry.celebrationBannerUrl && !cachedEntry.celebrationBannerUrl.includes('1531415074868-036b1c57e3ce')) ? cachedEntry.celebrationBannerUrl : initEntry.celebrationBannerUrl,
+                trophyPhotoPosY: cachedEntry.trophyPhotoPosY ?? initEntry.trophyPhotoPosY
+              };
+            });
+
+            // Retain any new seasons/years added by the user/admin
+            cached.forEach(c => {
+              if (!merged.some(m => m.year === c.year)) {
+                merged.push(c);
+              }
+            });
+
+            return merged.sort((a, b) => b.year - a.year);
+          });
+        }
+      } catch (err) {
+        console.warn('Failed to load hallOfFame from IndexedDB:', err);
+      } finally {
+        if (isMounted) {
+          isHofLoadedRef.current = true;
+        }
+      }
+    };
+
+    initHallOfFame();
+    return () => { isMounted = false; };
+  }, []);
+
+  // Persist hall of fame changes ONLY when user adds/modifies data (never on initial hydration)
+  useEffect(() => {
+    if (!isHofLoadedRef.current) return;
     saveToIndexedDB('cricmaster_hall_of_fame_v3', hallOfFame);
     safeSetLocalStorage('cricmaster_hall_of_fame_v3', JSON.stringify(hallOfFame));
+
+    // Silently sync with Cloudflare Pages API endpoint in background
+    try {
+      fetch('/api/halloffame', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(hallOfFame)
+      }).catch(() => {});
+    } catch (_) {}
   }, [hallOfFame]);
 
   const addHallOfFameEntry = (entry: HallOfFameEntry) => {
@@ -317,7 +454,18 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [tournament]);
 
   useEffect(() => {
+    if (!isTeamsLoadedRef.current) return;
+    saveToIndexedDB('cricmaster_teams_v4', teams);
     safeSetLocalStorage(STORAGE_KEYS.TEAMS, JSON.stringify(teams));
+
+    // Silently sync teams with Cloudflare Pages API endpoint in background
+    try {
+      fetch('/api/teams', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(teams)
+      }).catch(() => {});
+    } catch (_) {}
   }, [teams]);
 
   useEffect(() => {

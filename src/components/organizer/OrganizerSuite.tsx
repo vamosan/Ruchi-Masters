@@ -155,7 +155,7 @@ export const OrganizerSuite: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-xl bg-[#CCFF00] text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5">
+              <span className="px-3 py-1 rounded-full bg-slate-800 text-amber-300 font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 border border-slate-700">
                 <KeyRound className="w-3.5 h-3.5" />
                 Captain Access Portal
               </span>
@@ -176,7 +176,7 @@ export const OrganizerSuite: React.FC = () => {
               value={searchTeam}
               onChange={(e) => setSearchTeam(e.target.value)}
               placeholder="Filter 40 teams by name or code..."
-              className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-700 bg-slate-950 text-white text-xs font-medium focus:outline-none focus:border-[#CCFF00]"
+              className="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-700 bg-slate-950 text-white text-xs font-medium focus:outline-none focus:border-amber-400"
             />
             {searchTeam && (
               <button 
@@ -255,12 +255,12 @@ export const OrganizerSuite: React.FC = () => {
                             onChange={(e) => setNewPinValue(e.target.value)}
                             placeholder="New PIN"
                             maxLength={8}
-                            className="w-20 px-2 py-1 rounded bg-slate-900 border border-[#CCFF00] text-[#CCFF00] font-mono text-xs font-bold focus:outline-none"
+                            className="w-20 px-2 py-1 rounded bg-slate-900 border border-amber-400 text-amber-300 font-mono text-xs font-bold focus:outline-none"
                             autoFocus
                           />
                           <button
                             onClick={() => handleSavePin(team.id)}
-                            className="px-2 py-1 bg-[#CCFF00] text-slate-950 font-bold rounded text-xs"
+                            className="px-2 py-1 bg-amber-400 text-slate-950 font-bold rounded text-xs"
                           >
                             ✓
                           </button>

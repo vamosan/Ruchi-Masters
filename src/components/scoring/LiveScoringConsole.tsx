@@ -221,10 +221,10 @@ export const LiveScoringConsole: React.FC = () => {
             <button
               key={m.id}
               onClick={() => setActiveMatchId(m.id)}
-              className={'h-10 px-4 rounded-xl text-xs font-black shrink-0 flex items-center gap-2 border-2 transition-all ' + (
+              className={'h-9 px-3.5 rounded-lg text-xs font-semibold shrink-0 flex items-center gap-2 border transition-all ' + (
                 isCurrent 
-                  ? 'bg-[#CCFF00] text-slate-950 border-slate-950 shadow-[3px_3px_0px_#0f172a]' 
-                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50 hover:text-slate-950 hover:border-slate-900 shadow-[1px_1px_0px_#0f172a]'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-sm' 
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-950 shadow-2xs'
               )}
             >
               <span className="font-cabinet font-bold">{tA?.code} vs {tB?.code}</span>
