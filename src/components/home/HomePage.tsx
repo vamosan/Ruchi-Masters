@@ -267,12 +267,18 @@ export const HomePage: React.FC = () => {
       {latest && (
         <section className="max-w-[1320px] mx-auto px-5 sm:px-8 pt-8 sm:pt-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
-            {/* 2026 Winners Spotlight Card (6 Cols) */}
+            {/* 2026 Winners Spotlight Card with White-Outline Batter Silhouette (6 Cols) */}
             <button
               onClick={() => go('halloffame')}
-              className="lg:col-span-6 group rounded-[6px] bg-[#090909] text-[#f6f4f4] p-4 sm:px-5 flex items-center justify-between gap-4 text-left hover:bg-[#191717] transition-colors cursor-pointer"
+              className="lg:col-span-6 relative overflow-hidden group rounded-[6px] bg-[#090909] text-[#f6f4f4] p-4 sm:px-5 flex items-center justify-between gap-4 text-left hover:bg-[#191717] transition-colors cursor-pointer"
             >
-              <div className="flex items-center gap-3.5 min-w-0">
+              <img
+                src="/cricket-action/batter-outline.png"
+                alt=""
+                aria-hidden="true"
+                className="pointer-events-none select-none absolute right-24 -bottom-3 h-28 w-auto object-contain opacity-25 group-hover:scale-105 transition-transform"
+              />
+              <div className="relative z-10 flex items-center gap-3.5 min-w-0">
                 <span className="w-11 h-11 rounded-full bg-[#ff6a17] text-[#090909] flex items-center justify-center shrink-0">
                   <Trophy className="w-5 h-5" />
                 </span>
@@ -290,19 +296,25 @@ export const HomePage: React.FC = () => {
                   </div>
                 </div>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 text-[12px] font-medium text-[#f6f4f4] group-hover:bg-[#ff6a17] group-hover:text-[#090909] transition-colors shrink-0">
+              <span className="relative z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 text-[12px] font-medium text-[#f6f4f4] group-hover:bg-[#ff6a17] group-hover:text-[#090909] transition-colors shrink-0">
                 <span className="hidden sm:inline">Hall of Fame</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
               </span>
             </button>
 
-            {/* Orange Cap Leader (3 Cols) */}
+            {/* Orange Cap Leader with Lofted Batter Silhouette (3 Cols) */}
             {orangeLeader && (
               <button
                 onClick={() => go('stats')}
-                className="lg:col-span-3 rounded-[6px] bg-white border border-[#090909]/12 hover:border-[#090909] p-4 flex items-center justify-between text-left transition-colors cursor-pointer"
+                className="lg:col-span-3 relative overflow-hidden group rounded-[6px] bg-white border border-[#090909]/12 hover:border-[#090909] p-4 flex items-center justify-between text-left transition-colors cursor-pointer"
               >
-                <div className="min-w-0">
+                <img
+                  src="/cricket-action/batter-lofted.png"
+                  alt=""
+                  aria-hidden="true"
+                  className="pointer-events-none select-none absolute right-12 -bottom-2 h-24 w-auto object-contain opacity-[0.14] group-hover:opacity-25 group-hover:scale-105 transition-all"
+                />
+                <div className="relative z-10 min-w-0">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-[#ff6a17]">
                     Orange Cap · Most Runs
                   </div>
@@ -311,19 +323,25 @@ export const HomePage: React.FC = () => {
                   </div>
                   <div className="text-[11px] text-[#736e6e] font-mono">{orangeLeader.teamCode}</div>
                 </div>
-                <span className="font-mono text-[26px] font-black text-[#090909] shrink-0 ml-3">
+                <span className="relative z-10 font-mono text-[26px] font-black text-[#090909] shrink-0 ml-3">
                   {orangeLeader.runsScored}
                 </span>
               </button>
             )}
 
-            {/* Purple Cap Leader (3 Cols) */}
+            {/* Purple Cap Leader with Fast Bowler Silhouette (3 Cols) */}
             {purpleLeader && (
               <button
                 onClick={() => go('stats')}
-                className="lg:col-span-3 rounded-[6px] bg-white border border-[#090909]/12 hover:border-[#090909] p-4 flex items-center justify-between text-left transition-colors cursor-pointer"
+                className="lg:col-span-3 relative overflow-hidden group rounded-[6px] bg-white border border-[#090909]/12 hover:border-[#090909] p-4 flex items-center justify-between text-left transition-colors cursor-pointer"
               >
-                <div className="min-w-0">
+                <img
+                  src="/cricket-action/bowler-action.png"
+                  alt=""
+                  aria-hidden="true"
+                  className="pointer-events-none select-none absolute right-10 -bottom-2 h-24 w-auto object-contain opacity-[0.16] group-hover:opacity-25 group-hover:scale-105 transition-all"
+                />
+                <div className="relative z-10 min-w-0">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-[#575252]">
                     Purple Cap · Most Wickets
                   </div>
@@ -332,7 +350,7 @@ export const HomePage: React.FC = () => {
                   </div>
                   <div className="text-[11px] text-[#736e6e] font-mono">{purpleLeader.teamCode}</div>
                 </div>
-                <span className="font-mono text-[26px] font-black text-[#090909] shrink-0 ml-3">
+                <span className="relative z-10 font-mono text-[26px] font-black text-[#090909] shrink-0 ml-3">
                   {purpleLeader.wicketsTaken}
                 </span>
               </button>
@@ -341,8 +359,22 @@ export const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* ───────────── BAND 3: PIXEL-ALIGNED 2-COLUMN SCHEDULE & STANDINGS (ZERO GAP) ───────────── */}
-      <section className="max-w-[1320px] mx-auto px-5 sm:px-8 py-8 sm:py-10">
+      {/* ───────────── BAND 3: PIXEL-ALIGNED 2-COLUMN SCHEDULE & STANDINGS (WITH ACTION WATERMARKS) ───────────── */}
+      <section className="relative overflow-hidden">
+        {/* Left & Right Margin Cricket Action Silhouettes on Wide Screens */}
+        <img
+          src="/cricket-action/batter-lofted.png"
+          alt=""
+          aria-hidden="true"
+          className="hidden xl:block pointer-events-none select-none absolute left-3 bottom-4 h-72 w-auto object-contain opacity-[0.06]"
+        />
+        <img
+          src="/cricket-action/bowler-action.png"
+          alt=""
+          aria-hidden="true"
+          className="hidden xl:block pointer-events-none select-none absolute right-2 bottom-4 h-72 w-auto object-contain opacity-[0.07]"
+        />
+        <div className="relative z-10 max-w-[1320px] mx-auto px-5 sm:px-8 py-8 sm:py-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left 6 Cols: Hairline Schedule (Identical 58px Row Height) */}
           <div className="lg:col-span-6">
@@ -502,6 +534,7 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
         </div>
+        </div>
       </section>
 
       {/* ───────────── BAND 4: INTERACTIVE CLUB ZONE (HEAD-TO-HEAD & LIVE FAN POLLS) ───────────── */}
@@ -571,12 +604,18 @@ export const HomePage: React.FC = () => {
                     />
                   ) : (
                     <div
-                      className="w-full h-full flex items-center justify-center"
+                      className="relative w-full h-full flex items-center justify-center overflow-hidden"
                       style={{
                         background: `linear-gradient(160deg, ${t.primaryColor || '#2c2727'} 0%, #090909 85%)`,
                       }}
                     >
-                      <span className="text-[44px] opacity-90">{t.logo}</span>
+                      <img
+                        src="/cricket-action/batter-outline.png"
+                        alt=""
+                        aria-hidden="true"
+                        className="pointer-events-none select-none absolute -right-2 -bottom-2 h-36 w-auto object-contain opacity-25 group-hover:scale-105 transition-transform"
+                      />
+                      <span className="relative z-10 text-[44px] opacity-90">{t.logo}</span>
                     </div>
                   )}
                   {(isChamp || isMine) && (
@@ -609,8 +648,14 @@ export const HomePage: React.FC = () => {
 
       {/* ───────────── BAND 6: ROLL OF HONOUR & UNIFORM 4-COLUMN GALLERY (DARK) ───────────── */}
       {seasons.length > 0 && (
-        <section className="bg-[#090909] text-[#f6f4f4]">
-          <div className="max-w-[1320px] mx-auto px-5 sm:px-8 py-10 sm:py-12 space-y-8">
+        <section className="relative overflow-hidden bg-[#090909] text-[#f6f4f4]">
+          <img
+            src="/cricket-action/batter-outline.png"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none select-none absolute right-6 top-6 h-80 w-auto object-contain opacity-[0.12]"
+          />
+          <div className="relative z-10 max-w-[1320px] mx-auto px-5 sm:px-8 py-10 sm:py-12 space-y-8">
             <div className="flex items-end justify-between gap-4">
               <div>
                 <div className="rally-eyebrow text-[#ff6a17]">2022 – 2026 Archive</div>

@@ -103,9 +103,23 @@ export const ClubEngagementZone: React.FC = () => {
     <section className="max-w-[1320px] mx-auto px-5 sm:px-8 pb-10 sm:pb-12">
       <div className="border-t border-[#090909]/15 pt-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          {/* Left 6 Cols: Interactive Head-to-Head Club Comparator */}
-          <div className="lg:col-span-6 rounded-[6px] bg-white border border-[#090909]/12 p-5 flex flex-col justify-between">
-            <div>
+          {/* Left 6 Cols: Interactive Head-to-Head Club Comparator with Batter vs Bowler Silhouettes */}
+          <div className="lg:col-span-6 relative overflow-hidden rounded-[6px] bg-white border border-[#090909]/12 p-5 flex flex-col justify-between">
+            {/* Subtle Batter & Bowler Action Silhouettes on Left & Right Edges */}
+            <img
+              src="/cricket-action/batter-lofted.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none select-none absolute -left-2 bottom-2 h-56 w-auto object-contain opacity-[0.08]"
+            />
+            <img
+              src="/cricket-action/bowler-action.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none select-none absolute -right-4 bottom-2 h-56 w-auto object-contain opacity-[0.10]"
+            />
+
+            <div className="relative z-10">
               <div className="flex items-center justify-between gap-2 mb-3">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#090909] text-[#f6f4f4] text-[10px] font-bold uppercase tracking-wider">
@@ -207,7 +221,7 @@ export const ClubEngagementZone: React.FC = () => {
             </div>
 
             {/* Direct Profile Links */}
-            <div className="pt-3 flex items-center justify-between gap-3">
+            <div className="relative z-10 pt-3 flex items-center justify-between gap-3">
               {teamA && (
                 <button
                   onClick={() => openTeamProfile(teamA.id)}
@@ -229,9 +243,17 @@ export const ClubEngagementZone: React.FC = () => {
             </div>
           </div>
 
-          {/* Right 6 Cols: Locker-Room Community Polls & Matchday Predictions */}
-          <div className="lg:col-span-6 rounded-[6px] bg-[#090909] text-[#f6f4f4] p-5 flex flex-col justify-between">
-            <div>
+          {/* Right 6 Cols: Locker-Room Community Polls with Outline Batter Action Graphic */}
+          <div className="lg:col-span-6 relative overflow-hidden rounded-[6px] bg-[#090909] text-[#f6f4f4] p-5 flex flex-col justify-between">
+            {/* White-Outline Cover Drive Batter Graphic on Right Edge */}
+            <img
+              src="/cricket-action/batter-outline.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none select-none absolute -right-4 -bottom-4 h-72 w-auto object-contain opacity-20"
+            />
+
+            <div className="relative z-10">
               <div className="flex items-center justify-between gap-2 mb-3">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#ff6a17] text-[#090909] text-[10px] font-bold uppercase tracking-wider">
@@ -248,7 +270,7 @@ export const ClubEngagementZone: React.FC = () => {
               </h3>
 
               {/* Poll 1: Featured Matchday Vote */}
-              <div className="rounded-[6px] bg-white/[0.05] border border-white/10 p-3.5 mb-3.5">
+              <div className="rounded-[6px] bg-white/[0.06] backdrop-blur-[2px] border border-white/10 p-3.5 mb-3.5">
                 <div className="flex items-center justify-between text-[11px] text-[#f6f4f4]/60 mb-2">
                   <span className="uppercase tracking-wider font-bold text-[#ff6a17]">
                     Featured Matchday Poll · Who Wins?
@@ -298,7 +320,7 @@ export const ClubEngagementZone: React.FC = () => {
               </div>
 
               {/* Poll 2: Toughest Group ("Group of Death") */}
-              <div className="rounded-[6px] bg-white/[0.05] border border-white/10 p-3.5">
+              <div className="rounded-[6px] bg-white/[0.06] backdrop-blur-[2px] border border-white/10 p-3.5">
                 <div className="flex items-center justify-between text-[11px] text-[#f6f4f4]/60 mb-2">
                   <span className="uppercase tracking-wider font-bold text-[#f6f4f4]">
                     Which Group is the 2026 &ldquo;Group of Death&rdquo;?
@@ -332,7 +354,7 @@ export const ClubEngagementZone: React.FC = () => {
               </div>
             </div>
 
-            <div className="pt-3 flex items-center justify-between text-[12px] text-[#f6f4f4]/65">
+            <div className="relative z-10 pt-3 flex items-center justify-between text-[12px] text-[#f6f4f4]/65">
               <span>Tap any option above to cast your club vote</span>
               <button
                 onClick={() => {
