@@ -38,6 +38,7 @@ export const onRequestGet = async (context: { env: Env }) => {
           headers: {
             'Content-Type': 'application/json',
             'Cache-Control': 'public, max-age=10',
+            'X-Storage-Backend': 'cloudflare_kv',
             'Access-Control-Allow-Origin': '*'
           }
         });
@@ -48,14 +49,16 @@ export const onRequestGet = async (context: { env: Env }) => {
       return new Response(JSON.stringify(teamsMemoryCache), {
         headers: {
           'Content-Type': 'application/json',
+          'X-Storage-Backend': 'edge_memory',
           'Access-Control-Allow-Origin': '*'
         }
       });
     }
 
-    return new Response(JSON.stringify({ status: 'no_remote_data' }), {
+    return new Response(JSON.stringify({ status: 'no_remote_data', storage: kv ? 'cloudflare_kv' : 'edge_memory' }), {
       headers: {
         'Content-Type': 'application/json',
+        'X-Storage-Backend': kv ? 'cloudflare_kv' : 'edge_memory',
         'Access-Control-Allow-Origin': '*'
       }
     });

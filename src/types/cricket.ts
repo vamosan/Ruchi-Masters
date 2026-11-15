@@ -92,6 +92,11 @@ export interface Team {
   description?: string;
   bannerUrl?: string;
   teamPhotoUrl?: string;
+  teamPhotoPosX?: number;
+  teamPhotoPosY?: number;
+  teamPhotoZoom?: number;
+  teamPhotoFit?: 'cover' | 'contain';
+  updatedAt?: number;
   establishedYear?: number;
   trophyCabinet?: string;
   address?: string;

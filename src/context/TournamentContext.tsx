@@ -179,6 +179,60 @@ function mergeSeededStatsIfMissing(storedTeams: Team[]): { teams: Team[]; didMig
   return { teams: migrated, didMigrate: true };
 }
 
+function mergeLocalAndRemoteTeams(localTeams: Team[] | null, remoteTeams: Team[] | null): { merged: Team[]; shouldPushRemote: boolean } {
+  const localNormalized = localTeams && localTeams.length > 0 ? mergeSeededStatsIfMissing(localTeams).teams : [];
+  const remoteNormalized = remoteTeams && remoteTeams.length > 0 ? mergeSeededStatsIfMissing(remoteTeams).teams : [];
+
+  if (localNormalized.length === 0) {
+    return { merged: remoteNormalized, shouldPushRemote: false };
+  }
+  if (remoteNormalized.length === 0) {
+    return { merged: localNormalized, shouldPushRemote: true };
+  }
+
+  let shouldPushRemote = false;
+  const byId = new Map<string, Team>();
+
+  remoteNormalized.forEach(r => byId.set(r.id, r));
+
+  const merged = localNormalized.map(localTeam => {
+    const remoteTeam = byId.get(localTeam.id);
+    if (!remoteTeam) {
+      shouldPushRemote = true;
+      return localTeam;
+    }
+    const localTs = localTeam.updatedAt || 0;
+    const remoteTs = remoteTeam.updatedAt || 0;
+
+    if (localTs > remoteTs) {
+      shouldPushRemote = true;
+      return localTeam;
+    }
+    if (remoteTs > localTs) {
+      return remoteTeam;
+    }
+
+    // Equal or missing timestamps: preserve uploaded media/position/cabinet if present locally
+    const hasLocalCustomPhoto = Boolean(localTeam.teamPhotoUrl && !remoteTeam.teamPhotoUrl);
+    if (hasLocalCustomPhoto) shouldPushRemote = true;
+    return {
+      ...remoteTeam,
+      teamPhotoUrl: localTeam.teamPhotoUrl || remoteTeam.teamPhotoUrl,
+      teamPhotoPosX: localTeam.teamPhotoPosX ?? remoteTeam.teamPhotoPosX,
+      teamPhotoPosY: localTeam.teamPhotoPosY ?? remoteTeam.teamPhotoPosY,
+      teamPhotoZoom: localTeam.teamPhotoZoom ?? remoteTeam.teamPhotoZoom,
+      teamPhotoFit: localTeam.teamPhotoFit ?? remoteTeam.teamPhotoFit,
+      trophyCabinet: localTeam.trophyCabinet ?? remoteTeam.trophyCabinet,
+    };
+  });
+
+  remoteNormalized.forEach(r => {
+    if (!merged.some(m => m.id === r.id)) merged.push(r);
+  });
+
+  return { merged, shouldPushRemote };
+}
+
 export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tournament, setTournament] = useState<Tournament>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.TOURNAMENT);
@@ -279,48 +333,52 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return () => { isMounted = false; };
   }, []);
 
-  // Reconcile Teams with IndexedDB & Cloudflare API on mount
+  // Reconcile Teams with IndexedDB & Cloudflare API on mount (preserving local edits safely)
   useEffect(() => {
     let isMounted = true;
 
     const initTeams = async () => {
-      // 1. Try remote Cloudflare Pages function if deployed
+      let cached: Team[] | null = null;
       try {
-        const remoteRes = await fetch('/api/teams').catch(() => null);
-        if (remoteRes && remoteRes.ok) {
-          const remoteData = await remoteRes.json();
-          if (Array.isArray(remoteData) && remoteData.length >= 40 && isMounted) {
-            const { teams: syncedTeams, didMigrate } = mergeSeededStatsIfMissing(remoteData);
-            setTeams(syncedTeams);
-            saveToIndexedDB('cricmaster_teams_v4', syncedTeams);
-            if (didMigrate) {
-              fetch('/api/teams', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(syncedTeams),
-              }).catch(() => {});
-            }
-            isTeamsLoadedRef.current = true;
-            return;
-          }
-        }
-      } catch (_) {
-        // Fallback to IndexedDB
-      }
-
-      // 2. Load from client IndexedDB safely
-      try {
-        const cached = await loadFromIndexedDB<Team[]>('cricmaster_teams_v4');
-        if (isMounted && cached && Array.isArray(cached) && cached.length > 0) {
-          setTeams(() => mergeSeededStatsIfMissing(cached).teams);
+        const idbCached = await loadFromIndexedDB<Team[]>('cricmaster_teams_v4');
+        if (idbCached && Array.isArray(idbCached) && idbCached.length > 0) {
+          cached = idbCached;
         }
       } catch (err) {
         console.warn('Failed to load teams from IndexedDB:', err);
-      } finally {
-        if (isMounted) {
-          isTeamsLoadedRef.current = true;
+      }
+
+      let remoteData: Team[] | null = null;
+      try {
+        const remoteRes = await fetch('/api/teams').catch(() => null);
+        if (remoteRes && remoteRes.ok) {
+          const parsed = await remoteRes.json();
+          if (Array.isArray(parsed) && parsed.length >= 40) {
+            remoteData = parsed;
+          }
+        }
+      } catch (_) {
+        // Offline or local dev without API function
+      }
+
+      if (!isMounted) return;
+
+      if (cached || remoteData) {
+        const { merged, shouldPushRemote } = mergeLocalAndRemoteTeams(cached, remoteData);
+        if (merged.length > 0) {
+          setTeams(merged);
+          saveToIndexedDB('cricmaster_teams_v4', merged);
+          if (shouldPushRemote) {
+            fetch('/api/teams', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(merged),
+            }).catch(() => {});
+          }
         }
       }
+
+      isTeamsLoadedRef.current = true;
     };
 
     initTeams();
@@ -522,7 +580,8 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         return {
           ...t,
           passcode: newPasscode,
-          isPinSet: true
+          isPinSet: true,
+          updatedAt: Date.now()
         };
       }
       return t;
@@ -624,11 +683,12 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const addTeam = (team: Team) => {
-    setTeams(prev => [...prev, team]);
+    setTeams(prev => [...prev, { ...team, updatedAt: Date.now() }]);
   };
 
   const updateTeam = (team: Team) => {
-    setTeams(prev => prev.map(t => t.id === team.id ? team : t));
+    const stamped = { ...team, updatedAt: Date.now() };
+    setTeams(prev => prev.map(t => t.id === stamped.id ? stamped : t));
   };
 
   const deleteTeam = (teamId: string) => {
@@ -640,6 +700,7 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (t.id === teamId) {
         return {
           ...t,
+          updatedAt: Date.now(),
           players: [...t.players, player]
         };
       }
@@ -652,6 +713,7 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (t.id === teamId) {
         return {
           ...t,
+          updatedAt: Date.now(),
           players: t.players.map(p => p.id === player.id ? player : p)
         };
       }
@@ -664,6 +726,7 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (t.id === teamId) {
         return {
           ...t,
+          updatedAt: Date.now(),
           players: t.players.filter(p => p.id !== playerId)
         };
       }

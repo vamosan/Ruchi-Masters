@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { 
   ArrowLeft,
   Edit3, 
@@ -23,7 +23,12 @@ import {
   Trash2,
   Trophy,
   LayoutGrid,
-  GalleryHorizontalEnd
+  GalleryHorizontalEnd,
+  Move,
+  RotateCcw,
+  Check,
+  Maximize2,
+  X
 } from 'lucide-react';
 import { Team, Player, PlayerRole, BattingStyle, BowlingStyle } from '../../types/cricket';
 import { useTournament } from '../../context/TournamentContext';
@@ -66,6 +71,23 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
   const [authPlayerModal, setAuthPlayerModal] = useState<Player | null>(null);
   const [selectedCertPlayer, setSelectedCertPlayer] = useState<Player | null>(null);
   const [enlargedPlayer, setEnlargedPlayer] = useState<Player | null>(null);
+
+  // Squad Photo Reposition & Fit State
+  const [isAdjustingPhoto, setIsAdjustingPhoto] = useState(false);
+  const [photoPosX, setPhotoPosX] = useState<number>(team.teamPhotoPosX ?? 50);
+  const [photoPosY, setPhotoPosY] = useState<number>(team.teamPhotoPosY ?? 35);
+  const [photoZoom, setPhotoZoom] = useState<number>(team.teamPhotoZoom ?? 1);
+  const [photoFit, setPhotoFit] = useState<'cover' | 'contain'>(team.teamPhotoFit || 'cover');
+  const photoBoxRef = useRef<HTMLDivElement | null>(null);
+  const dragRef = useRef<{ startX: number; startY: number; origX: number; origY: number } | null>(null);
+
+  useEffect(() => {
+    setIsAdjustingPhoto(false);
+    setPhotoPosX(team.teamPhotoPosX ?? 50);
+    setPhotoPosY(team.teamPhotoPosY ?? 35);
+    setPhotoZoom(team.teamPhotoZoom ?? 1);
+    setPhotoFit(team.teamPhotoFit || 'cover');
+  }, [team.id, team.teamPhotoPosX, team.teamPhotoPosY, team.teamPhotoZoom, team.teamPhotoFit]);
 
   // Search & Filters for squad
   const [searchQuery, setSearchQuery] = useState('');
@@ -169,11 +191,70 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
       const base64 = await processBannerPhoto(file);
       updateTeam({
         ...team,
-        teamPhotoUrl: base64
+        teamPhotoUrl: base64,
+        teamPhotoPosX: 50,
+        teamPhotoPosY: 25,
+        teamPhotoZoom: 1,
+        teamPhotoFit: 'cover'
       });
+      setPhotoPosX(50);
+      setPhotoPosY(25);
+      setPhotoZoom(1);
+      setPhotoFit('cover');
+      setIsAdjustingPhoto(true);
     } catch (err) {
       console.error(err);
       alert('Could not upload team photo');
+    }
+  };
+
+  const handleSavePhotoFrame = () => {
+    updateTeam({
+      ...team,
+      teamPhotoPosX: Math.round(photoPosX),
+      teamPhotoPosY: Math.round(photoPosY),
+      teamPhotoZoom: Number(photoZoom.toFixed(2)),
+      teamPhotoFit: photoFit,
+    });
+    setIsAdjustingPhoto(false);
+  };
+
+  const handleCancelPhotoFrame = () => {
+    setPhotoPosX(team.teamPhotoPosX ?? 50);
+    setPhotoPosY(team.teamPhotoPosY ?? 35);
+    setPhotoZoom(team.teamPhotoZoom ?? 1);
+    setPhotoFit(team.teamPhotoFit || 'cover');
+    setIsAdjustingPhoto(false);
+  };
+
+  const handlePhotoPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isAdjustingPhoto) return;
+    e.preventDefault();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      origX: photoPosX,
+      origY: photoPosY,
+    };
+  };
+
+  const handlePhotoPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isAdjustingPhoto || !dragRef.current || !photoBoxRef.current) return;
+    const rect = photoBoxRef.current.getBoundingClientRect();
+    const dx = ((e.clientX - dragRef.current.startX) / Math.max(1, rect.width)) * 100;
+    const dy = ((e.clientY - dragRef.current.startY) / Math.max(1, rect.height)) * 100;
+    // Dragging image right brings left edge into view (lower X%); dragging down brings top edge down (lower Y%)
+    setPhotoPosX(Math.max(0, Math.min(100, dragRef.current.origX - dx * 1.4)));
+    setPhotoPosY(Math.max(0, Math.min(100, dragRef.current.origY - dy * 1.4)));
+  };
+
+  const handlePhotoPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragRef.current) {
+      dragRef.current = null;
+      if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+        e.currentTarget.releasePointerCapture(e.pointerId);
+      }
     }
   };
 
@@ -484,19 +565,37 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
           {/* RIGHT COLUMN (7 Cols): BIG Dramatic Edge-to-Edge Fading Team Photo */}
           <div
+            ref={photoBoxRef}
+            onPointerDown={handlePhotoPointerDown}
+            onPointerMove={handlePhotoPointerMove}
+            onPointerUp={handlePhotoPointerUp}
+            onPointerCancel={handlePhotoPointerUp}
             onClick={() => {
+              if (isAdjustingPhoto) return;
               if (isAuthorized) {
                 document.getElementById('team-direct-photo-upload')?.click();
               } else {
                 openAuthModal(team.id);
               }
             }}
-            className="lg:col-span-7 relative min-h-[260px] sm:min-h-[320px] lg:min-h-[380px] overflow-hidden cursor-pointer group bg-[#0a0a0c]"
+            className={`lg:col-span-7 relative min-h-[260px] sm:min-h-[320px] lg:min-h-[380px] overflow-hidden group bg-[#0a0a0c] ${
+              isAdjustingPhoto ? 'cursor-grab active:cursor-grabbing touch-none select-none ring-2 ring-inset ring-[#ff6a17]/70' : 'cursor-pointer'
+            }`}
           >
             <img
               src={team.teamPhotoUrl || team.bannerUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1400&q=80'}
               alt={team.name}
-              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-700"
+              draggable={false}
+              style={{
+                objectPosition: `${photoPosX}% ${photoPosY}%`,
+                transform: `scale(${photoZoom})`,
+                transformOrigin: `${photoPosX}% ${photoPosY}%`,
+              }}
+              className={`absolute inset-0 w-full h-full ${
+                photoFit === 'contain' ? 'object-contain' : 'object-cover'
+              } ${
+                isAdjustingPhoto ? 'transition-none' : 'group-hover:scale-[1.02] transition-transform duration-500'
+              }`}
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1400&q=80';
@@ -507,13 +606,137 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a0a0c] via-[#0a0a0c]/20 to-transparent" />
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a0a0c]/90 via-transparent to-transparent" />
 
-            {/* Clean Photo Action Pill */}
-            <div className="absolute bottom-4 right-4 z-10">
-              <span className="px-3 py-1.5 rounded-full bg-black/75 backdrop-blur border border-white/15 text-[11px] font-semibold text-white/90 opacity-85 group-hover:opacity-100 flex items-center gap-1.5 transition-opacity">
-                <Camera className="w-3.5 h-3.5 text-[#ff6a17]" />
-                <span>{isAuthorized ? 'Change Squad Photo' : 'Captain Login for Photo'}</span>
-              </span>
-            </div>
+            {isAdjustingPhoto ? (
+              <>
+                {/* Top Drag Instruction Pill */}
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="absolute top-3 left-1/2 -translate-x-1/2 z-20 px-3 py-1 rounded-full bg-black/80 backdrop-blur-md border border-[#ff6a17]/60 text-[11px] font-semibold text-white flex items-center gap-1.5 whitespace-nowrap shadow-lg"
+                >
+                  <Move className="w-3.5 h-3.5 text-[#ff6a17]" />
+                  <span>Drag photo or slide below to fit everyone</span>
+                </div>
+
+                {/* Interactive Framing Control Bar */}
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  className="absolute bottom-3 left-3 right-3 z-20 p-3 rounded-xl bg-[#0a0a0c]/90 backdrop-blur-md border border-white/15 shadow-2xl space-y-2.5 cursor-default"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px] text-slate-300">
+                    <label className="flex items-center gap-2">
+                      <span className="w-12 shrink-0 font-semibold text-slate-400">Left–Right</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={Math.round(photoPosX)}
+                        onChange={(e) => setPhotoPosX(Number(e.target.value))}
+                        className="w-full accent-[#ff6a17] cursor-pointer"
+                      />
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <span className="w-12 shrink-0 font-semibold text-slate-400">Up–Down</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={Math.round(photoPosY)}
+                        onChange={(e) => setPhotoPosY(Number(e.target.value))}
+                        className="w-full accent-[#ff6a17] cursor-pointer"
+                      />
+                    </label>
+                    <label className="flex items-center gap-2">
+                      <span className="w-10 shrink-0 font-semibold text-slate-400">Zoom</span>
+                      <input
+                        type="range"
+                        min={1}
+                        max={1.6}
+                        step={0.05}
+                        value={photoZoom}
+                        onChange={(e) => setPhotoZoom(Number(e.target.value))}
+                        className="w-full accent-[#ff6a17] cursor-pointer"
+                      />
+                    </label>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-white/10">
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPhotoFit(photoFit === 'cover' ? 'contain' : 'cover');
+                          if (photoFit === 'cover') setPhotoZoom(1);
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 border transition-colors cursor-pointer ${
+                          photoFit === 'contain'
+                            ? 'bg-[#ff6a17] text-[#090909] border-[#ff6a17]'
+                            : 'bg-white/10 hover:bg-white/20 text-white border-white/15'
+                        }`}
+                      >
+                        <Maximize2 className="w-3 h-3" />
+                        <span>{photoFit === 'contain' ? 'Showing Full Pic' : 'Fit Entire Pic'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setPhotoPosX(50);
+                          setPhotoPosY(35);
+                          setPhotoZoom(1);
+                          setPhotoFit('cover');
+                        }}
+                        className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 text-[11px] font-semibold flex items-center gap-1 border border-white/15 cursor-pointer"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        <span>Reset</span>
+                      </button>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={handleCancelPhotoFrame}
+                        className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
+                      >
+                        <X className="w-3 h-3" />
+                        <span>Cancel</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSavePhotoFrame}
+                        className="px-3 py-1 rounded-lg bg-[#ff6a17] hover:bg-[#ff8640] text-[#090909] text-[11px] font-black flex items-center gap-1 cursor-pointer"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Save Position</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Clean Photo Action Pills */
+              <div className="absolute bottom-4 right-4 z-10 flex items-center gap-2">
+                {isAuthorized && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsAdjustingPhoto(true);
+                    }}
+                    className="px-3 py-1.5 rounded-full bg-black/75 hover:bg-black backdrop-blur border border-white/15 hover:border-[#ff6a17] text-[11px] font-semibold text-white/95 flex items-center gap-1.5 transition-all cursor-pointer"
+                  >
+                    <Move className="w-3.5 h-3.5 text-[#ff6a17]" />
+                    <span>Move / Fit Pic</span>
+                  </button>
+                )}
+
+                <span className="px-3 py-1.5 rounded-full bg-black/75 backdrop-blur border border-white/15 text-[11px] font-semibold text-white/90 opacity-85 group-hover:opacity-100 flex items-center gap-1.5 transition-opacity">
+                  <Camera className="w-3.5 h-3.5 text-[#ff6a17]" />
+                  <span>{isAuthorized ? 'Change Squad Photo' : 'Captain Login for Photo'}</span>
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
