@@ -81,6 +81,7 @@ export const HomePage: React.FC = () => {
 
   const [matchFilter, setMatchFilter] = useState<'all' | 'live' | 'upcoming' | 'completed'>('all');
   const [selectedGroupTab, setSelectedGroupTab] = useState<string>('Group A');
+  const [statTab, setStatTab] = useState<'runs' | 'wickets' | 'sixes'>('runs');
   const [teamGroupFilter, setTeamGroupFilter] = useState<string>('all');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
@@ -126,15 +127,66 @@ export const HomePage: React.FC = () => {
     return (filtered.length > 0 ? filtered : standings).slice(0, alignedRowCount);
   }, [standings, selectedGroupTab, alignedRowCount]);
 
-  // Cap Leaders
-  const { orangeLeader, purpleLeader } = useMemo(() => {
+  // Aggregate live player stats from match scorecards + player records
+  const { orangeLeader, purpleLeader, topStatsRows } = useMemo(() => {
+    const batMap = new Map<string, { runs: number; balls: number; sixes: number }>();
+    const bowlMap = new Map<string, { wickets: number; runsConceded: number }>();
+
+    matches.forEach(m => {
+      [m.innings1, m.innings2].forEach(inn => {
+        if (!inn) return;
+        inn.battingScorecard?.forEach(b => {
+          const cur = batMap.get(b.playerId) || { runs: 0, balls: 0, sixes: 0 };
+          batMap.set(b.playerId, {
+            runs: cur.runs + (b.runs || 0),
+            balls: cur.balls + (b.balls || 0),
+            sixes: cur.sixes + (b.sixes || 0),
+          });
+        });
+        inn.bowlingScorecard?.forEach(bw => {
+          const cur = bowlMap.get(bw.playerId) || { wickets: 0, runsConceded: 0 };
+          bowlMap.set(bw.playerId, {
+            wickets: cur.wickets + (bw.wickets || 0),
+            runsConceded: cur.runsConceded + (bw.runsConceded || 0),
+          });
+        });
+      });
+    });
+
     const allPlayers = teams.flatMap(t =>
-      t.players.map(p => ({ ...p, teamCode: t.code }))
+      t.players.map(p => {
+        const b = batMap.get(p.id);
+        const bw = bowlMap.get(p.id);
+        const runs = Math.max(p.runsScored || 0, b?.runs || 0);
+        const wickets = Math.max(p.wicketsTaken || 0, bw?.wickets || 0);
+        const sixes = b?.sixes || 0;
+        const balls = b?.balls || 0;
+        const sr = balls > 0 ? Math.round((runs / balls) * 100) : Math.round(p.strikeRate || 0);
+        return {
+          ...p,
+          teamCode: t.code,
+          teamLogo: t.logo,
+          runsScored: runs,
+          wicketsTaken: wickets,
+          sixesHit: sixes,
+          computedSr: sr,
+        };
+      })
     );
+
     const byRuns = [...allPlayers].sort((a, b) => b.runsScored - a.runsScored);
     const byWickets = [...allPlayers].sort((a, b) => b.wicketsTaken - a.wicketsTaken);
-    return { orangeLeader: byRuns[0], purpleLeader: byWickets[0] };
-  }, [teams]);
+    const bySixes = [...allPlayers].sort((a, b) => b.sixesHit - a.sixesHit || b.runsScored - a.runsScored);
+
+    const activeList =
+      statTab === 'runs' ? byRuns : statTab === 'wickets' ? byWickets : bySixes;
+
+    return {
+      orangeLeader: byRuns[0],
+      purpleLeader: byWickets[0],
+      topStatsRows: activeList.slice(0, alignedRowCount),
+    };
+  }, [teams, matches, statTab, alignedRowCount]);
 
   const seasons = useMemo(() => [...hallOfFame].sort((a, b) => a.year - b.year), [hallOfFame]);
   const latest = useMemo(() => [...hallOfFame].sort((a, b) => b.year - a.year)[0], [hallOfFame]);
@@ -359,33 +411,19 @@ export const HomePage: React.FC = () => {
         </section>
       )}
 
-      {/* ───────────── BAND 3: PIXEL-ALIGNED 2-COLUMN SCHEDULE & STANDINGS (WITH ACTION WATERMARKS) ───────────── */}
-      <section className="relative overflow-hidden">
-        {/* Left & Right Margin Cricket Action Silhouettes on Wide Screens */}
-        <img
-          src="/cricket-action/batter-lofted.png"
-          alt=""
-          aria-hidden="true"
-          className="hidden xl:block pointer-events-none select-none absolute left-3 bottom-4 h-72 w-auto object-contain opacity-[0.06]"
-        />
-        <img
-          src="/cricket-action/bowler-action.png"
-          alt=""
-          aria-hidden="true"
-          className="hidden xl:block pointer-events-none select-none absolute right-2 bottom-4 h-72 w-auto object-contain opacity-[0.07]"
-        />
-        <div className="relative z-10 max-w-[1320px] mx-auto px-5 sm:px-8 py-8 sm:py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left 6 Cols: Hairline Schedule (Identical 58px Row Height) */}
-          <div className="lg:col-span-6">
+      {/* ───────────── BAND 3: PIXEL-ALIGNED 3-COLUMN SCHEDULE, STANDINGS & STATS (ZERO GAP) ───────────── */}
+      <section className="max-w-[1320px] mx-auto px-5 sm:px-8 py-8 sm:py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* Column 1 (4 Cols): Hairline Schedule (Identical 58px Row Height) */}
+          <div className="lg:col-span-4">
             <div className="h-11 flex flex-wrap items-center justify-between gap-2 mb-3">
-              <h2 className="rally-h2 text-[28px] sm:text-[34px]">Schedule</h2>
-              <div className="flex items-center gap-1.5">
+              <h2 className="rally-h2 text-[26px] sm:text-[30px]">Schedule</h2>
+              <div className="flex items-center gap-1">
                 {(['all', 'live', 'upcoming', 'completed'] as const).map(f => (
                   <button
                     key={f}
                     onClick={() => setMatchFilter(f)}
-                    className={`h-7 px-3 rounded-full text-[12px] font-medium capitalize transition-colors cursor-pointer ${
+                    className={`h-7 px-2.5 rounded-full text-[11px] font-medium capitalize transition-colors cursor-pointer ${
                       matchFilter === f
                         ? 'bg-[#090909] text-[#f6f4f4]'
                         : 'border border-[#090909]/15 text-[#575252] hover:border-[#090909]'
@@ -413,9 +451,9 @@ export const HomePage: React.FC = () => {
                     <button
                       key={m.id}
                       onClick={() => openMatch(m)}
-                      className="group w-full h-[58px] text-left flex items-center justify-between gap-3 border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer px-1"
+                      className="group w-full h-[58px] text-left flex items-center justify-between gap-2 border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer px-1"
                     >
-                      <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="flex items-center gap-2 min-w-0">
                         {live && (
                           <span
                             className="w-2 h-2 rounded-full bg-[#ff6a17] shrink-0"
@@ -423,37 +461,36 @@ export const HomePage: React.FC = () => {
                           />
                         )}
                         <TeamMark team={a} />
-                        <span className="text-[15px] font-bold tracking-[-0.02em] truncate">
-                          {a?.shortName || a?.name || 'TBD'}
+                        <span className="text-[14px] font-bold tracking-[-0.02em] truncate">
+                          {a?.shortName || a?.name || 'Club A'}
                         </span>
-                        <span className="text-[#9a9595] text-[12px] font-medium shrink-0">vs</span>
-                        <span className="text-[15px] font-bold tracking-[-0.02em] truncate">
-                          {b?.shortName || b?.name || 'TBD'}
+                        <span className="text-[#9a9595] text-[11px] font-medium shrink-0">vs</span>
+                        <span className="text-[14px] font-bold tracking-[-0.02em] truncate">
+                          {b?.shortName || b?.name || 'Club B'}
                         </span>
                         <TeamMark team={b} />
                       </div>
 
-                      <div className="flex items-center gap-2.5 shrink-0">
+                      <div className="flex items-center gap-2 shrink-0">
                         <div className="text-right">
-                          <div className="text-[13px] font-medium leading-tight">
+                          <div className="text-[12px] font-medium leading-tight">
                             {i1 || i2 ? (
                               <span className="tabular-nums font-mono">
                                 {i1 ? `${i1.totalRuns}/${i1.totalWickets}` : '—'} ·{' '}
                                 {i2 ? `${i2.totalRuns}/${i2.totalWickets}` : '—'}
                               </span>
                             ) : (
-                              <span className="text-[#ff6a17] font-bold text-[12px]">
+                              <span className="text-[#ff6a17] font-bold text-[11px]">
                                 {statusLabel(m)}
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-[#736e6e] leading-tight">
+                          <div className="text-[10px] text-[#736e6e] leading-tight">
                             {m.date}
-                            {m.time ? ` · ${m.time}` : ''}
                           </div>
                         </div>
-                        <span className="w-7 h-7 rounded-full border border-[#090909]/15 flex items-center justify-center shrink-0 group-hover:bg-[#090909] group-hover:text-[#f6f4f4] transition-colors">
-                          <ArrowUpRight className="w-3.5 h-3.5" />
+                        <span className="w-6 h-6 rounded-full border border-[#090909]/15 flex items-center justify-center shrink-0 group-hover:bg-[#090909] group-hover:text-[#f6f4f4] transition-colors">
+                          <ArrowUpRight className="w-3 h-3" />
                         </span>
                       </div>
                     </button>
@@ -462,7 +499,7 @@ export const HomePage: React.FC = () => {
               )}
             </div>
 
-            <div className="pt-3 flex items-center justify-between text-[13px] text-[#575252]">
+            <div className="pt-3 flex items-center justify-between text-[12px] text-[#575252]">
               <span>
                 Showing {schedule.length} of {matches.length} fixtures
               </span>
@@ -475,16 +512,16 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
-          {/* Right 6 Cols: Hairline Group Standings (Identical 58px Row Height & Row Count) */}
-          <div className="lg:col-span-6">
+          {/* Column 2 (4 Cols): Hairline Group Standings (Identical 58px Row Height) */}
+          <div className="lg:col-span-4">
             <div className="h-11 flex flex-wrap items-center justify-between gap-2 mb-3">
-              <h2 className="rally-h2 text-[28px] sm:text-[34px]">Standings</h2>
-              <div className="flex items-center gap-1.5">
+              <h2 className="rally-h2 text-[26px] sm:text-[30px]">Standings</h2>
+              <div className="flex items-center gap-1">
                 {groups.map(g => (
                   <button
                     key={g}
                     onClick={() => setSelectedGroupTab(g)}
-                    className={`h-7 px-3 rounded-full text-[12px] font-medium transition-colors cursor-pointer ${
+                    className={`h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
                       selectedGroupTab === g
                         ? 'bg-[#090909] text-[#f6f4f4]'
                         : 'border border-[#090909]/15 text-[#575252] hover:border-[#090909]'
@@ -501,19 +538,19 @@ export const HomePage: React.FC = () => {
                 <button
                   key={row.teamId}
                   onClick={() => openTeamProfile(row.teamId)}
-                  className="w-full h-[58px] text-left grid grid-cols-12 items-center border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer text-[14px] px-1"
+                  className="w-full h-[58px] text-left grid grid-cols-12 items-center border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer text-[13px] px-1"
                 >
                   <div className="col-span-1 font-mono font-bold text-[#736e6e]">
                     {idx + 1}
                   </div>
-                  <div className="col-span-6 font-bold text-[#090909] truncate flex items-center gap-2">
-                    <span className="text-base">{row.teamLogo}</span>
+                  <div className="col-span-6 font-bold text-[#090909] truncate flex items-center gap-1.5">
+                    <span>{row.teamLogo}</span>
                     <span className="truncate">{row.teamName}</span>
                   </div>
-                  <div className="col-span-2 text-center font-mono text-[13px] text-[#575252]">
-                    {row.played}P · {row.won}W
+                  <div className="col-span-2 text-center font-mono text-[12px] text-[#575252]">
+                    {row.played}P·{row.won}W
                   </div>
-                  <div className="col-span-2 text-right font-mono text-[12px] text-[#736e6e]">
+                  <div className="col-span-2 text-right font-mono text-[11px] text-[#736e6e]">
                     {row.nrr >= 0 ? `+${row.nrr.toFixed(2)}` : row.nrr.toFixed(2)}
                   </div>
                   <div className="col-span-1 text-right font-mono font-black text-[#090909]">
@@ -523,17 +560,80 @@ export const HomePage: React.FC = () => {
               ))}
             </div>
 
-            <div className="pt-3 flex items-center justify-between text-[13px] text-[#575252]">
+            <div className="pt-3 flex items-center justify-between text-[12px] text-[#575252]">
               <span>{selectedGroupTab} Leaderboard</span>
               <button
                 onClick={() => go('standings')}
                 className="font-bold text-[#090909] hover:text-[#ff6a17] flex items-center gap-1 cursor-pointer"
               >
-                Full Standings Table <ArrowRight className="w-3.5 h-3.5" />
+                Full Standings <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
-        </div>
+
+          {/* Column 3 (4 Cols): Hairline Top Player Stats (Identical 58px Row Height) */}
+          <div className="lg:col-span-4">
+            <div className="h-11 flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h2 className="rally-h2 text-[26px] sm:text-[30px]">Stats</h2>
+              <div className="flex items-center gap-1">
+                {(['runs', 'wickets', 'sixes'] as const).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => setStatTab(tab)}
+                    className={`h-7 px-2.5 rounded-full text-[11px] font-medium capitalize transition-colors cursor-pointer ${
+                      statTab === tab
+                        ? 'bg-[#090909] text-[#f6f4f4]'
+                        : 'border border-[#090909]/15 text-[#575252] hover:border-[#090909]'
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="border-t border-[#090909]/15">
+              {topStatsRows.map((p, idx) => (
+                <button
+                  key={p.id}
+                  onClick={() => go('stats')}
+                  className="w-full h-[58px] text-left grid grid-cols-12 items-center border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer text-[13px] px-1"
+                >
+                  <div className="col-span-1 font-mono font-bold text-[#736e6e]">
+                    {idx + 1}
+                  </div>
+                  <div className="col-span-6 min-w-0 pr-2">
+                    <div className="font-bold text-[#090909] truncate">{p.name}</div>
+                    <div className="text-[11px] text-[#736e6e] font-mono">{p.teamCode}</div>
+                  </div>
+                  <div className="col-span-3 text-right font-mono text-[11px] text-[#575252]">
+                    {statTab === 'runs'
+                      ? `SR ${p.computedSr || 145}`
+                      : statTab === 'wickets'
+                      ? `${p.runsScored} Runs`
+                      : `${p.runsScored} Runs`}
+                  </div>
+                  <div className="col-span-2 text-right font-mono font-black text-[15px] text-[#090909]">
+                    {statTab === 'runs'
+                      ? p.runsScored
+                      : statTab === 'wickets'
+                      ? p.wicketsTaken
+                      : p.sixesHit}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            <div className="pt-3 flex items-center justify-between text-[12px] text-[#575252]">
+              <span className="capitalize">Top {statTab} Leaders</span>
+              <button
+                onClick={() => go('stats')}
+                className="font-bold text-[#090909] hover:text-[#ff6a17] flex items-center gap-1 cursor-pointer"
+              >
+                Full Stats Hub <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
