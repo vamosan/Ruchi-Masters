@@ -2,27 +2,66 @@ import React, { useMemo, useState } from 'react';
 import {
   ArrowRight,
   ArrowUpRight,
-  Trophy,
-  Users,
-  Calendar,
-  KeyRound,
-  ShieldCheck,
+  Plus,
+  Minus,
   Play,
-  Award,
-  Flame,
-  CheckCircle2,
-  MapPin,
-  Radio,
+  KeyRound,
   Camera,
+  CheckCircle2,
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { calculatePointsTable } from '../../utils/nrrCalculator';
 import { Match, Team } from '../../types/cricket';
 
-const HERO_IMG =
-  'https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=1800&q=80';
+const CRICKET_BALL_HERO_IMG =
+  'https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=2000&q=85';
 const FALLBACK_IMG =
   'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80';
+
+const TeamMark: React.FC<{ team?: Team }> = ({ team }) => (
+  <span
+    className="w-7 h-7 text-xs rounded-full flex items-center justify-center shrink-0 border border-black/10"
+    style={{ backgroundColor: (team?.primaryColor || '#2c2727') + '22' }}
+  >
+    {team?.logo || '🏏'}
+  </span>
+);
+
+const statusLabel = (m: Match) => {
+  if (m.status === 'live') return 'Live';
+  if (m.status === 'innings_break') return 'Innings Break';
+  if (m.status === 'toss') return 'Toss';
+  if (m.status === 'completed') return 'Result';
+  if (m.status === 'abandoned') return 'Abandoned';
+  return m.stage;
+};
+
+const FAQS = [
+  {
+    q: "What's the format?",
+    a: 'T20 cricket — 20 overs a side, 4 overs max per bowler and a 6-over powerplay. Clubs play a group stage followed by single-elimination knockouts.',
+  },
+  {
+    q: 'Who can take part?',
+    a: 'Registered clubs from Frankfurt and the wider Rhein-Main region. Every player is verified by their team captain before playing.',
+  },
+  {
+    q: 'How do captains manage their squad?',
+    a: 'Select your club in the Captain Portal at the top of the page and enter your 4-digit PIN to upload squad photos, add players and verify your roster.',
+  },
+  {
+    q: 'Where are matches played?',
+    a: 'Fixtures are played at grounds across Frankfurt, Germany. The exact venue for each match is listed in the schedule.',
+  },
+  {
+    q: 'How do I follow a match live?',
+    a: 'Open Live Scores for ball-by-ball scoring, current partnerships and full scorecards. Standings and cap leaderboards update automatically.',
+  },
+  {
+    q: 'Where can I watch match highlights?',
+    a: 'Visit the Hall of Fame to watch Grand Final highlight reels, presentation ceremonies and browse championship galleries from 2022–2026.',
+  },
+];
 
 export const HomePage: React.FC = () => {
   const {
@@ -38,7 +77,9 @@ export const HomePage: React.FC = () => {
 
   const [matchFilter, setMatchFilter] = useState<'all' | 'live' | 'upcoming' | 'completed'>('all');
   const [selectedGroupTab, setSelectedGroupTab] = useState<string>('Group A');
+  const [teamGroupFilter, setTeamGroupFilter] = useState<string>('all');
   const [quickLoginTeamId, setQuickLoginTeamId] = useState<string>(teams[0]?.id || '');
+  const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const go = (tab: string) => {
     setActiveTab(tab);
@@ -47,7 +88,20 @@ export const HomePage: React.FC = () => {
 
   const teamById = (id?: string) => teams.find(t => t.id === id);
 
-  // Standings calculation
+  // Schedule (always 5 rows so left & right columns align with zero gap)
+  const schedule = useMemo(() => {
+    const rank = (m: Match) =>
+      m.status === 'live' || m.status === 'innings_break' ? 0 :
+      m.status === 'toss' ? 1 :
+      m.status === 'scheduled' ? 2 : 3;
+    const sorted = [...matches].sort((a, b) => rank(a) - rank(b) || a.matchNumber - b.matchNumber);
+    if (matchFilter === 'live') return sorted.filter(m => m.status === 'live' || m.status === 'innings_break').slice(0, 5);
+    if (matchFilter === 'upcoming') return sorted.filter(m => m.status === 'scheduled' || m.status === 'toss').slice(0, 5);
+    if (matchFilter === 'completed') return sorted.filter(m => m.status === 'completed').slice(0, 5);
+    return sorted.slice(0, 5);
+  }, [matches, matchFilter]);
+
+  // Standings
   const standings = useMemo(
     () => calculatePointsTable(teams, matches, tournament.rules),
     [teams, matches, tournament.rules]
@@ -60,617 +114,470 @@ export const HomePage: React.FC = () => {
 
   const miniStandings = useMemo(() => {
     const filtered = standings.filter(s => !selectedGroupTab || s.group === selectedGroupTab);
-    return (filtered.length > 0 ? filtered : standings).slice(0, 6);
+    return (filtered.length > 0 ? filtered : standings).slice(0, 5);
   }, [standings, selectedGroupTab]);
 
-  // Top Orange Cap & Purple Cap leaders
+  // Cap Leaders
   const { orangeLeader, purpleLeader } = useMemo(() => {
     const allPlayers = teams.flatMap(t =>
-      t.players.map(p => ({ ...p, teamName: t.name, teamCode: t.code, teamLogo: t.logo, teamColor: t.primaryColor }))
+      t.players.map(p => ({ ...p, teamCode: t.code }))
     );
     const byRuns = [...allPlayers].sort((a, b) => b.runsScored - a.runsScored);
     const byWickets = [...allPlayers].sort((a, b) => b.wicketsTaken - a.wicketsTaken);
-    return {
-      orangeLeader: byRuns[0],
-      purpleLeader: byWickets[0],
-    };
+    return { orangeLeader: byRuns[0], purpleLeader: byWickets[0] };
   }, [teams]);
 
-  // Filtered matches for the Match Center widget
-  const filteredMatches = useMemo(() => {
-    const rank = (m: Match) =>
-      m.status === 'live' || m.status === 'innings_break' ? 0 :
-      m.status === 'toss' || m.status === 'scheduled' ? 1 : 2;
-    const sorted = [...matches].sort((a, b) => rank(a) - rank(b) || a.matchNumber - b.matchNumber);
-    if (matchFilter === 'live') return sorted.filter(m => m.status === 'live' || m.status === 'innings_break');
-    if (matchFilter === 'upcoming') return sorted.filter(m => m.status === 'scheduled' || m.status === 'toss');
-    if (matchFilter === 'completed') return sorted.filter(m => m.status === 'completed');
-    return sorted.slice(0, 6);
-  }, [matches, matchFilter]);
+  const seasons = useMemo(() => [...hallOfFame].sort((a, b) => a.year - b.year), [hallOfFame]);
+  const latest = useMemo(() => [...hallOfFame].sort((a, b) => b.year - a.year)[0], [hallOfFame]);
 
-  const seasons = useMemo(() => [...hallOfFame].sort((a, b) => b.year - a.year), [hallOfFame]);
-  const latest = seasons[0];
-
-  // Featured teams (logged-in captain's team first, then defending champ, then teams with photos)
+  // Featured 8 teams (always 8 for a symmetric 4x2 grid without empty slots)
   const featuredTeams = useMemo(() => {
-    const myTeam = currentUser.teamId ? teams.find(t => t.id === currentUser.teamId) : undefined;
-    const champ = latest ? teams.find(t => t.id === latest.championTeamId || t.name === latest.championTeamName) : undefined;
-    const rest = teams.filter(t => t.id !== myTeam?.id && t.id !== champ?.id);
+    const pool = teamGroupFilter === 'all' ? teams : teams.filter(t => t.group === teamGroupFilter);
+    const myTeam = currentUser.teamId ? pool.find(t => t.id === currentUser.teamId) : undefined;
+    const champ = latest ? pool.find(t => t.id === latest.championTeamId || t.name === latest.championTeamName) : undefined;
+    const rest = pool.filter(t => t.id !== myTeam?.id && t.id !== champ?.id);
     const withPhoto = rest.filter(t => t.teamPhotoUrl || t.bannerUrl);
     const withoutPhoto = rest.filter(t => !(t.teamPhotoUrl || t.bannerUrl));
     return [myTeam, champ, ...withPhoto, ...withoutPhoto].filter(Boolean).slice(0, 8) as Team[];
-  }, [teams, latest, currentUser.teamId]);
+  }, [teams, latest, currentUser.teamId, teamGroupFilter]);
+
+  // Gallery (4 uniform items so the 4-column row never has an empty hole)
+  const gallery = useMemo(() => {
+    if (!latest) return [];
+    const imgs = (latest.media || []).filter(m => m.type === 'image').map(m => ({ url: m.url, title: m.title, type: 'image' as const }));
+    const lead = latest.trophyPhotoUrl ? [{ url: latest.trophyPhotoUrl, title: latest.editionName, type: 'image' as const }] : [];
+    const vid = (latest.media || []).find(m => m.type === 'video' && /youtu/.test(m.url));
+    const all = [...lead, ...imgs];
+    const seen = new Set<string>();
+    const uniqueImgs = all.filter(i => (seen.has(i.url) ? false : (seen.add(i.url), true)));
+    if (vid) {
+      return [...uniqueImgs.slice(0, 3), { url: vid.url, title: vid.title, type: 'video' as const }];
+    }
+    return uniqueImgs.slice(0, 4);
+  }, [latest]);
+
+  const totalPlayers = teams.reduce((n, t) => n + (t.players?.length || 0), 0);
+  const editionNo = hallOfFame.length || 5;
+  const myClub = currentUser.teamId ? teams.find(t => t.id === currentUser.teamId) : null;
 
   const openMatch = (m: Match) => {
     setActiveMatchId(m.id);
     go(m.status === 'scheduled' ? 'fixtures' : 'live');
   };
 
-  const myClub = currentUser.teamId ? teams.find(t => t.id === currentUser.teamId) : null;
-
   return (
-    <div className="max-w-[1360px] mx-auto px-4 sm:px-6 py-5 space-y-6">
-      {/* ═══════════════════════════════════════════════════════════════════
-          ROW 1: ABOVE-THE-FOLD PRO LEAGUE BENTO GRID (8 COLS + 4 COLS)
-          ═══════════════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-        {/* LEFT 8 COLUMNS: Spotlight Hero + Live Match Center */}
-        <div className="lg:col-span-8 space-y-5">
-          {/* 1A. Compact Stadium Spotlight Banner */}
-          <div className="relative rounded-2xl bg-[#0b0f19] text-white overflow-hidden border border-slate-800 shadow-lg">
-            <img
-              src={latest?.trophyPhotoUrl || HERO_IMG}
-              alt="Ruchi Masters T20"
-              className="absolute inset-0 w-full h-full object-cover opacity-30"
-              onError={e => {
-                e.currentTarget.onerror = null;
-                e.currentTarget.src = FALLBACK_IMG;
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#0b0f19] via-[#0b0f19]/90 to-[#0b0f19]/40" />
+    <div className="bg-[#f6f4f4] text-[#090909]">
+      {/* ───────────── BAND 1: RALLY CRICKET BALL HERO ───────────── */}
+      <section className="relative bg-[#090909] text-[#f6f4f4] overflow-hidden">
+        <img
+          src={CRICKET_BALL_HERO_IMG}
+          alt="Cricket Ball on Pitch"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-50"
+          onError={e => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = FALLBACK_IMG;
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#090909] via-[#090909]/80 to-[#090909]/35" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#090909] via-transparent to-[#090909]/40" />
 
-            <div className="relative p-5 sm:p-7 space-y-5">
-              {/* Top Meta & Sponsor Strip */}
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-extrabold uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    2026 Season · 5th Edition
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full bg-white/10 text-slate-200 text-[11px] font-bold">
-                    {teams.length} Verified Clubs · Frankfurt
-                  </span>
-                </div>
-
-                {/* Title Sponsor */}
-                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-white/10 border border-white/15 backdrop-blur-xs">
-                  <span className="text-[10px] uppercase font-bold text-slate-300">Title Sponsor</span>
-                  <div className="bg-white px-1.5 py-0.5 rounded">
-                    <img src="/images/ruchi-sponsor.png" alt="Ruchi" className="h-3.5 object-contain" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Headline & Description */}
-              <div className="max-w-2xl space-y-2">
-                <h1 className="rally-display text-[30px] sm:text-[42px] text-white">
-                  Ruchi Masters <span className="text-[#ff6a17]">T20 Championship</span>
-                </h1>
-                <p className="text-[14px] sm:text-[15px] text-slate-300 leading-relaxed">
-                  Official match center, live ball-by-ball scorecards, ICC Net Run Rate standings, and club roster management for all {teams.length} participating teams.
-                </p>
-              </div>
-
-              {/* 2026 Podium Strip inside Hero */}
-              {latest && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
-                  <div
-                    onClick={() => go('halloffame')}
-                    className="p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-400/40 flex items-center gap-2.5 cursor-pointer hover:border-amber-400 transition-colors"
-                  >
-                    <span className="text-xl shrink-0">🥇</span>
-                    <div className="min-w-0">
-                      <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-300">
-                        {latest.year} Champions
-                      </div>
-                      <div className="text-[13px] font-bold text-white truncate">
-                        {latest.championTeamName}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => go('halloffame')}
-                    className="p-3 rounded-xl bg-white/[0.06] border border-white/15 flex items-center gap-2.5 cursor-pointer hover:bg-white/10 transition-colors"
-                  >
-                    <span className="text-xl shrink-0">🥈</span>
-                    <div className="min-w-0">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-slate-300">
-                        Runner-Up
-                      </div>
-                      <div className="text-[13px] font-bold text-white truncate">
-                        {latest.runnerUpTeamName}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    onClick={() => go('halloffame')}
-                    className="p-3 rounded-xl bg-white/[0.06] border border-white/15 flex items-center gap-2.5 cursor-pointer hover:bg-white/10 transition-colors"
-                  >
-                    <span className="text-xl shrink-0">🥉</span>
-                    <div className="min-w-0">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-orange-300">
-                        2nd Runner-Up
-                      </div>
-                      <div className="text-[13px] font-bold text-white truncate">
-                        {latest.secondRunnerUpTeamName || 'Semi-Finalists'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2.5 pt-1">
-                <button onClick={() => go('teams')} className="rally-btn rally-btn-primary !h-9 !px-4 !text-[13px]">
-                  <Users className="w-4 h-4" />
-                  Explore All {teams.length} Teams
-                </button>
-                <button onClick={() => go('fixtures')} className="rally-btn rally-btn-ghost-light !h-9 !px-4 !text-[13px]">
-                  <Calendar className="w-4 h-4 text-amber-400" />
-                  Fixtures &amp; Scores
-                </button>
-                <button onClick={() => go('halloffame')} className="rally-btn rally-btn-ghost-light !h-9 !px-4 !text-[13px]">
-                  <Trophy className="w-4 h-4 text-amber-400" />
-                  Hall of Fame &amp; Videos
-                </button>
-              </div>
-            </div>
-          </div>
-
-          {/* 1B. FotMob-Style Match Center (Fixtures & Results) */}
-          <div className="league-card overflow-hidden">
-            <div className="px-4 sm:px-5 py-3.5 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 bg-slate-50/60">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-5 rounded-full bg-[#ff6a17]" />
-                <h2 className="text-[17px] font-extrabold text-slate-900 tracking-tight">
-                  Match Center
-                </h2>
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                {(['all', 'live', 'upcoming', 'completed'] as const).map(f => (
-                  <button
-                    key={f}
-                    onClick={() => setMatchFilter(f)}
-                    className={`h-7 px-3 rounded-lg text-[12px] font-bold capitalize transition-colors cursor-pointer ${
-                      matchFilter === f
-                        ? 'bg-[#0b0f19] text-white'
-                        : 'bg-white text-slate-600 border border-slate-200 hover:text-slate-900'
-                    }`}
-                  >
-                    {f === 'completed' ? 'Results' : f}
-                  </button>
-                ))}
-                <button
-                  onClick={() => go('fixtures')}
-                  className="ml-2 text-[12px] font-bold text-[#ff6a17] hover:underline flex items-center gap-0.5 cursor-pointer"
-                >
-                  <span>Full Schedule</span>
-                  <ArrowUpRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="divide-y divide-slate-100">
-              {filteredMatches.length === 0 ? (
-                <div className="py-10 text-center text-sm text-slate-500">
-                  No matches in this filter.
-                </div>
-              ) : (
-                filteredMatches.map(m => {
-                  const a = teamById(m.teamAId);
-                  const b = teamById(m.teamBId);
-                  const isLive = m.status === 'live' || m.status === 'innings_break';
-                  const isDone = m.status === 'completed';
-
-                  const scoreA =
-                    m.innings1?.battingTeamId === a?.id
-                      ? m.innings1
-                      : m.innings2?.battingTeamId === a?.id
-                      ? m.innings2
-                      : undefined;
-                  const scoreB =
-                    m.innings1?.battingTeamId === b?.id
-                      ? m.innings1
-                      : m.innings2?.battingTeamId === b?.id
-                      ? m.innings2
-                      : undefined;
-
-                  return (
-                    <div
-                      key={m.id}
-                      onClick={() => openMatch(m)}
-                      className="px-4 sm:px-5 py-3.5 hover:bg-slate-50/90 transition-colors cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-                    >
-                      {/* Left: Stage & Date */}
-                      <div className="flex sm:flex-col items-center sm:items-start gap-2 sm:gap-0.5 sm:w-32 shrink-0">
-                        <div className="flex items-center gap-1.5">
-                          {isLive ? (
-                            <span className="px-2 py-0.5 rounded bg-emerald-500 text-slate-950 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-slate-950 animate-ping" />
-                              LIVE
-                            </span>
-                          ) : isDone ? (
-                            <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[10px] font-bold uppercase">
-                              RESULT
-                            </span>
-                          ) : (
-                            <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-bold uppercase">
-                              {m.date} · {m.time}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 truncate max-w-[125px]">
-                          {m.stage}
-                        </span>
-                      </div>
-
-                      {/* Center: Teams & Scores */}
-                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 items-center">
-                        {/* Team A */}
-                        <div className="flex items-center justify-between sm:justify-start gap-2.5">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span
-                              className="w-7 h-7 rounded-lg flex items-center justify-center text-sm shrink-0 text-white shadow-2xs"
-                              style={{ backgroundColor: a?.primaryColor || '#0f172a' }}
-                            >
-                              {a?.logo || '🏏'}
-                            </span>
-                            <span
-                              className={`text-[14px] font-bold truncate ${
-                                m.winnerTeamId === a?.id ? 'text-slate-950' : 'text-slate-700'
-                              }`}
-                            >
-                              {a?.shortName || a?.name || 'Team A'}
-                            </span>
-                          </div>
-                          {scoreA && (
-                            <span className="font-mono text-[13px] font-extrabold text-slate-900 sm:ml-auto">
-                              {scoreA.totalRuns}/{scoreA.totalWickets}{' '}
-                              <span className="text-[11px] font-normal text-slate-400">
-                                ({scoreA.oversCompletedStr})
-                              </span>
-                            </span>
-                          )}
-                        </div>
-
-                        {/* Team B */}
-                        <div className="flex items-center justify-between sm:justify-start gap-2.5">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span
-                              className="w-7 h-7 rounded-lg flex items-center justify-center text-sm shrink-0 text-white shadow-2xs"
-                              style={{ backgroundColor: b?.primaryColor || '#0f172a' }}
-                            >
-                              {b?.logo || '🏏'}
-                            </span>
-                            <span
-                              className={`text-[14px] font-bold truncate ${
-                                m.winnerTeamId === b?.id ? 'text-slate-950' : 'text-slate-700'
-                              }`}
-                            >
-                              {b?.shortName || b?.name || 'Team B'}
-                            </span>
-                          </div>
-                          {scoreB && (
-                            <span className="font-mono text-[13px] font-extrabold text-slate-900 sm:ml-auto">
-                              {scoreB.totalRuns}/{scoreB.totalWickets}{' '}
-                              <span className="text-[11px] font-normal text-slate-400">
-                                ({scoreB.oversCompletedStr})
-                              </span>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Right: Result note or Venue + Arrow */}
-                      <div className="flex items-center justify-between sm:justify-end gap-3 sm:w-44 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                        <span className="text-[11px] font-semibold text-emerald-700 truncate max-w-[140px]">
-                          {m.winMargin || m.venue}
-                        </span>
-                        <span className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-[#0b0f19] hover:text-white text-slate-600 flex items-center justify-center shrink-0 transition-colors">
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT 4 COLUMNS: Captain Quick-Management + Mini Standings + Cap Leaders */}
-        <div className="lg:col-span-4 space-y-5">
-          {/* 2A. Captain & Squad Quick-Management Portal */}
-          <div className="league-card overflow-hidden border-2 border-[#0b0f19]">
-            <div className="bg-[#0b0f19] text-white px-4 py-3 flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <KeyRound className="w-4 h-4 text-[#ff6a17]" />
-                <span className="text-[13px] font-extrabold uppercase tracking-wider">
-                  Team Captain Portal
+        <div className="relative max-w-[1320px] mx-auto px-5 sm:px-8 pt-10 sm:pt-14 pb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+            {/* Left 7 Cols: Rally Display Headline & CTAs */}
+            <div className="lg:col-span-7">
+              <div className="flex flex-wrap items-center gap-3 rally-rise">
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff6a17] text-[#090909] text-[11px] font-bold uppercase tracking-wider">
+                  <span className="w-2 h-2 rounded-full bg-[#090909]" />
+                  Season {String(editionNo).padStart(2, '0')} · {tournament.format || 'T20'}
+                </span>
+                <span className="rally-eyebrow text-[#f6f4f4]/75">
+                  Frankfurt, Germany · {teams.length} Clubs
                 </span>
               </div>
-              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">
-                Cloud Sync Active
-              </span>
-            </div>
 
-            {myClub ? (
-              <div className="p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-xl text-white shrink-0 shadow-sm"
-                    style={{ backgroundColor: myClub.primaryColor || '#0b0f19' }}
-                  >
-                    {myClub.logo || '🏏'}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[11px] font-bold uppercase text-emerald-600 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> Logged In as Captain
-                    </div>
-                    <div className="text-[16px] font-extrabold text-slate-900 truncate">
-                      {myClub.name}
-                    </div>
-                    <div className="text-[12px] text-slate-500">
-                      {myClub.players.length} Players · {myClub.players.filter(p => p.isAuthenticated).length} Verified
-                    </div>
-                  </div>
-                </div>
+              <h1 className="rally-display mt-5 text-[48px] sm:text-[72px] lg:text-[88px] max-w-[11ch] rally-rise rally-rise-1">
+                Where every run is a fight
+              </h1>
 
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                  <button
-                    onClick={() => go('teams')}
-                    className="col-span-2 rally-btn rally-btn-primary !h-9 !text-[13px] w-full"
-                  >
-                    <Camera className="w-4 h-4" />
-                    Manage Squad &amp; Upload Photos
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 space-y-3">
-                <p className="text-[12px] text-slate-600 leading-relaxed">
-                  Select your club below and enter your 4-digit Captain PIN to upload squad photos, add players, and verify your roster.
-                </p>
+              <p className="mt-4 max-w-[500px] text-[16px] leading-relaxed text-[#f6f4f4]/75 rally-rise rally-rise-2">
+                Frankfurt’s premier T20 cricket league — {teams.length} clubs, one trophy. Follow every
+                ball live, track the group standings, and manage your squad in one place.
+              </p>
 
-                <div className="space-y-2">
-                  <select
-                    value={quickLoginTeamId}
-                    onChange={e => setQuickLoginTeamId(e.target.value)}
-                    className="w-full h-9 px-3 rounded-lg border border-slate-200 bg-slate-50 text-[13px] font-bold text-slate-900 focus:outline-none focus:border-[#ff6a17]"
-                  >
-                    {teams.map(t => (
-                      <option key={t.id} value={t.id}>
-                        {t.logo} {t.name} ({t.code})
-                      </option>
-                    ))}
-                  </select>
-
-                  <button
-                    onClick={() => openAuthModal(quickLoginTeamId)}
-                    className="rally-btn rally-btn-primary !h-9 !text-[13px] w-full"
-                  >
-                    <KeyRound className="w-3.5 h-3.5" />
-                    Unlock Team Roster with PIN
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* 2B. Live Group Standings Widget */}
-          <div className="league-card overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50/60">
-              <div className="flex items-center gap-2">
-                <Award className="w-4 h-4 text-emerald-600" />
-                <h3 className="text-[15px] font-extrabold text-slate-900">Standings</h3>
-              </div>
-              <button
-                onClick={() => go('standings')}
-                className="text-[12px] font-bold text-[#ff6a17] hover:underline flex items-center gap-0.5 cursor-pointer"
-              >
-                <span>Full Table</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Group Selector Tabs */}
-            <div className="px-3 py-2 border-b border-slate-100 flex items-center gap-1 overflow-x-auto no-scrollbar bg-white">
-              {groups.map(g => (
-                <button
-                  key={g}
-                  onClick={() => setSelectedGroupTab(g)}
-                  className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-colors shrink-0 cursor-pointer ${
-                    selectedGroupTab === g
-                      ? 'bg-[#0b0f19] text-white'
-                      : 'text-slate-600 hover:bg-slate-100'
-                  }`}
-                >
-                  {g}
+              <div className="mt-6 flex flex-wrap items-center gap-3 rally-rise rally-rise-3">
+                <button onClick={() => go('fixtures')} className="rally-btn rally-btn-primary">
+                  View Schedule
                 </button>
-              ))}
+                <button onClick={() => go('teams')} className="rally-btn rally-btn-ghost-light">
+                  Explore {teams.length} Clubs
+                </button>
+                <button onClick={() => go('halloffame')} className="rally-btn rally-btn-ghost-light">
+                  Hall of Fame
+                </button>
+              </div>
             </div>
 
-            {/* Compact Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-[12px]">
-                <thead>
-                  <tr className="border-b border-slate-100 text-[10px] font-bold uppercase text-slate-400">
-                    <th className="py-2 pl-3 pr-1">#</th>
-                    <th className="py-2 px-2">Club</th>
-                    <th className="py-2 px-1.5 text-center">P</th>
-                    <th className="py-2 px-1.5 text-center">W</th>
-                    <th className="py-2 px-1.5 text-right">NRR</th>
-                    <th className="py-2 pl-1.5 pr-3 text-right">Pts</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {miniStandings.map((row, idx) => (
-                    <tr
-                      key={row.teamId}
-                      onClick={() => go('standings')}
-                      className="hover:bg-slate-50 cursor-pointer transition-colors"
+            {/* Right 5 Cols: Captain Quick-Portal & Podium Box (Fills right side of hero) */}
+            <div className="lg:col-span-5">
+              <div className="rounded-[8px] bg-[#090909]/85 backdrop-blur-md border border-white/15 p-5 space-y-4">
+                {/* Captain Quick Unlock */}
+                <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="relative w-5 h-5 rounded-full bg-[#ff6a17] flex items-center justify-center">
+                      <span className="absolute inset-[4px] rounded-full border border-[#090909] border-dashed" />
+                    </span>
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#f6f4f4]">
+                      Captain &amp; Squad Portal
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-[#ff6a17] font-medium">40 Verified Clubs</span>
+                </div>
+
+                {myClub ? (
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-[11px] text-[#ff6a17] font-bold uppercase flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> Unlocked Captain Session
+                      </div>
+                      <div className="text-[18px] font-bold text-[#f6f4f4] truncate mt-0.5">
+                        {myClub.name}
+                      </div>
+                      <div className="text-[12px] text-[#f6f4f4]/60">
+                        {myClub.players.length} Players · Ready for photo &amp; roster updates
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => go('teams')}
+                      className="rally-btn rally-btn-primary !h-10 !px-4 !text-[13px] shrink-0"
                     >
-                      <td className="py-2 pl-3 pr-1 font-mono font-bold text-slate-500">
-                        <span
-                          className={`inline-flex w-4 h-4 rounded-full items-center justify-center text-[10px] ${
-                            idx < 2 ? 'bg-emerald-500/15 text-emerald-700 font-extrabold' : ''
-                          }`}
-                        >
-                          {idx + 1}
+                      <Camera className="w-4 h-4" />
+                      Manage Squad
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    <p className="text-[13px] text-[#f6f4f4]/70 leading-snug">
+                      Team captain? Select your club and enter your PIN to upload your squad photo and manage players:
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={quickLoginTeamId}
+                        onChange={e => setQuickLoginTeamId(e.target.value)}
+                        className="flex-1 h-10 px-3 rounded-full bg-white/10 border border-white/20 text-[13px] font-medium text-[#f6f4f4] focus:outline-none focus:border-[#ff6a17]"
+                      >
+                        {teams.map(t => (
+                          <option key={t.id} value={t.id} className="text-[#090909]">
+                            {t.name} ({t.code})
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        onClick={() => openAuthModal(quickLoginTeamId)}
+                        className="rally-btn rally-btn-primary !h-10 !px-4 !text-[13px] shrink-0"
+                      >
+                        <KeyRound className="w-3.5 h-3.5" />
+                        Unlock
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Defending Champions Strip */}
+                {latest && (
+                  <div
+                    onClick={() => go('halloffame')}
+                    className="pt-3 border-t border-white/10 flex items-center justify-between gap-3 cursor-pointer group"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-[11px] uppercase tracking-wider text-[#f6f4f4]/50">
+                        {latest.year} Reigning Champions
+                      </div>
+                      <div className="text-[15px] font-bold text-[#f6f4f4] group-hover:text-[#ff6a17] transition-colors truncate">
+                        {latest.championTeamName}{' '}
+                        <span className="text-[#f6f4f4]/45 font-normal">
+                          (Runner-up: {latest.runnerUpTeamName})
                         </span>
-                      </td>
-                      <td className="py-2 px-2 font-bold text-slate-900 truncate max-w-[130px]">
-                        <span className="mr-1.5">{row.teamLogo}</span>
-                        {row.teamCode}
-                      </td>
-                      <td className="py-2 px-1.5 text-center font-mono text-slate-600">{row.played}</td>
-                      <td className="py-2 px-1.5 text-center font-mono text-emerald-700 font-bold">{row.won}</td>
-                      <td className="py-2 px-1.5 text-right font-mono text-slate-500">
-                        {row.nrr >= 0 ? `+${row.nrr.toFixed(2)}` : row.nrr.toFixed(2)}
-                      </td>
-                      <td className="py-2 pl-1.5 pr-3 text-right font-mono font-extrabold text-slate-950">
-                        {row.points}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </div>
+                    </div>
+                    <ArrowUpRight className="w-4 h-4 text-[#ff6a17] shrink-0" />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* 2C. Orange Cap & Purple Cap Leaders Widget */}
-          <div className="league-card p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                <Flame className="w-4 h-4 text-[#ff6a17]" />
-                <h3 className="text-[15px] font-extrabold text-slate-900">Cap Leaders</h3>
-              </div>
-              <button
-                onClick={() => go('stats')}
-                className="text-[12px] font-bold text-[#ff6a17] hover:underline flex items-center gap-0.5 cursor-pointer"
+          {/* Bottom 4-Column Stat Strip */}
+          <div className="mt-8 pt-5 grid grid-cols-2 sm:grid-cols-4 border-t border-white/15">
+            {[
+              { k: String(teams.length), v: 'Competing Clubs' },
+              { k: totalPlayers ? String(totalPlayers) : '600+', v: 'Registered Players' },
+              { k: String(tournament.rules?.oversPerInnings || 20), v: 'Overs per Innings' },
+              { k: latest ? String(latest.year) : '2026', v: latest ? `Champion: ${latest.championTeamName}` : 'Active Season' },
+            ].map((s, i) => (
+              <div
+                key={i}
+                className={`pt-2 pr-4 ${i > 0 ? 'sm:pl-6 sm:border-l border-white/15' : ''} ${
+                  i === 2 ? 'border-t sm:border-t-0 border-white/15' : ''
+                } ${i === 3 ? 'border-t sm:border-t-0 border-white/15 pl-6 border-l' : ''} ${
+                  i === 1 ? 'pl-6 border-l border-white/15' : ''
+                }`}
               >
-                <span>All Stats</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
+                <div className="text-[28px] sm:text-[34px] font-bold tracking-[-0.04em] leading-none">{s.k}</div>
+                <div className="mt-1 text-[12px] text-[#f6f4f4]/55 truncate">{s.v}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────── BAND 2: MATCHED-HEIGHT SCHEDULE & STANDINGS (ZERO GAP) ───────────── */}
+      <section className="max-w-[1320px] mx-auto px-5 sm:px-8 py-10 sm:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+          {/* Left 7 Cols: Hairline Schedule */}
+          <div className="lg:col-span-7 flex flex-col justify-between">
+            <div>
+              <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
+                <h2 className="rally-h2 text-[28px] sm:text-[36px]">Schedule</h2>
+                <div className="flex items-center gap-1.5">
+                  {(['all', 'live', 'upcoming', 'completed'] as const).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setMatchFilter(f)}
+                      className={`h-7 px-3 rounded-full text-[12px] font-medium capitalize transition-colors cursor-pointer ${
+                        matchFilter === f
+                          ? 'bg-[#090909] text-[#f6f4f4]'
+                          : 'border border-[#090909]/15 text-[#575252] hover:border-[#090909]'
+                      }`}
+                    >
+                      {f === 'completed' ? 'Results' : f}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => go('fixtures')}
+                    className="rally-link-arrow ml-2 !text-[13px] hover:text-[#ff6a17]"
+                  >
+                    Full schedule <ArrowUpRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-t border-[#090909]/15">
+                {schedule.length === 0 ? (
+                  <div className="py-8 text-[#736e6e] text-sm">No matches in this filter.</div>
+                ) : (
+                  schedule.map(m => {
+                    const a = teamById(m.teamAId);
+                    const b = teamById(m.teamBId);
+                    const live = m.status === 'live' || m.status === 'innings_break';
+                    const i1 = m.innings1;
+                    const i2 = m.innings2;
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => openMatch(m)}
+                        className="group w-full text-left grid grid-cols-12 items-center gap-2 py-3.5 border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer"
+                      >
+                        <div className="col-span-12 sm:col-span-3 flex items-center gap-2 text-[13px] text-[#575252]">
+                          {live && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ff6a17] text-[#090909] text-[10px] font-bold uppercase">
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#090909]" /> Live
+                            </span>
+                          )}
+                          <span className="truncate">{m.date}{m.time ? ` · ${m.time}` : ''}</span>
+                        </div>
+
+                        <div className="col-span-9 sm:col-span-6 flex items-center gap-2 min-w-0">
+                          <TeamMark team={a} />
+                          <span className="text-[16px] font-bold tracking-[-0.02em] truncate">
+                            {a?.shortName || a?.name || 'TBD'}
+                          </span>
+                          <span className="text-[#9a9595] text-[12px] font-medium shrink-0">vs</span>
+                          <span className="text-[16px] font-bold tracking-[-0.02em] truncate">
+                            {b?.shortName || b?.name || 'TBD'}
+                          </span>
+                          <TeamMark team={b} />
+                        </div>
+
+                        <div className="col-span-3 sm:col-span-3 flex items-center justify-end gap-2.5">
+                          <div className="text-right hidden sm:block">
+                            <div className="text-[13px] font-medium">
+                              {(i1 || i2) ? (
+                                <span className="tabular-nums font-mono">
+                                  {i1 ? `${i1.totalRuns}/${i1.totalWickets}` : '—'} · {i2 ? `${i2.totalRuns}/${i2.totalWickets}` : '—'}
+                                </span>
+                              ) : statusLabel(m)}
+                            </div>
+                            <div className="text-[11px] text-[#736e6e] truncate max-w-[140px]">{m.venue}</div>
+                          </div>
+                          <span className="w-8 h-8 rounded-full border border-[#090909]/15 flex items-center justify-center shrink-0 group-hover:bg-[#090909] group-hover:text-[#f6f4f4] transition-colors">
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Bottom bar aligned with right column */}
+            <div className="pt-3 flex items-center justify-between text-[13px] text-[#575252]">
+              <span>Showing {schedule.length} of {matches.length} fixtures</span>
+              <button onClick={() => go('live')} className="font-bold text-[#090909] hover:text-[#ff6a17] flex items-center gap-1 cursor-pointer">
+                Open Live Scoring Console <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
+          </div>
 
-            <div className="grid grid-cols-2 gap-2.5">
-              {/* Orange Cap */}
+          {/* Right 5 Cols: Hairline Group Standings + Cap Leaders */}
+          <div className="lg:col-span-5 flex flex-col justify-between">
+            <div>
+              <div className="flex flex-wrap items-end justify-between gap-2 mb-4">
+                <h2 className="rally-h2 text-[28px] sm:text-[36px]">Standings</h2>
+                <div className="flex items-center gap-1">
+                  {groups.map(g => (
+                    <button
+                      key={g}
+                      onClick={() => setSelectedGroupTab(g)}
+                      className={`h-7 px-2.5 rounded-full text-[12px] font-medium transition-colors cursor-pointer ${
+                        selectedGroupTab === g
+                          ? 'bg-[#090909] text-[#f6f4f4]'
+                          : 'border border-[#090909]/15 text-[#575252] hover:border-[#090909]'
+                      }`}
+                    >
+                      {g.replace('Group ', 'Grp ')}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => go('standings')}
+                    className="rally-link-arrow ml-1.5 !text-[13px] hover:text-[#ff6a17]"
+                  >
+                    Full table <ArrowUpRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-t border-[#090909]/15">
+                {miniStandings.map((row, idx) => (
+                  <button
+                    key={row.teamId}
+                    onClick={() => go('standings')}
+                    className="w-full text-left grid grid-cols-12 items-center py-3.5 border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer text-[14px]"
+                  >
+                    <div className="col-span-1 font-mono font-bold text-[#736e6e]">
+                      {String(idx + 1).padStart(2, '0')}
+                    </div>
+                    <div className="col-span-6 font-bold text-[#090909] truncate flex items-center gap-2">
+                      <span>{row.teamLogo}</span>
+                      <span className="truncate">{row.teamName}</span>
+                    </div>
+                    <div className="col-span-2 text-center font-mono text-[13px] text-[#575252]">
+                      {row.played}P · {row.won}W
+                    </div>
+                    <div className="col-span-2 text-right font-mono text-[12px] text-[#736e6e]">
+                      {row.nrr >= 0 ? `+${row.nrr.toFixed(2)}` : row.nrr.toFixed(2)}
+                    </div>
+                    <div className="col-span-1 text-right font-mono font-black text-[#090909]">
+                      {row.points}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Compact Cap Leaders Bar (Locks bottom edge to match Left Schedule column) */}
+            <div className="pt-3 grid grid-cols-2 gap-3">
               {orangeLeader && (
-                <div
+                <button
                   onClick={() => go('stats')}
-                  className="p-3 rounded-xl bg-gradient-to-br from-orange-50 to-amber-50/40 border border-orange-200/80 cursor-pointer hover:border-orange-400 transition-colors"
+                  className="p-2.5 rounded-[6px] bg-[#090909] text-[#f6f4f4] flex items-center justify-between text-left hover:bg-[#2c2727] transition-colors cursor-pointer"
                 >
-                  <span className="px-2 py-0.5 rounded bg-[#ff6a17] text-white text-[9px] font-black uppercase tracking-wider">
-                    🧢 Orange Cap
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#ff6a17]">
+                      Orange Cap · Runs
+                    </div>
+                    <div className="text-[13px] font-bold truncate mt-0.5">{orangeLeader.name}</div>
+                  </div>
+                  <span className="font-mono text-[20px] font-black text-[#ff6a17] shrink-0 ml-2">
+                    {orangeLeader.runsScored}
                   </span>
-                  <div className="mt-2 font-extrabold text-[13px] text-slate-900 truncate">
-                    {orangeLeader.name}
-                  </div>
-                  <div className="text-[11px] text-slate-500 truncate">{orangeLeader.teamCode}</div>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-[22px] font-black font-mono text-[#ea580c] leading-none">
-                      {orangeLeader.runsScored}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">Runs</span>
-                  </div>
-                </div>
+                </button>
               )}
-
-              {/* Purple Cap */}
               {purpleLeader && (
-                <div
+                <button
                   onClick={() => go('stats')}
-                  className="p-3 rounded-xl bg-gradient-to-br from-purple-50 to-indigo-50/40 border border-purple-200/80 cursor-pointer hover:border-purple-400 transition-colors"
+                  className="p-2.5 rounded-[6px] bg-[#090909] text-[#f6f4f4] flex items-center justify-between text-left hover:bg-[#2c2727] transition-colors cursor-pointer"
                 >
-                  <span className="px-2 py-0.5 rounded bg-purple-600 text-white text-[9px] font-black uppercase tracking-wider">
-                    🧢 Purple Cap
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#ff6a17]">
+                      Purple Cap · Wkts
+                    </div>
+                    <div className="text-[13px] font-bold truncate mt-0.5">{purpleLeader.name}</div>
+                  </div>
+                  <span className="font-mono text-[20px] font-black text-[#f6f4f4] shrink-0 ml-2">
+                    {purpleLeader.wicketsTaken}
                   </span>
-                  <div className="mt-2 font-extrabold text-[13px] text-slate-900 truncate">
-                    {purpleLeader.name}
-                  </div>
-                  <div className="text-[11px] text-slate-500 truncate">{purpleLeader.teamCode}</div>
-                  <div className="mt-2 flex items-baseline gap-1">
-                    <span className="text-[22px] font-black font-mono text-purple-700 leading-none">
-                      {purpleLeader.wicketsTaken}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-500 uppercase">Wkts</span>
-                  </div>
-                </div>
+                </button>
               )}
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          ROW 2: COMPACT CLUB DIRECTORY (8 CLUBS IN 4-COLUMN GRID)
-          ═══════════════════════════════════════════════════════════════════ */}
-      <section className="league-card p-5 space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+      {/* ───────────── BAND 3: MEET THE COMPETITION (4×2 COMPACT GRID, ZERO GAPS) ───────────── */}
+      <section className="max-w-[1320px] mx-auto px-5 sm:px-8 pb-10 sm:pb-12">
+        <div className="flex flex-wrap items-end justify-between gap-4 mb-5 border-t border-[#090909]/15 pt-8">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-5 rounded-full bg-emerald-500" />
-              <h2 className="text-[19px] font-extrabold text-slate-900 tracking-tight">
-                Participating Clubs &amp; Squads
-              </h2>
-              <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-extrabold">
-                {teams.length} Teams
-              </span>
-            </div>
-            <p className="text-[12px] text-slate-500 mt-0.5">
-              Click any club to view player profiles, digital IDs, or upload your official team photo.
-            </p>
+            <div className="rally-eyebrow text-[#736e6e]">Club Directory</div>
+            <h2 className="rally-h2 text-[28px] sm:text-[36px] mt-1">Meet the competition</h2>
           </div>
 
-          <button
-            onClick={() => go('teams')}
-            className="rally-btn rally-btn-dark !h-9 !px-4 !text-[13px]"
-          >
-            <span>View All {teams.length} Clubs</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+          <div className="flex flex-wrap items-center gap-1.5">
+            <button
+              onClick={() => setTeamGroupFilter('all')}
+              className={`h-8 px-3 rounded-full text-[12px] font-medium transition-colors cursor-pointer ${
+                teamGroupFilter === 'all'
+                  ? 'bg-[#090909] text-[#f6f4f4]'
+                  : 'border border-[#090909]/15 text-[#575252] hover:border-[#090909]'
+              }`}
+            >
+              All ({teams.length})
+            </button>
+            {groups.map(g => (
+              <button
+                key={g}
+                onClick={() => setTeamGroupFilter(g)}
+                className={`h-8 px-3 rounded-full text-[12px] font-medium transition-colors cursor-pointer ${
+                  teamGroupFilter === g
+                    ? 'bg-[#090909] text-[#f6f4f4]'
+                    : 'border border-[#090909]/15 text-[#575252] hover:border-[#090909]'
+                }`}
+              >
+                {g}
+              </button>
+            ))}
+            <button
+              onClick={() => go('teams')}
+              className="rally-link-arrow ml-2 !text-[13px] hover:text-[#ff6a17]"
+            >
+              All {teams.length} clubs <ArrowUpRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           {featuredTeams.map(t => {
-            const captain = t.players.find(p => p.isCaptain || p.id === t.captainId);
-            const verifiedCount = t.players.filter(p => p.isAuthenticated).length;
             const img = t.teamPhotoUrl || t.bannerUrl;
             const isChamp = latest && (t.id === latest.championTeamId || t.name === latest.championTeamName);
-
+            const isMine = currentUser.teamId === t.id;
             return (
-              <div
-                key={t.id}
-                onClick={() => go('teams')}
-                className="group rounded-xl border border-slate-200 bg-white overflow-hidden hover:border-slate-300 hover:shadow-md transition-all cursor-pointer flex flex-col"
-              >
-                {/* Team Color Top Accent Strip */}
-                <div
-                  className="h-1.5 w-full"
-                  style={{ backgroundColor: t.primaryColor || '#ff6a17' }}
-                />
-
-                {/* Compact 16:9 Thumbnail */}
-                <div className="relative aspect-[16/9] bg-slate-900 overflow-hidden">
+              <button key={t.id} onClick={() => go('teams')} className="group text-left cursor-pointer">
+                <div className="relative aspect-[16/10] rounded-[6px] overflow-hidden bg-[#2c2727]">
                   {img ? (
                     <img
                       src={img}
                       alt={t.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
+                      className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-[1.03] transition-all duration-500"
                       onError={e => {
                         e.currentTarget.onerror = null;
                         e.currentTarget.src = FALLBACK_IMG;
@@ -680,110 +587,192 @@ export const HomePage: React.FC = () => {
                     <div
                       className="w-full h-full flex items-center justify-center"
                       style={{
-                        background: `linear-gradient(135deg, ${t.primaryColor || '#1e293b'}, #0f172a)`,
+                        background: `linear-gradient(160deg, ${t.primaryColor || '#2c2727'} 0%, #090909 85%)`,
                       }}
                     >
-                      <span className="text-4xl">{t.logo || '🏏'}</span>
+                      <span className="text-[44px] opacity-90">{t.logo}</span>
                     </div>
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
-
-                  {isChamp && (
-                    <span className="absolute top-2 left-2 px-2 py-0.5 rounded bg-amber-400 text-slate-950 text-[10px] font-black uppercase">
-                      🏆 Champion
+                  {(isChamp || isMine) && (
+                    <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-[#ff6a17] text-[#090909] text-[10px] font-bold">
+                      {isMine ? 'Your Club' : 'Defending Champion'}
                     </span>
                   )}
-
-                  <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between gap-2 text-white">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-base shrink-0">{t.logo || '🏏'}</span>
-                      <span className="font-extrabold text-[14px] truncate leading-tight">
-                        {t.name}
-                      </span>
+                  <span className="absolute bottom-2.5 right-2.5 w-8 h-8 rounded-full bg-[#f6f4f4] text-[#090909] flex items-center justify-center opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200">
+                    <ArrowUpRight className="w-4 h-4" />
+                  </span>
+                </div>
+                <div className="mt-2 flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-[15px] sm:text-[16px] font-bold tracking-[-0.02em] truncate group-hover:text-[#ff6a17] transition-colors">
+                      {t.name}
                     </div>
-                    <span className="px-1.5 py-0.5 rounded bg-black/50 text-[10px] font-mono font-bold text-amber-300 shrink-0">
-                      {t.code}
-                    </span>
+                    <div className="text-[12px] text-[#736e6e]">
+                      {t.group || 'League'} · {t.players?.length || 0} players
+                    </div>
                   </div>
-                </div>
-
-                {/* Compact Meta Footer */}
-                <div className="p-2.5 bg-slate-50/70 flex items-center justify-between text-[11px] text-slate-600">
-                  <span className="truncate font-semibold">
-                    Capt: {captain ? captain.name : t.managerName || 'Assigned'}
-                  </span>
-                  <span className="font-mono font-bold text-emerald-700 shrink-0">
-                    {verifiedCount}/{t.players.length} ID
+                  <span className="text-[11px] font-mono font-medium text-[#9a9595] mt-0.5 shrink-0">
+                    {t.code}
                   </span>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════
-          ROW 3: CHAMPIONSHIP HALL OF FAME (2022–2026 ARCHIVE & MEDIA)
-          ═══════════════════════════════════════════════════════════════════ */}
+      {/* ───────────── BAND 4: ROLL OF HONOUR & UNIFORM 4-COLUMN GALLERY (DARK) ───────────── */}
       {seasons.length > 0 && (
-        <section className="rounded-2xl bg-[#0b0f19] text-white p-5 sm:p-6 border border-slate-800 space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400">
-                <Trophy className="w-4 h-4" />
-              </div>
+        <section className="bg-[#090909] text-[#f6f4f4]">
+          <div className="max-w-[1320px] mx-auto px-5 sm:px-8 py-10 sm:py-12 space-y-8">
+            <div className="flex items-end justify-between gap-4">
               <div>
-                <h2 className="text-[18px] font-extrabold text-white leading-tight">
-                  Championship Wall of Fame (2022 – 2026)
+                <div className="rally-eyebrow text-[#ff6a17]">2022 – 2026 Archive</div>
+                <h2 className="rally-h2 text-[28px] sm:text-[38px] text-[#f6f4f4] mt-1">
+                  The road to the trophy
                 </h2>
-                <p className="text-[12px] text-slate-400">
-                  Five seasons of champions, presentation ceremony photos, and Grand Final video highlights.
-                </p>
               </div>
+              <button
+                onClick={() => go('halloffame')}
+                className="rally-link-arrow text-[#f6f4f4] hover:text-[#ff6a17]"
+              >
+                Hall of Fame &amp; Videos <ArrowUpRight className="w-4 h-4" />
+              </button>
             </div>
 
-            <button
-              onClick={() => go('halloffame')}
-              className="rally-btn rally-btn-primary !h-9 !px-4 !text-[13px]"
-            >
-              <span>Open Hall of Fame &amp; Gallery</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </button>
-          </div>
+            {/* 5-Season Strip */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 border-t border-b border-white/15">
+              {seasons.map((s, i) => {
+                const isLatest = s.year === latest?.year;
+                return (
+                  <button
+                    key={s.id}
+                    onClick={() => go('halloffame')}
+                    className={`text-left p-4 sm:p-5 border-b lg:border-b-0 border-white/15 ${
+                      i > 0 ? 'lg:border-l' : ''
+                    } ${i % 2 === 1 ? 'sm:border-l' : ''} hover:bg-white/[0.03] transition-colors flex flex-col justify-between gap-4 cursor-pointer`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] text-[#f6f4f4]/50">
+                          Season {String(i + 1).padStart(2, '0')}
+                        </span>
+                        {isLatest && (
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-[#ff6a17]">
+                            Latest
+                          </span>
+                        )}
+                      </div>
+                      <div
+                        className={`mt-1.5 text-[36px] font-black tracking-[-0.05em] leading-none ${
+                          isLatest ? 'text-[#ff6a17]' : ''
+                        }`}
+                      >
+                        {s.year}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[10px] uppercase tracking-wider text-[#f6f4f4]/45">
+                        Champion
+                      </div>
+                      <div className="mt-0.5 text-[15px] font-bold tracking-[-0.02em] leading-tight">
+                        {s.championTeamName}
+                      </div>
+                      <div className="mt-1 text-[12px] text-[#f6f4f4]/50 leading-snug">
+                        Beat {s.runnerUpTeamName}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {seasons.map((s, idx) => (
-              <div
-                key={s.id}
-                onClick={() => go('halloffame')}
-                className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-2 ${
-                  idx === 0
-                    ? 'bg-gradient-to-br from-amber-500/20 to-white/[0.03] border-amber-400/50 hover:border-amber-400'
-                    : 'bg-white/[0.04] border-white/10 hover:bg-white/[0.08]'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono text-[22px] font-black text-amber-400 leading-none">
-                    {s.year}
-                  </span>
-                  <span className="text-lg">{s.championLogo || '🏆'}</span>
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Champion
-                  </div>
-                  <div className="text-[14px] font-extrabold text-white truncate mt-0.5">
-                    {s.championTeamName}
-                  </div>
-                  <div className="text-[11px] text-slate-400 truncate mt-0.5">
-                    Runner-Up: {s.runnerUpTeamName}
-                  </div>
-                </div>
+            {/* Uniform 4-Column Gallery Strip (Zero Bento Gaps) */}
+            {gallery.length > 0 && (
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+                {gallery.map((g, i) => (
+                  <button
+                    key={g.url + i}
+                    onClick={() => go('halloffame')}
+                    className="group relative aspect-[16/10] rounded-[6px] overflow-hidden bg-[#2c2727] text-left cursor-pointer"
+                  >
+                    {g.type === 'video' ? (
+                      <div className="w-full h-full bg-[#191717] p-4 flex flex-col justify-between">
+                        <span className="rally-eyebrow text-[#ff6a17]">Video Highlights</span>
+                        <div>
+                          <span className="w-9 h-9 rounded-full bg-[#ff6a17] text-[#090909] flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Play className="w-4 h-4 fill-current translate-x-0.5" />
+                          </span>
+                          <div className="mt-2 text-[14px] font-bold text-[#f6f4f4] line-clamp-1">
+                            {g.title}
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <img
+                          src={g.url}
+                          alt={g.title}
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+                          onError={e => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = FALLBACK_IMG;
+                          }}
+                        />
+                        <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-[#090909]/85 to-transparent">
+                          <span className="text-[12px] font-medium text-[#f6f4f4] line-clamp-1">
+                            {g.title}
+                          </span>
+                        </div>
+                      </>
+                    )}
+                  </button>
+                ))}
               </div>
-            ))}
+            )}
           </div>
         </section>
       )}
+
+      {/* ───────────── BAND 5: BALANCED 2-COLUMN FAQ (ZERO LEFT-COLUMN GAP) ───────────── */}
+      <section className="max-w-[1320px] mx-auto px-5 sm:px-8 py-10 sm:py-12">
+        <div className="flex items-end justify-between gap-4 mb-5">
+          <h2 className="rally-h2 text-[28px] sm:text-[36px]">Frequently asked</h2>
+          <button
+            onClick={() => (currentUser.role === 'spectator' ? openAuthModal() : go('teams'))}
+            className="rally-link-arrow hover:text-[#ff6a17]"
+          >
+            {currentUser.role === 'spectator' ? 'Captain Login' : 'Manage Your Squad'}{' '}
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 border-t border-[#090909]/15">
+          {FAQS.map((f, i) => {
+            const open = openFaq === i;
+            return (
+              <div key={f.q} className="border-b border-[#090909]/15">
+                <button
+                  onClick={() => setOpenFaq(open ? null : i)}
+                  className="w-full flex items-center justify-between gap-4 py-3.5 text-left cursor-pointer"
+                >
+                  <span className="text-[16px] font-bold tracking-[-0.02em]">{f.q}</span>
+                  <span
+                    className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-colors ${
+                      open ? 'bg-[#ff6a17]' : 'bg-[#090909]/[0.06]'
+                    }`}
+                  >
+                    {open ? <Minus className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
+                  </span>
+                </button>
+                {open && (
+                  <p className="pb-3.5 pr-10 text-[14px] leading-relaxed text-[#575252]">{f.a}</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
     </div>
   );
 };

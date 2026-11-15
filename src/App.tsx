@@ -29,8 +29,8 @@ const MainLayout: React.FC = () => {
   const isFullBleed = activeTab === 'overview' || activeTab === 'videos';
 
   return (
-    <div className="min-h-screen bg-[#f3f4f6] text-slate-900 font-sans flex flex-col">
-      {/* Pro League Top Navigation + Matchday Scoreboard Strip */}
+    <div className="min-h-screen bg-[#f6f4f4] text-[#090909] font-sans flex flex-col">
+      {/* Rally Editorial Top Navigation */}
       <RuchiNavbar />
 
       {/* Main Content */}
@@ -39,7 +39,7 @@ const MainLayout: React.FC = () => {
           <HomePage />
         </main>
       ) : (
-        <div className="flex-1 max-w-[1360px] w-full mx-auto px-4 sm:px-6 py-5">
+        <div className="flex-1 max-w-[1320px] w-full mx-auto px-5 sm:px-8 py-6 sm:py-8">
           <main className="min-w-0">
             {activeTab === 'halloffame' && <HallOfFamePage />}
             {activeTab === 'pickem' && <MatchdayPickEm />}
