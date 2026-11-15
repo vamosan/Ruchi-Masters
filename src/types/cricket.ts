@@ -44,10 +44,22 @@ export interface Player {
   wicketsTaken: number;
   highestScore: number;
   bestBowling?: string;
+  fours?: number;
+  sixes?: number;
   fifties?: number;
   hundreds?: number;
   strikeRate?: number;
   economy?: number;
+}
+
+export interface StandingsOverride {
+  played: number;
+  won: number;
+  lost: number;
+  tied: number;
+  noResult: number;
+  points: number;
+  nrr: number;
 }
 
 export interface Team {
@@ -85,6 +97,7 @@ export interface Team {
   };
   passcode?: string;
   isPinSet?: boolean;
+  standingsOverride?: StandingsOverride;
   players: Player[];
 }
 

@@ -9,16 +9,20 @@ import {
   Award,
   Sparkles,
   Filter,
-  X
+  X,
+  Edit3
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { calculatePointsTable } from '../../utils/nrrCalculator';
 import { PointsTableEntry } from '../../types/cricket';
+import { EditStandingsModal } from './EditStandingsModal';
 
 export const PointsTable: React.FC = () => {
-  const { teams, matches, tournament } = useTournament();
+  const { teams, matches, tournament, isAdmin } = useTournament();
   const [selectedGroup, setSelectedGroup] = useState<string>('all');
   const [showNrrExplainer, setShowNrrExplainer] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<PointsTableEntry | null>(null);
+  const adminMode = isAdmin();
 
   const standings = calculatePointsTable(teams, matches, tournament.rules);
 
@@ -109,6 +113,7 @@ export const PointsTable: React.FC = () => {
                 <th className="p-4 text-center hidden md:table-cell">For (Runs/Ov)</th>
                 <th className="p-4 text-center hidden md:table-cell">Against (Runs/Ov)</th>
                 <th className="p-4 text-center">Form</th>
+                {adminMode && <th className="p-4 text-right">Admin</th>}
               </tr>
             </thead>
 
@@ -186,6 +191,18 @@ export const PointsTable: React.FC = () => {
                         )}
                       </div>
                     </td>
+                    {adminMode && (
+                      <td className="p-4 text-right">
+                        <button
+                          onClick={() => setEditingEntry(entry)}
+                          className="h-7 px-2.5 rounded-full bg-[#ff6a17] text-[#090909] hover:bg-[#090909] hover:text-white text-[11px] font-bold inline-flex items-center gap-1 transition-colors cursor-pointer"
+                          title="Edit Points, Wins, NRR or Group"
+                        >
+                          <Edit3 className="w-3 h-3" />
+                          <span>Edit</span>
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -262,6 +279,11 @@ export const PointsTable: React.FC = () => {
           </div>
         </div>
       )}
+      {/* Edit Standings Modal */}
+      <EditStandingsModal
+        entry={editingEntry}
+        onClose={() => setEditingEntry(null)}
+      />
     </div>
   );
 };

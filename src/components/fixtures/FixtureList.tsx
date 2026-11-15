@@ -6,17 +6,19 @@ import {
   Trash2,
   Shuffle,
   ArrowUpRight,
+  Edit3,
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { Match } from '../../types/cricket';
 import { ScheduleMatchModal } from './ScheduleMatchModal';
+import { EditMatchModal } from './EditMatchModal';
 import { DetailedScorecard } from '../scorecard/DetailedScorecard';
 
 export const FixtureList: React.FC = () => {
   const {
     matches,
     teams,
-    viewMode,
+    isAdmin,
     setActiveMatchId,
     setActiveTab,
     deleteMatch,
@@ -25,7 +27,9 @@ export const FixtureList: React.FC = () => {
 
   const [activeFilter, setActiveFilter] = useState<'all' | 'live' | 'upcoming' | 'completed' | 'playoffs'>('all');
   const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [editingMatch, setEditingMatch] = useState<Match | null>(null);
   const [inspectScorecardMatch, setInspectScorecardMatch] = useState<Match | null>(null);
+  const adminMode = isAdmin();
 
   const getTeam = (id: string) => teams.find(t => t.id === id);
 
@@ -103,7 +107,7 @@ export const FixtureList: React.FC = () => {
             );
           })}
 
-          {viewMode === 'organizer' && (
+          {adminMode && (
             <>
               <button
                 onClick={() => autoGenerateRoundRobinFixtures()}
@@ -237,18 +241,28 @@ export const FixtureList: React.FC = () => {
                   </button>
                 )}
 
-                {viewMode === 'organizer' && (
-                  <button
-                    onClick={() => {
-                      if (window.confirm(`Delete ${match.title}?`)) {
-                        deleteMatch(match.id);
-                      }
-                    }}
-                    className="w-9 h-9 rounded-full border border-[#090909]/15 text-[#736e6e] hover:text-[#090909] flex items-center justify-center transition-colors"
-                    title="Delete Match"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                {adminMode && (
+                  <>
+                    <button
+                      onClick={() => setEditingMatch(match)}
+                      className="h-9 px-3 rounded-full bg-[#ff6a17] text-[#090909] hover:bg-[#090909] hover:text-white text-[12px] font-bold inline-flex items-center gap-1 transition-colors cursor-pointer"
+                      title="Edit Fixture, Score & Winner"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Delete ${match.title}?`)) {
+                          deleteMatch(match.id);
+                        }
+                      }}
+                      className="w-9 h-9 rounded-full border border-[#090909]/15 text-[#736e6e] hover:text-rose-600 hover:border-rose-300 flex items-center justify-center transition-colors cursor-pointer"
+                      title="Delete Match"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -260,6 +274,12 @@ export const FixtureList: React.FC = () => {
       <ScheduleMatchModal
         isOpen={showScheduleModal}
         onClose={() => setShowScheduleModal(false)}
+      />
+
+      {/* Edit Fixture & Match Result Modal */}
+      <EditMatchModal
+        match={editingMatch}
+        onClose={() => setEditingMatch(null)}
       />
 
       {/* Inspect Scorecard Modal */}

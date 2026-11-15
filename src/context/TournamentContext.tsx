@@ -171,6 +171,39 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Guard refs to PREVENT overwriting IndexedDB/storage on initial mount/hydration!
   const isHofLoadedRef = useRef(false);
   const isTeamsLoadedRef = useRef(false);
+  const isMatchesLoadedRef = useRef(false);
+
+  // Reconcile Matches with IndexedDB & Cloudflare API on mount
+  useEffect(() => {
+    let isMounted = true;
+    const initMatches = async () => {
+      try {
+        const remoteRes = await fetch('/api/matches').catch(() => null);
+        const contentType = remoteRes?.headers.get('content-type') || '';
+        if (remoteRes && remoteRes.ok && contentType.includes('application/json')) {
+          const remoteData = await remoteRes.json();
+          if (Array.isArray(remoteData) && remoteData.length > 0 && isMounted) {
+            setMatches(remoteData);
+            saveToIndexedDB(STORAGE_KEYS.MATCHES, remoteData);
+            isMatchesLoadedRef.current = true;
+            return;
+          }
+        }
+      } catch (_) {}
+
+      try {
+        const cached = await loadFromIndexedDB<Match[]>(STORAGE_KEYS.MATCHES);
+        if (isMounted && cached && Array.isArray(cached) && cached.length > 0) {
+          setMatches(cached);
+        }
+      } catch (_) {}
+      finally {
+        if (isMounted) isMatchesLoadedRef.current = true;
+      }
+    };
+    initMatches();
+    return () => { isMounted = false; };
+  }, []);
 
   // Reconcile Teams with IndexedDB & Cloudflare API on mount
   useEffect(() => {
@@ -416,6 +449,9 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       };
       setCurrentUser(adminUser);
       setViewMode('organizer');
+      setActiveTeamProfileId(null);
+      setActiveTabState('organizer');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return true;
     }
     return false;
@@ -489,7 +525,17 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, [teams]);
 
   useEffect(() => {
+    if (!isMatchesLoadedRef.current) return;
+    saveToIndexedDB(STORAGE_KEYS.MATCHES, matches);
     safeSetLocalStorage(STORAGE_KEYS.MATCHES, JSON.stringify(matches));
+
+    try {
+      fetch('/api/matches', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(matches)
+      }).catch(() => {});
+    } catch (_) {}
   }, [matches]);
 
   useEffect(() => {

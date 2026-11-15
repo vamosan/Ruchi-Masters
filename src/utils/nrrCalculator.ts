@@ -143,7 +143,8 @@ export function calculatePointsTable(
 
     const rateFor = oversFor > 0 ? (runsFor / oversFor) : 0;
     const rateAgainst = oversAgainst > 0 ? (runsAgainst / oversAgainst) : 0;
-    const nrr = Number((rateFor - rateAgainst).toFixed(3));
+    const computedNrr = Number((rateFor - rateAgainst).toFixed(3));
+    const ov = item.team.standingsOverride;
 
     return {
       teamId: item.team.id,
@@ -151,13 +152,13 @@ export function calculatePointsTable(
       teamCode: item.team.code,
       teamLogo: item.team.logo,
       group: item.team.group,
-      played: item.played,
-      won: item.won,
-      lost: item.lost,
-      tied: item.tied,
-      noResult: item.noResult,
-      points: item.points,
-      nrr: isNaN(nrr) ? 0 : nrr,
+      played: ov ? ov.played : item.played,
+      won: ov ? ov.won : item.won,
+      lost: ov ? ov.lost : item.lost,
+      tied: ov ? ov.tied : item.tied,
+      noResult: ov ? ov.noResult : item.noResult,
+      points: ov ? ov.points : item.points,
+      nrr: ov ? ov.nrr : (isNaN(computedNrr) ? 0 : computedNrr),
       runsScored: runsFor,
       legalOversFaced: Number(oversFor.toFixed(2)),
       runsConceded: runsAgainst,

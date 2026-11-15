@@ -7,24 +7,35 @@ import {
   Zap, 
   Target, 
   ShieldCheck,
-  Trophy
+  Trophy,
+  Edit3,
+  Search
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { Player, Team } from '../../types/cricket';
+import { EditPlayerStatsModal } from './EditPlayerStatsModal';
 
 export const Leaderboards: React.FC = () => {
-  const { teams, matches } = useTournament();
+  const { teams, matches, isAdmin } = useTournament();
   const [activeStatTab, setActiveStatTab] = useState<'orange' | 'purple' | 'sixes' | 'mvp'>('orange');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [editingPlayer, setEditingPlayer] = useState<{
+    player: Player;
+    team: Team;
+    fours: number;
+    sixes: number;
+  } | null>(null);
+  const adminMode = isAdmin();
 
-  // Aggregated Player Statistics
+  // Aggregated Player Statistics (merges scorecard totals & admin overrides)
   const allPlayersWithStats = teams.flatMap(team => {
     return team.players.map(player => {
-      let tournamentRuns = player.runsScored;
+      let matchRuns = 0;
       let tournamentBalls = 0;
-      let tournamentFours = 0;
-      let tournamentSixes = 0;
+      let matchFours = 0;
+      let matchSixes = 0;
       let highestScore = player.highestScore || 0;
-      let tournamentWickets = player.wicketsTaken;
+      let matchWickets = 0;
       let totalLegalBallsBowled = 0;
       let runsConceded = 0;
 
@@ -33,23 +44,38 @@ export const Leaderboards: React.FC = () => {
           if (!inn) return;
           const bat = inn.battingScorecard.find(b => b.playerId === player.id);
           if (bat) {
-            tournamentBalls += bat.balls;
-            tournamentFours += bat.fours;
-            tournamentSixes += bat.sixes;
+            matchRuns += bat.runs || 0;
+            tournamentBalls += bat.balls || 0;
+            matchFours += bat.fours || 0;
+            matchSixes += bat.sixes || 0;
             if (bat.runs > highestScore) highestScore = bat.runs;
           }
 
           const bowl = inn.bowlingScorecard.find(b => b.playerId === player.id);
           if (bowl) {
-            totalLegalBallsBowled += bowl.ballsLegal;
-            runsConceded += bowl.runsConceded;
+            matchWickets += bowl.wickets || 0;
+            totalLegalBallsBowled += bowl.ballsLegal || 0;
+            runsConceded += bowl.runsConceded || 0;
           }
         });
       });
 
+      const tournamentRuns = Math.max(player.runsScored || 0, matchRuns);
+      const tournamentWickets = Math.max(player.wicketsTaken || 0, matchWickets);
+      const tournamentFours = player.fours !== undefined ? player.fours : matchFours;
+      const tournamentSixes = player.sixes !== undefined ? player.sixes : matchSixes;
+
       const oversBowledDec = totalLegalBallsBowled / 6;
-      const calcEconomy = oversBowledDec > 0 ? Number((runsConceded / oversBowledDec).toFixed(2)) : (player.economy || 0);
-      const calcStrikeRate = tournamentBalls > 0 ? Number(((tournamentRuns / tournamentBalls) * 100).toFixed(1)) : (player.strikeRate || 0);
+      const calcEconomy = player.economy && player.economy > 0
+        ? player.economy
+        : oversBowledDec > 0
+        ? Number((runsConceded / oversBowledDec).toFixed(2))
+        : 0;
+      const calcStrikeRate = player.strikeRate && player.strikeRate > 0
+        ? player.strikeRate
+        : tournamentBalls > 0
+        ? Number(((tournamentRuns / tournamentBalls) * 100).toFixed(1))
+        : 0;
       const mvpPoints = (tournamentRuns * 1) + (tournamentFours * 1) + (tournamentSixes * 2.5) + (tournamentWickets * 20);
 
       return {
@@ -197,40 +223,53 @@ export const Leaderboards: React.FC = () => {
 
       </div>
 
-      {/* Category Segmented Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 pb-3">
-        <button
-          onClick={() => setActiveStatTab('orange')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-            activeStatTab === 'orange' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          👑 Most Runs (Orange Cap)
-        </button>
-        <button
-          onClick={() => setActiveStatTab('purple')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-            activeStatTab === 'purple' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          🎯 Most Wickets (Purple Cap)
-        </button>
-        <button
-          onClick={() => setActiveStatTab('sixes')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-            activeStatTab === 'sixes' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          🚀 Maximum Sixes
-        </button>
-        <button
-          onClick={() => setActiveStatTab('mvp')}
-          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-            activeStatTab === 'mvp' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-          }`}
-        >
-          ⚡ MVP Index
-        </button>
+      {/* Category Segmented Tabs + Player Search */}
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setActiveStatTab('orange')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeStatTab === 'orange' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            👑 Most Runs (Orange Cap)
+          </button>
+          <button
+            onClick={() => setActiveStatTab('purple')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeStatTab === 'purple' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            🎯 Most Wickets (Purple Cap)
+          </button>
+          <button
+            onClick={() => setActiveStatTab('sixes')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeStatTab === 'sixes' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            🚀 Maximum Sixes
+          </button>
+          <button
+            onClick={() => setActiveStatTab('mvp')}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+              activeStatTab === 'mvp' ? 'bg-slate-900 text-white shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+            }`}
+          >
+            ⚡ MVP Index
+          </button>
+        </div>
+
+        <div className="relative w-full sm:w-64">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search player or club..."
+            className="w-full h-8 pl-8 pr-3 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 focus:outline-none focus:border-[#ff6a17]"
+          />
+        </div>
       </div>
 
       {/* Leaderboard Table Card */}
@@ -275,11 +314,23 @@ export const Leaderboards: React.FC = () => {
                     <th className="p-4 text-right">Role</th>
                   </>
                 )}
+                {adminMode && <th className="p-4 text-right">Admin</th>}
               </tr>
             </thead>
 
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-              {(activeStatTab === 'orange' ? orangeCapList : activeStatTab === 'purple' ? purpleCapList : activeStatTab === 'sixes' ? sixesList : mvpList).slice(0, 15).map((entry, idx) => (
+              {(activeStatTab === 'orange' ? orangeCapList : activeStatTab === 'purple' ? purpleCapList : activeStatTab === 'sixes' ? sixesList : mvpList)
+                .filter(entry => {
+                  if (!searchQuery.trim()) return true;
+                  const q = searchQuery.toLowerCase();
+                  return (
+                    entry.player.name.toLowerCase().includes(q) ||
+                    entry.team.name.toLowerCase().includes(q) ||
+                    entry.team.code.toLowerCase().includes(q)
+                  );
+                })
+                .slice(0, 20)
+                .map((entry, idx) => (
                 <tr key={entry.player.id} className="hover:bg-slate-50 transition-colors">
                   <td className="p-4 text-center font-bold text-slate-400 font-mono">
                     {idx === 0 ? <span className="text-amber-600 font-extrabold text-sm">🥇 1</span> : idx === 1 ? '🥈 2' : idx === 2 ? '🥉 3' : idx + 1}
@@ -336,12 +387,40 @@ export const Leaderboards: React.FC = () => {
                       <td className="p-4 text-right text-slate-500 capitalize">{entry.player.role.replace('_', ' ')}</td>
                     </>
                   )}
+                  {adminMode && (
+                    <td className="p-4 text-right">
+                      <button
+                        onClick={() =>
+                          setEditingPlayer({
+                            player: entry.player,
+                            team: entry.team,
+                            fours: entry.fours,
+                            sixes: entry.sixes,
+                          })
+                        }
+                        className="h-7 px-2.5 rounded-full bg-[#ff6a17] text-[#090909] hover:bg-[#090909] hover:text-white text-[11px] font-bold inline-flex items-center gap-1 transition-colors cursor-pointer"
+                        title="Edit Runs, Wickets, Sixes & Averages"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                        <span>Edit</span>
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Edit Player Stats Modal */}
+      <EditPlayerStatsModal
+        player={editingPlayer?.player || null}
+        team={editingPlayer?.team || null}
+        computedFours={editingPlayer?.fours || 0}
+        computedSixes={editingPlayer?.sixes || 0}
+        onClose={() => setEditingPlayer(null)}
+      />
     </div>
   );
 };

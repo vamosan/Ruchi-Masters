@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Menu, X, ArrowUpRight, KeyRound, UserCheck } from 'lucide-react';
+import { Menu, X, ArrowUpRight, KeyRound, UserCheck, ShieldCheck } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 
 /**
@@ -90,8 +90,18 @@ export const RuchiNavbar: React.FC = () => {
           })}
         </nav>
 
-        {/* Right actions: Direct Captain Login / My Profile + Live Scores */}
+        {/* Right actions: Direct Admin Panel / Team Login / My Profile + Live Scores */}
         <div className="hidden lg:flex items-center gap-2.5 shrink-0">
+          {currentUser.role === 'admin' && (
+            <button
+              onClick={() => go('organizer')}
+              className="h-9 px-3.5 rounded-full bg-white/15 hover:bg-[#ff6a17] hover:text-[#090909] text-[13px] font-bold text-[#ff6a17] transition-colors cursor-pointer flex items-center gap-1.5"
+              title="Open Admin Command Center (Edit Fixtures, Standings & Stats)"
+            >
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Admin Panel</span>
+            </button>
+          )}
           {currentUser.role === 'team' && currentUser.teamId && (
             <button
               onClick={() => openTeamProfile(currentUser.teamId!)}

@@ -159,9 +159,11 @@ export const HomePage: React.FC = () => {
         const bw = bowlMap.get(p.id);
         const runs = Math.max(p.runsScored || 0, b?.runs || 0);
         const wickets = Math.max(p.wicketsTaken || 0, bw?.wickets || 0);
-        const sixes = b?.sixes || 0;
+        const sixes = p.sixes !== undefined ? p.sixes : (b?.sixes || 0);
         const balls = b?.balls || 0;
-        const sr = balls > 0 ? Math.round((runs / balls) * 100) : Math.round(p.strikeRate || 0);
+        const sr = p.strikeRate && p.strikeRate > 0
+          ? Math.round(p.strikeRate)
+          : (balls > 0 ? Math.round((runs / balls) * 100) : 0);
         return {
           ...p,
           teamCode: t.code,
