@@ -105,6 +105,73 @@ const STORAGE_KEYS = {
   AUTH_USER: 'cricmaster_auth_user_v5',
 };
 
+const normPlayerName = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+function mergeSeededStatsIfMissing(storedTeams: Team[]): { teams: Team[]; didMigrate: boolean } {
+  const alreadySynced = storedTeams.some(t => t.players.some(p => p.mvpPoints !== undefined));
+  if (alreadySynced) return { teams: storedTeams, didMigrate: false };
+
+  const migrated = INITIAL_TEAMS.map(initTeam => {
+    const cachedTeam = storedTeams.find(c => c.id === initTeam.id);
+    if (!cachedTeam) return initTeam;
+
+    const existingPlayers = cachedTeam.players || [];
+    const updatedPlayers: Player[] = initTeam.players.map(initPlayer => {
+      const existing = existingPlayers.find(
+        p => p.id === initPlayer.id || normPlayerName(p.name) === normPlayerName(initPlayer.name)
+      );
+      if (!existing) return initPlayer;
+      return {
+        ...initPlayer,
+        ...existing,
+        // Preserve custom photos / captaincy / jersey / PIN data while hydrating CricHeroes stats
+        matchesPlayed: existing.matchesPlayed > 0 ? existing.matchesPlayed : initPlayer.matchesPlayed,
+        runsScored: existing.runsScored > 0 ? existing.runsScored : initPlayer.runsScored,
+        wicketsTaken: existing.wicketsTaken > 0 ? existing.wicketsTaken : initPlayer.wicketsTaken,
+        highestScore: existing.highestScore > 0 ? existing.highestScore : initPlayer.highestScore,
+        bestBowling: existing.bestBowling && existing.bestBowling !== '0/0' ? existing.bestBowling : initPlayer.bestBowling,
+        fours: existing.fours !== undefined && existing.fours > 0 ? existing.fours : initPlayer.fours,
+        sixes: existing.sixes !== undefined && existing.sixes > 0 ? existing.sixes : initPlayer.sixes,
+        fifties: existing.fifties ?? initPlayer.fifties,
+        hundreds: existing.hundreds ?? initPlayer.hundreds,
+        strikeRate: existing.strikeRate && existing.strikeRate > 0 ? existing.strikeRate : initPlayer.strikeRate,
+        economy: existing.economy && existing.economy > 0 ? existing.economy : initPlayer.economy,
+        catches: existing.catches ?? initPlayer.catches,
+        stumpings: existing.stumpings ?? initPlayer.stumpings,
+        runOuts: existing.runOuts ?? initPlayer.runOuts,
+        mvpPoints: initPlayer.mvpPoints ?? 0,
+        battingStyle: initPlayer.battingStyle || existing.battingStyle,
+        bowlingStyle: initPlayer.bowlingStyle || existing.bowlingStyle,
+        role: initPlayer.role || existing.role,
+      };
+    });
+
+    // Keep any custom-added players added by captains/admins not in INITIAL_TEAMS
+    existingPlayers.forEach(ep => {
+      if (!updatedPlayers.some(up => up.id === ep.id || normPlayerName(up.name) === normPlayerName(ep.name))) {
+        updatedPlayers.push({ ...ep, mvpPoints: ep.mvpPoints ?? 0 });
+      }
+    });
+
+    return {
+      ...initTeam,
+      ...cachedTeam,
+      teamPhotoUrl: cachedTeam.teamPhotoUrl || initTeam.teamPhotoUrl,
+      bannerUrl: cachedTeam.bannerUrl || initTeam.bannerUrl,
+      logo: cachedTeam.logo || initTeam.logo,
+      players: updatedPlayers,
+    };
+  });
+
+  storedTeams.forEach(c => {
+    if (!migrated.some(m => m.id === c.id)) {
+      migrated.push(c);
+    }
+  });
+
+  return { teams: migrated, didMigrate: true };
+}
+
 export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [tournament, setTournament] = useState<Tournament>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.TOURNAMENT);
@@ -117,7 +184,7 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 40) {
-          return parsed;
+          return mergeSeededStatsIfMissing(parsed).teams;
         }
       } catch (e) {
         console.error(e);
@@ -216,8 +283,16 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (remoteRes && remoteRes.ok) {
           const remoteData = await remoteRes.json();
           if (Array.isArray(remoteData) && remoteData.length >= 40 && isMounted) {
-            setTeams(remoteData);
-            saveToIndexedDB('cricmaster_teams_v4', remoteData);
+            const { teams: syncedTeams, didMigrate } = mergeSeededStatsIfMissing(remoteData);
+            setTeams(syncedTeams);
+            saveToIndexedDB('cricmaster_teams_v4', syncedTeams);
+            if (didMigrate) {
+              fetch('/api/teams', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(syncedTeams),
+              }).catch(() => {});
+            }
             isTeamsLoadedRef.current = true;
             return;
           }
@@ -230,30 +305,7 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       try {
         const cached = await loadFromIndexedDB<Team[]>('cricmaster_teams_v4');
         if (isMounted && cached && Array.isArray(cached) && cached.length > 0) {
-          setTeams(prev => {
-            // Merge cached teams with initial data so custom uploaded squad photos & player photos NEVER vanish
-            const merged = INITIAL_TEAMS.map(initTeam => {
-              const cachedTeam = cached.find(c => c.id === initTeam.id);
-              if (!cachedTeam) return initTeam;
-              return {
-                ...initTeam,
-                ...cachedTeam,
-                teamPhotoUrl: cachedTeam.teamPhotoUrl || initTeam.teamPhotoUrl,
-                bannerUrl: cachedTeam.bannerUrl || initTeam.bannerUrl,
-                logo: cachedTeam.logo || initTeam.logo,
-                players: cachedTeam.players && cachedTeam.players.length > 0 ? cachedTeam.players : initTeam.players
-              };
-            });
-
-            // Retain any new teams added by organizers
-            cached.forEach(c => {
-              if (!merged.some(m => m.id === c.id)) {
-                merged.push(c);
-              }
-            });
-
-            return merged;
-          });
+          setTeams(() => mergeSeededStatsIfMissing(cached).teams);
         }
       } catch (err) {
         console.warn('Failed to load teams from IndexedDB:', err);

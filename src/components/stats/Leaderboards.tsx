@@ -40,6 +40,7 @@ export const Leaderboards: React.FC = () => {
       let runsConceded = 0;
 
       matches.forEach(m => {
+        if (['m-101', 'm-102', 'm-103'].includes(m.id)) return;
         [m.innings1, m.innings2].forEach(inn => {
           if (!inn) return;
           const bat = inn.battingScorecard.find(b => b.playerId === player.id);
@@ -76,7 +77,9 @@ export const Leaderboards: React.FC = () => {
         : tournamentBalls > 0
         ? Number(((tournamentRuns / tournamentBalls) * 100).toFixed(1))
         : 0;
-      const mvpPoints = (tournamentRuns * 1) + (tournamentFours * 1) + (tournamentSixes * 2.5) + (tournamentWickets * 20);
+      const mvpPoints = player.mvpPoints !== undefined
+        ? Number(player.mvpPoints.toFixed(1))
+        : Math.round((tournamentRuns * 1) + (tournamentFours * 1) + (tournamentSixes * 2.5) + (tournamentWickets * 20));
 
       return {
         player,
@@ -89,7 +92,7 @@ export const Leaderboards: React.FC = () => {
         wickets: tournamentWickets,
         economy: calcEconomy,
         strikeRate: calcStrikeRate,
-        mvpPoints: Math.round(mvpPoints)
+        mvpPoints
       };
     });
   });
@@ -350,7 +353,7 @@ export const Leaderboards: React.FC = () => {
                     </div>
                   </td>
 
-                  <td className="p-4 text-right text-slate-500 font-mono">{entry.player.matchesPlayed || 4}</td>
+                  <td className="p-4 text-right text-slate-500 font-mono">{entry.player.matchesPlayed ?? 0}</td>
 
                   {activeStatTab === 'orange' && (
                     <>

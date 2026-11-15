@@ -50,6 +50,10 @@ export interface Player {
   hundreds?: number;
   strikeRate?: number;
   economy?: number;
+  catches?: number;
+  stumpings?: number;
+  runOuts?: number;
+  mvpPoints?: number;
 }
 
 export interface StandingsOverride {

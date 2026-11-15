@@ -122,6 +122,7 @@ export const OrganizerSuite: React.FC = () => {
     const bowlMap = new Map<string, { wickets: number; runsConceded: number; legalBalls: number }>();
 
     matches.forEach(m => {
+      if (['m-101', 'm-102', 'm-103'].includes(m.id)) return;
       [m.innings1, m.innings2].forEach(inn => {
         if (!inn) return;
         inn.battingScorecard?.forEach(b => {
