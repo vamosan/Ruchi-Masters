@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { 
   ArrowLeft,
+  ArrowRight,
   Globe,
   AtSign,
   Share2,
@@ -22,6 +23,7 @@ import {
   Search, 
   Filter, 
   UserCheck, 
+  ChevronLeft,
   ChevronRight, 
   TrendingUp, 
   Zap, 
@@ -37,10 +39,13 @@ import {
   KeyRound,
   ShieldAlert,
   ShieldCheck,
-  Trash2
+  Trash2,
+  LayoutGrid,
+  GalleryHorizontalEnd
 } from 'lucide-react';
 import { Team, Player, Match, PlayerRole, BattingStyle, BowlingStyle } from '../../types/cricket';
 import { useTournament } from '../../context/TournamentContext';
+import { calculatePointsTable } from '../../utils/nrrCalculator';
 import { processPlayerPhoto, processBannerPhoto } from '../../utils/imageUtils';
 import { EditTeamModal } from './EditTeamModal';
 import { HoloTiltCard } from '../common/HoloTiltCard';
@@ -55,6 +60,7 @@ interface Props {
 
 export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam }) => {
   const { 
+    tournament,
     teams, 
     matches, 
     currentUser, 
@@ -72,8 +78,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
   } = useTournament();
 
   const isAuthorized = canEditTeam(team.id);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
 
   const [activeTabKey, setActiveTabKey] = useState<'squad' | 'overview' | 'matches' | 'media'>('squad');
+  const [squadLayout, setSquadLayout] = useState<'carousel' | 'grid'>('carousel');
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
@@ -105,11 +113,24 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
   const viceCaptain = team.players.find(p => p.isViceCaptain || p.id === team.viceCaptainId);
   const [captainSignName, setCaptainSignName] = useState(captain?.name || team.managerName || 'Team Captain');
 
+  // Standings & League Record for this club
+  const allStandings = useMemo(
+    () => calculatePointsTable(teams, matches, tournament.rules),
+    [teams, matches, tournament.rules]
+  );
+  const groupStandings = useMemo(
+    () => allStandings.filter(s => (team.group ? s.group === team.group : true)).slice(0, 5),
+    [allStandings, team.group]
+  );
+  const teamStanding = allStandings.find(s => s.teamId === team.id);
+  const groupPosition = Math.max(1, groupStandings.findIndex(s => s.teamId === team.id) + 1);
+
   // Filter matches involving this team
   const teamMatches = matches.filter(m => m.teamAId === team.id || m.teamBId === team.id);
   const completedMatches = teamMatches.filter(m => m.status === 'completed');
-  const winsCount = completedMatches.filter(m => m.winnerTeamId === team.id).length;
-  const lossesCount = completedMatches.filter(m => m.winnerTeamId && m.winnerTeamId !== team.id).length;
+  const winsCount = teamStanding ? teamStanding.won : completedMatches.filter(m => m.winnerTeamId === team.id).length;
+  const lossesCount = teamStanding ? teamStanding.lost : completedMatches.filter(m => m.winnerTeamId && m.winnerTeamId !== team.id).length;
+  const matchesPlayedCount = teamStanding ? teamStanding.played : teamMatches.length;
 
   const verifiedCount = team.players.filter(p => p.isAuthenticated).length;
 
@@ -118,6 +139,14 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
   const totalWicketsTaken = team.players.reduce((sum, p) => sum + (p.wicketsTaken || 0), 0);
   const topRunScorer = [...team.players].sort((a, b) => (b.runsScored || 0) - (a.runsScored || 0))[0];
   const topWicketTaker = [...team.players].sort((a, b) => (b.wicketsTaken || 0) - (a.wicketsTaken || 0))[0];
+  const topMvpPlayer = [...team.players].sort((a, b) => (b.mvpPoints || 0) - (a.mvpPoints || 0))[0];
+
+  const scrollCarousel = (dir: 'prev' | 'next') => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const step = Math.max(320, Math.round(el.clientWidth * 0.72));
+    el.scrollBy({ left: dir === 'next' ? step : -step, behavior: 'smooth' });
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
@@ -277,159 +306,98 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
   });
 
   return (
-    <div className="space-y-6 pb-20 animate-in fade-in duration-300">
-      
-      {/* Top Navigation & Team Switcher Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm">
-        <button
-          onClick={onBack}
-          className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs flex items-center gap-2 transition-all shadow-2xs"
-        >
-          <ArrowLeft className="w-4 h-4 text-slate-600" />
-          <span>Back to All Squads</span>
-        </button>
-
-        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-          {/* Direct Team Selector Dropdown */}
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500 font-medium hidden md:inline">Switch Franchise:</span>
-            <select
-              value={team.id}
-              onChange={(e) => {
-                const found = teams.find(t => t.id === e.target.value);
-                if (found) onSelectTeam(found);
-              }}
-              className="px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-semibold text-xs outline-none cursor-pointer hover:bg-white transition-colors"
-            >
-              {teams.map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Edit Team / Login Button */}
-          {isAuthorized ? (
-            <button
-              onClick={() => setShowEditModal(true)}
-              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
-            >
-              <Edit3 className="w-3.5 h-3.5 text-amber-300" />
-              <span>Edit Team Profile & Pic</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => openAuthModal(team.id)}
-              className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
-            >
-              <KeyRound className="w-3.5 h-3.5 text-amber-300" />
-              <span>Captain Login to Edit</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Role Access Alert Banner */}
-      {!isAuthorized && (
-        <div className="p-4 rounded-2xl bg-slate-900 text-white border border-slate-800 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs">
-          <div className="flex items-start sm:items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-slate-800 text-amber-300 border border-slate-700 shrink-0">
-              <Lock className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 font-bold text-sm text-white">
-                <span>Read-Only Squad View</span>
-                <span className="text-slate-500">•</span>
-                <span className="text-slate-300">{team.name}</span>
-              </div>
-              <p className="text-slate-400 text-xs mt-0.5">
-                Viewing as <strong>{currentUser.role === 'team' ? currentUser.teamName + ' Captain' : 'Spectator'}</strong>. Only certified <strong>{team.name} Captain</strong> or tournament admins can modify roster data.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              onClick={() => openAuthModal(team.id)}
-              className="px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all"
-            >
-              <Crown className="w-4 h-4 text-slate-950" />
-              <span>Log In as Team Captain</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {isAuthorized && (
-        <div className="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex items-center justify-between gap-3 text-xs shadow-2xs">
+    <div className="space-y-8 pb-20 animate-in fade-in duration-300">
+      {/* Role Access Alert Strip (Compact) */}
+      {isAuthorized ? (
+        <div className="px-4 py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex flex-wrap items-center justify-between gap-2 text-xs shadow-2xs">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             <span className="font-bold">
-              {currentUser.role === 'admin' 
-                ? 'Super Admin Mode Active: You can edit this team and certify all squad members.'
-                : 'Franchise Captain Authorized: You have exclusive management access for ' + team.name + '.'}
+              {currentUser.role === 'admin'
+                ? 'Super Admin Mode Active: Edit team info, photos, and all squad members.'
+                : `Franchise Captain Authorized: Exclusive management access for ${team.name}.`}
             </span>
           </div>
           <span className="px-2.5 py-0.5 rounded-lg bg-emerald-200 text-emerald-900 font-mono font-black text-[10px]">
             EDIT ACCESS GRANTED
           </span>
         </div>
-      )}
+      ) : null}
 
-      {/* DYNAMIC FRANCHISE HERO BANNER (Full Height with Elevated Team Pic) */}
-      <div className="relative rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 text-white shadow-lg">
-        
-        {/* Stadium Background Banner with Gradient Overlay */}
-        <div className="absolute inset-0 z-0">
+      {/* EDITORIAL DARK ATHLETE / CLUB HERO SHOWCASE */}
+      <div className="relative rounded-3xl overflow-hidden bg-[#0c0d13] text-white border border-white/10 shadow-2xl">
+        {/* Soft Ghosted Backdrop Image + Radial Club Glow */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
           <img
-            src={team.bannerUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1600&q=80'}
-            alt={team.name}
-            className="w-full h-full object-cover object-center brightness-[0.35]"
-            onError={(e) => {
-              e.currentTarget.onerror = null;
-              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1600&q=80';
-            }}
+            src={team.teamPhotoUrl || team.bannerUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1600&q=80'}
+            alt=""
+            aria-hidden="true"
+            className="w-full h-full object-cover object-center opacity-[0.14] scale-105 blur-[1px]"
           />
-          <div 
+          <div
             className="absolute inset-0"
             style={{
-              background: 'linear-gradient(135deg, ' + (team.primaryColor || '#2563eb') + '88 0%, ' + (team.secondaryColor || '#f59e0b') + '35 60%, #090d16 100%)'
+              background: `radial-gradient(circle at 72% 45%, ${team.primaryColor || '#ff6a17'}40 0%, rgba(12,13,19,0.92) 55%, #0c0d13 100%)`
             }}
           />
+          {/* Giant Ghosted Club Code Watermark */}
+          <div className="hidden lg:block absolute -left-6 bottom-12 text-[180px] font-black tracking-tighter leading-none text-white/[0.03] select-none pointer-events-none font-cabinet uppercase">
+            {team.code}
+          </div>
         </div>
 
-        {/* Hero Content */}
-        <div className="relative z-10 p-6 sm:p-8 space-y-6">
-          
-          {/* Top Row: Group Badge & Edit Action */}
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur text-white font-mono font-semibold text-xs border border-white/20">
-                OFFICIAL FRANCHISE
+        <div className="relative z-10 p-5 sm:p-8 lg:p-10 space-y-8">
+          {/* Top Navigation Bar inside Hero */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
+            <div className="flex flex-wrap items-center gap-2.5">
+              <button
+                onClick={onBack}
+                className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-[#ff6a17] transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>back to all {teams.length} squads</span>
+              </button>
+              <span className="text-white/20">|</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-[#ff6a17]/20 text-[#ff8e47] border border-[#ff6a17]/30 text-[11px] font-bold font-mono uppercase">
+                {team.group || 'Ruchi Masters'} • #{groupPosition}
               </span>
-              <span className="px-3 py-1 rounded-full bg-black/40 backdrop-blur text-slate-300 border border-white/10 text-xs font-mono font-medium">
+              <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-slate-300 border border-white/10 text-[11px] font-mono">
                 EST. {team.establishedYear || 2022}
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={team.id}
+                onChange={(e) => {
+                  const found = teams.find(t => t.id === e.target.value);
+                  if (found) onSelectTeam(found);
+                }}
+                aria-label="Switch Franchise"
+                className="px-3 py-1.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold text-xs outline-none cursor-pointer"
+              >
+                {teams.map(t => (
+                  <option key={t.id} value={t.id} className="bg-slate-900 text-white">
+                    {t.name} ({t.code})
+                  </option>
+                ))}
+              </select>
+
               {isAuthorized ? (
                 <>
                   <button
                     onClick={() => setShowEditModal(true)}
-                    className="px-3.5 py-1.5 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs flex items-center gap-1.5 border border-white/20 backdrop-blur-md transition-all shadow-sm"
+                    className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs flex items-center gap-1.5 border border-white/15 transition-all cursor-pointer"
                   >
-                    <Edit3 className="w-3.5 h-3.5 text-amber-300" />
-                    <span>Edit Team Info</span>
+                    <Edit3 className="w-3.5 h-3.5 text-[#ff6a17]" />
+                    <span>Edit Info</span>
                   </button>
-
-                  <label 
+                  <label
                     htmlFor="team-direct-photo-upload"
-                    className="cursor-pointer px-3.5 py-1.5 rounded-xl bg-white text-slate-950 hover:bg-slate-100 font-semibold text-xs transition-all shadow-sm flex items-center gap-1.5"
+                    className="cursor-pointer px-3 py-1.5 rounded-xl bg-[#ff6a17] hover:bg-[#ff7f36] text-[#090909] font-bold text-xs flex items-center gap-1.5 shadow transition-all"
                   >
-                    <Camera className="w-3.5 h-3.5 text-slate-900" />
-                    <span>Upload Squad Photo</span>
+                    <Camera className="w-3.5 h-3.5" />
+                    <span>Update Photo</span>
                     <input
                       id="team-direct-photo-upload"
                       type="file"
@@ -445,174 +413,290 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               ) : (
                 <button
                   onClick={() => openAuthModal(team.id)}
-                  className="px-3.5 py-1.5 rounded-xl bg-black/40 hover:bg-black/60 text-slate-200 backdrop-blur text-xs font-semibold transition-all border border-white/20 flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-xl bg-[#ff6a17] hover:bg-[#ff7f36] text-[#090909] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
                 >
-                  <Lock className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Captain Login to Edit</span>
+                  <KeyRound className="w-3.5 h-3.5" />
+                  <span>Captain Login</span>
                 </button>
               )}
             </div>
           </div>
 
-          {/* Main Hero Header: Team Title on Left, High Elevated Team Photo on Right */}
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 pt-2">
-            
-            {/* Left: Team Name */}
-            <div className="flex items-start sm:items-center gap-4 sm:gap-6 flex-1 min-w-0">
-              <div className="space-y-1.5 flex-1 min-w-0">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-cabinet tracking-tight text-white drop-shadow-md truncate">
-                    {team.name}
-                  </h1>
+          {/* Main 2-Column Hero Showcase: Club Data Left + Big Team Photo Right */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            {/* LEFT COLUMN (6 Cols): Oversized Title, Season Stats & Mini Group Standing */}
+            <div className="lg:col-span-6 space-y-6">
+              <div>
+                <div className="text-xs font-mono uppercase tracking-[0.2em] text-[#ff6a17] font-bold mb-1.5 flex items-center gap-2">
+                  <span>{team.logo}</span>
+                  <span>{team.shortName || team.code} · Official Franchise Profile</span>
+                </div>
+                <h1 className="text-4xl sm:text-5xl xl:text-[54px] font-black font-cabinet tracking-tight leading-[0.98] text-white">
+                  {team.name}
+                </h1>
+                {team.slogan && (
+                  <p className="text-sm text-slate-400 mt-2 italic">"{team.slogan}"</p>
+                )}
+              </div>
+
+              {/* Clean Bulleted Profile + Season Facts (Reference Style) */}
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 text-xs border-y border-white/10 py-4">
+                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
+                  <span className="text-slate-400">• Captain:</span>
+                  <span className="font-bold text-white truncate">{captain?.name || 'TBD'}</span>
+                </div>
+                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
+                  <span className="text-slate-400">• Ground:</span>
+                  <span className="font-bold text-white truncate">{team.homeGround || 'Apex Oval'}</span>
+                </div>
+                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
+                  <span className="text-slate-400">• Squad:</span>
+                  <span className="font-bold text-white">{team.players.length} Players ({verifiedCount} Verified)</span>
+                </div>
+                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
+                  <span className="text-slate-400">• Season 2026:</span>
+                  <span className="font-bold text-emerald-400 font-mono">
+                    {matchesPlayedCount}M · {winsCount}W · {lossesCount}L
+                  </span>
+                </div>
+                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
+                  <span className="text-slate-400">• Total Runs:</span>
+                  <span className="font-bold text-amber-300 font-mono">{totalRunsScored}</span>
+                </div>
+                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
+                  <span className="text-slate-400">• Total Wkts:</span>
+                  <span className="font-bold text-purple-300 font-mono">{totalWicketsTaken}</span>
+                </div>
+              </div>
+
+              {/* Inline Mini Group Standing Card (Inspired by Reference #1) */}
+              {groupStandings.length > 0 && (
+                <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-4 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300">
+                      {team.group || 'Tournament'} Standing
+                    </span>
+                    <button
+                      onClick={() => setActiveTab('standings')}
+                      className="text-[11px] font-semibold text-[#ff6a17] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>View full table</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+
+                  <div className="divide-y divide-white/[0.06] text-xs">
+                    {groupStandings.map((row, idx) => {
+                      const isCurrent = row.teamId === team.id;
+                      return (
+                        <button
+                          key={row.teamId}
+                          onClick={() => {
+                            const found = teams.find(t => t.id === row.teamId);
+                            if (found) onSelectTeam(found);
+                          }}
+                          className={`w-full py-1.5 px-2 rounded-lg flex items-center justify-between gap-2 text-left transition-colors cursor-pointer ${
+                            isCurrent ? 'bg-[#ff6a17] text-[#090909] font-bold' : 'hover:bg-white/5 text-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="font-mono w-4 text-[11px]">{idx + 1}.</span>
+                            <span>{row.teamLogo}</span>
+                            <span className="truncate">{row.teamName}</span>
+                          </div>
+                          <div className="flex items-center gap-3 shrink-0 font-mono text-[11px]">
+                            <span className="hidden sm:inline">{row.played}M</span>
+                            <span>{row.nrr >= 0 ? `+${row.nrr.toFixed(2)}` : row.nrr.toFixed(2)}</span>
+                            <span className="w-7 text-right font-black">{row.points}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* RIGHT COLUMN (6 Cols): BIG Hero Team Photo Card + Bold Orange Glow Ring */}
+            <div className="lg:col-span-6 relative flex flex-col items-center">
+              {/* Circular Accent Glow behind Photo */}
+              <div
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-96 sm:h-96 rounded-full opacity-80 blur-[2px] pointer-events-none"
+                style={{
+                  background: `radial-gradient(circle, ${team.secondaryColor || '#ff6a17'}cc 0%, ${team.primaryColor || '#ff6a17'}44 55%, transparent 72%)`
+                }}
+              />
+
+              <div
+                onClick={() => {
+                  if (isAuthorized) {
+                    document.getElementById('team-direct-photo-upload')?.click();
+                  } else {
+                    openAuthModal(team.id);
+                  }
+                }}
+                className="relative z-10 group cursor-pointer w-full rounded-3xl overflow-hidden border-2 border-white/15 shadow-2xl bg-slate-900"
+              >
+                <div className="h-[320px] sm:h-[400px] w-full overflow-hidden">
+                  <img
+                    src={team.teamPhotoUrl || team.bannerUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80'}
+                    alt={team.name}
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80';
+                    }}
+                  />
                 </div>
 
-                
-
-                <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs text-slate-200 font-medium pt-1">
-                  <span className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-xl border border-white/10">
-                    <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                    <span className="font-bold">{team.homeGround || 'Apex Oval Complex'}</span>
-                  </span>
-
-                  {team.address && (
-                    <span className="flex items-center gap-1.5 bg-black/40 px-2.5 py-1 rounded-xl border border-white/10 hidden sm:flex">
-                      <Building2 className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                      <span>{team.address}</span>
-                    </span>
+                {/* Hover Overlay for Upload */}
+                <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white text-xs font-bold backdrop-blur-[2px]">
+                  {isAuthorized ? (
+                    <>
+                      <Camera className="w-5 h-5 text-[#ff6a17]" />
+                      <span>Click to Upload New Team Photo</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4 text-[#ff6a17]" />
+                      <span>Captain Login to Update Photo</span>
+                    </>
                   )}
+                </div>
 
-                  {captain && (
-                    <span className="flex items-center gap-1.5 bg-black/60 px-3 py-1 rounded-xl border border-white/20 text-white font-bold">
-                      <Crown className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                      <span>Captain: <strong className="text-amber-300 font-black">{captain.name}</strong></span>
+                {/* Bottom Overlay Bar Inside Photo */}
+                <div className="absolute bottom-3 left-3 right-3 px-4 py-2.5 rounded-2xl bg-[#090909]/85 backdrop-blur-md border border-white/15 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="font-bold text-white">#{groupPosition} in {team.group || 'League'}</span>
+                    <span className="text-white/30">•</span>
+                    <span className="font-mono text-slate-300">
+                      For: {teamStanding?.runsScored ?? 0}/{teamStanding?.legalOversFaced ?? 0}
                     </span>
-                  )}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    {(teamStanding?.form || []).slice(-5).map((f, i) => (
+                      <span
+                        key={i}
+                        className={`w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center ${
+                          f === 'W'
+                            ? 'bg-emerald-500 text-slate-950'
+                            : f === 'L'
+                              ? 'bg-rose-500 text-white'
+                              : 'bg-slate-600 text-white'
+                        }`}
+                      >
+                        {f}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
 
-                  {/* Online links if available */}
+              {/* Optional Club Links Strip */}
+              {(team.website || team.instagram || team.facebook) && (
+                <div className="relative z-10 flex items-center gap-2 mt-3 self-end text-[11px]">
                   {team.website && (
                     <a
                       href={team.website.startsWith('http') ? team.website : 'https://' + team.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 bg-cyan-500/20 hover:bg-cyan-500 text-cyan-200 hover:text-slate-950 px-2.5 py-1 rounded-xl border border-cyan-400/30 transition-all font-bold"
-                      title="Visit Official Website"
+                      className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1"
                     >
-                      <Globe className="w-3.5 h-3.5" />
-                      <span>Website</span>
+                      <Globe className="w-3 h-3" /> Website
                     </a>
                   )}
-
                   {team.instagram && (
                     <a
                       href={team.instagram.startsWith('http') ? team.instagram : 'https://instagram.com/' + team.instagram.replace('@', '')}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 bg-pink-500/20 hover:bg-pink-500 text-pink-200 hover:text-white px-2.5 py-1 rounded-xl border border-pink-400/30 transition-all font-bold"
-                      title="View Instagram"
+                      className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1"
                     >
-                      <AtSign className="w-3.5 h-3.5" />
-                      <span>Instagram</span>
+                      <AtSign className="w-3 h-3" /> Instagram
                     </a>
                   )}
-
                   {team.facebook && (
                     <a
                       href={team.facebook.startsWith('http') ? team.facebook : 'https://facebook.com/' + team.facebook}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-1 bg-blue-500/20 hover:bg-blue-500 text-blue-200 hover:text-white px-2.5 py-1 rounded-xl border border-blue-400/30 transition-all font-bold"
-                      title="View Facebook"
+                      className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1"
                     >
-                      <Share2 className="w-3.5 h-3.5" />
-                      <span>Facebook</span>
+                      <Share2 className="w-3 h-3" /> Facebook
                     </a>
                   )}
                 </div>
-              </div>
+              )}
             </div>
-
-            {/* Right: Elevated Team Squad Photo Card (Fully visible and elevated) */}
-            <div 
-              onClick={() => {
-                if (isAuthorized) {
-                  document.getElementById('team-direct-photo-upload')?.click();
-                } else {
-                  openAuthModal(team.id);
-                }
-              }}
-              className="relative group cursor-pointer shrink-0 rounded-2xl overflow-hidden border border-white/20 shadow-md hover:scale-[1.02] transition-all w-full sm:w-80 bg-slate-900"
-            >
-              <div className="h-44 sm:h-48 w-full overflow-hidden">
-                <img
-                  src={team.teamPhotoUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80'}
-                  alt="Team Squad"
-                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=800&q=80';
-                  }}
-                />
-              </div>
-              <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-xs font-semibold backdrop-blur-xs">
-                {isAuthorized ? (
-                  <>
-                    <Camera className="w-4 h-4 text-amber-300" />
-                    <span>Upload New Squad Pic</span>
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-4 h-4 text-amber-300" />
-                    <span>Captain Login to Change Pic</span>
-                  </>
-                )}
-              </div>
-              <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between px-2.5 py-1 rounded-xl bg-slate-950/85 backdrop-blur border border-white/10 text-white text-[11px] font-semibold">
-                <span className="flex items-center gap-1"><Users className="w-3 h-3 text-emerald-400" /> Official Squad</span>
-                <span className="text-amber-400 text-[10px] font-semibold font-mono">2026 ROSTER</span>
-              </div>
-            </div>
-
           </div>
 
-        </div>
-      </div>
+          {/* Bottom Spotlight Strip (Club Leaders + Bold Points Card — Reference #1 Style) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+            {/* Top Run Scorer */}
+            <button
+              onClick={() => topRunScorer && setEnlargedPlayer(topRunScorer)}
+              className="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/10 flex items-center gap-3 text-left transition-colors cursor-pointer"
+            >
+              <img
+                src={topRunScorer?.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'}
+                alt={topRunScorer?.name || 'Runs Leader'}
+                className="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/15"
+              />
+              <div className="min-w-0">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Club Top Scorer</div>
+                <div className="text-sm font-bold text-white truncate">{topRunScorer?.name || 'TBD'}</div>
+                <div className="text-xs font-mono text-slate-300">{topRunScorer?.runsScored || 0} runs · SR {topRunScorer?.strikeRate || 0}</div>
+              </div>
+            </button>
 
-      {/* KEY STATS BAR */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Squad Size</span>
-          <span className="text-2xl font-black text-slate-900 mt-1 font-mono">{team.players.length}</span>
-          <span className="text-[11px] text-emerald-600 font-medium">25 Player Capacity</span>
-        </div>
+            {/* Top Wicket Taker */}
+            <button
+              onClick={() => topWicketTaker && setEnlargedPlayer(topWicketTaker)}
+              className="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/10 flex items-center gap-3 text-left transition-colors cursor-pointer"
+            >
+              <img
+                src={topWicketTaker?.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'}
+                alt={topWicketTaker?.name || 'Wickets Leader'}
+                className="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/15"
+              />
+              <div className="min-w-0">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400">Lead Bowler</div>
+                <div className="text-sm font-bold text-white truncate">{topWicketTaker?.name || 'TBD'}</div>
+                <div className="text-xs font-mono text-slate-300">{topWicketTaker?.wicketsTaken || 0} wkts · Econ {topWicketTaker?.economy || 0}</div>
+              </div>
+            </button>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Verified Players</span>
-          <span className="text-2xl font-black text-emerald-600 mt-1 font-mono">{verifiedCount}/{team.players.length}</span>
-          <span className="text-[11px] text-slate-500 font-medium">Photo ID Certified</span>
-        </div>
+            {/* Top MVP */}
+            <button
+              onClick={() => topMvpPlayer && setEnlargedPlayer(topMvpPlayer)}
+              className="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/10 flex items-center gap-3 text-left transition-colors cursor-pointer"
+            >
+              <img
+                src={topMvpPlayer?.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'}
+                alt={topMvpPlayer?.name || 'Club MVP'}
+                className="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/15"
+              />
+              <div className="min-w-0">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Club MVP Leader</div>
+                <div className="text-sm font-bold text-white truncate">{topMvpPlayer?.name || 'TBD'}</div>
+                <div className="text-xs font-mono text-slate-300">{topMvpPlayer?.mvpPoints ?? 0} MVP pts</div>
+              </div>
+            </button>
 
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Win Record</span>
-          <span className="text-2xl font-black text-slate-900 mt-1 font-mono">{winsCount}W - {lossesCount}L</span>
-          <span className="text-[11px] text-slate-500 font-medium">{teamMatches.length} Matches</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Total Runs</span>
-          <span className="text-2xl font-black text-slate-900 mt-1 font-mono">{totalRunsScored}</span>
-          <span className="text-[11px] text-slate-500 font-medium truncate">Top: {topRunScorer?.name?.split(' ')[0]} ({topRunScorer?.runsScored})</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Total Wickets</span>
-          <span className="text-2xl font-black text-slate-900 mt-1 font-mono">{totalWicketsTaken}</span>
-          <span className="text-[11px] text-slate-500 font-medium truncate">Top: {topWicketTaker?.name?.split(' ')[0]} ({topWicketTaker?.wicketsTaken})</span>
-        </div>
-
-        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm flex flex-col justify-between">
-          <span className="text-slate-400 font-semibold text-[11px] uppercase tracking-wider">Captain</span>
-          <span className="text-sm font-bold text-slate-900 mt-1 truncate">{captain?.name || 'TBD'}</span>
-          <span className="text-[11px] text-slate-500 font-medium truncate">{team.managerPhone || team.homeGround}</span>
+            {/* Bold Highlighted Points / NRR Callout */}
+            <div className="p-4 rounded-2xl bg-[#ff6a17] text-[#090909] flex items-center justify-between shadow-lg">
+              <div>
+                <div className="text-[10px] font-black uppercase tracking-wider opacity-80">Season 2026 Points</div>
+                <div className="text-3xl font-black font-mono leading-none mt-1">
+                  {teamStanding?.points ?? 0} PTS
+                </div>
+                <div className="text-xs font-bold font-mono mt-1 opacity-85">
+                  NRR {teamStanding ? (teamStanding.nrr >= 0 ? `+${teamStanding.nrr.toFixed(3)}` : teamStanding.nrr.toFixed(3)) : '+0.000'}
+                </div>
+              </div>
+              <span className="text-3xl">{team.logo}</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -671,217 +755,342 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
       {activeTabKey === 'squad' && (
         <div className="space-y-6">
           
-          {/* Squad Header & Search/Filter Controls */}
-          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
-              <input
-                type="text"
-                placeholder="Search player by name, jersey #, or tournament ID..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none font-medium text-xs transition-colors"
-              />
+          {/* Carousel / Filter Toolbar with Next & Prev Controls */}
+          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h2 className="text-lg sm:text-xl font-black text-slate-950 font-cabinet flex items-center gap-2">
+                  <span>Squad Player Cards</span>
+                  <span className="px-2 py-0.5 rounded-full bg-slate-900 text-white text-xs font-mono">
+                    {filteredPlayers.length}
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Scroll horizontally or click Prev / Next · Click any player card for full 2026 stats & career view
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {squadLayout === 'carousel' && (
+                  <div className="flex items-center gap-1.5 mr-1">
+                    <button
+                      type="button"
+                      onClick={() => scrollCarousel('prev')}
+                      aria-label="Previous Players"
+                      className="w-9 h-9 rounded-full border border-slate-300 bg-white hover:bg-slate-900 hover:text-white hover:border-slate-900 text-slate-800 flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scrollCarousel('next')}
+                      aria-label="Next Players"
+                      className="w-9 h-9 rounded-full bg-[#ff6a17] hover:bg-[#090909] text-[#090909] hover:text-white flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => setSquadLayout('carousel')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-all ${
+                      squadLayout === 'carousel' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    <GalleryHorizontalEnd className="w-3.5 h-3.5" />
+                    <span>Slider</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSquadLayout('grid')}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 cursor-pointer transition-all ${
+                      squadLayout === 'grid' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-500 hover:text-slate-900'
+                    }`}
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span>Grid</span>
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 text-xs">
-              <select
-                value={roleFilter}
-                onChange={e => setRoleFilter(e.target.value)}
-                className="border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-slate-800 font-medium outline-none cursor-pointer hover:bg-white transition-colors"
-              >
-                <option value="all">All Roles ({team.players.length})</option>
-                <option value="pure_batter">Pure Batters</option>
-                <option value="wk_batter">Wicketkeeper Batters</option>
-                <option value="pace_allrounder">Pace All-rounders</option>
-                <option value="spin_allrounder">Spin All-rounders</option>
-                <option value="fast_bowler">Fast Bowlers</option>
-                <option value="spin_bowler">Spin Bowlers</option>
-              </select>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-slate-100">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Search player by name, jersey #, or tournament ID..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white text-slate-900 placeholder-slate-400 outline-none font-medium text-xs transition-colors"
+                />
+              </div>
 
-              <select
-                value={authFilter}
-                onChange={e => setAuthFilter(e.target.value as any)}
-                className="border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-slate-800 font-medium outline-none cursor-pointer hover:bg-white transition-colors"
-              >
-                <option value="all">All Verification Status</option>
-                <option value="verified">Verified Real Players</option>
-                <option value="pending">Pending Authentication</option>
-              </select>
+              <div className="flex flex-wrap items-center gap-2 text-xs">
+                <select
+                  value={roleFilter}
+                  onChange={e => setRoleFilter(e.target.value)}
+                  className="border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-slate-800 font-medium outline-none cursor-pointer hover:bg-white transition-colors"
+                >
+                  <option value="all">All Roles ({team.players.length})</option>
+                  <option value="pure_batter">Pure Batters</option>
+                  <option value="wk_batter">Wicketkeeper Batters</option>
+                  <option value="pace_allrounder">Pace All-rounders</option>
+                  <option value="spin_allrounder">Spin All-rounders</option>
+                  <option value="fast_bowler">Fast Bowlers</option>
+                  <option value="spin_bowler">Spin Bowlers</option>
+                </select>
 
-              {isAuthorized ? (
-                <button
-                  onClick={() => {
-                    setEditingPlayer(null);
-                    setPlayerName('');
-                    setShowAddPlayer(true);
-                  }}
-                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all"
+                <select
+                  value={authFilter}
+                  onChange={e => setAuthFilter(e.target.value as any)}
+                  className="border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-slate-800 font-medium outline-none cursor-pointer hover:bg-white transition-colors"
                 >
-                  <Plus className="w-4 h-4 text-amber-300" />
-                  <span>Add Squad Player</span>
-                </button>
-              ) : (
-                <button
-                  onClick={() => openAuthModal(team.id)}
-                  className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs flex items-center gap-1.5 border border-slate-200 transition-colors"
-                >
-                  <Lock className="w-4 h-4 text-slate-500" />
-                  <span>Captain Auth to Add</span>
-                </button>
-              )}
+                  <option value="all">All Verification Status</option>
+                  <option value="verified">Verified Real Players</option>
+                  <option value="pending">Pending Authentication</option>
+                </select>
+
+                {isAuthorized ? (
+                  <button
+                    onClick={() => {
+                      setEditingPlayer(null);
+                      setPlayerName('');
+                      setShowAddPlayer(true);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4 text-amber-300" />
+                    <span>Add Squad Player</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => openAuthModal(team.id)}
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs flex items-center gap-1.5 border border-slate-200 transition-colors cursor-pointer"
+                  >
+                    <Lock className="w-4 h-4 text-slate-500" />
+                    <span>Captain Auth to Add</span>
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Player Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredPlayers.map((player) => (
-              <HoloTiltCard
-                key={player.id}
-                isSpecial={player.isCaptain}
-                className="h-full cursor-pointer group"
-                onClick={() => setEnlargedPlayer(player)}
-              >
+          {/* Horizontal Scrollable Player Cards Deck (or Grid Toggle) */}
+          <div className="relative">
+            <div
+              ref={carouselRef}
+              className={
+                squadLayout === 'carousel'
+                  ? 'flex gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 pt-1'
+                  : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'
+              }
+            >
+              {[...filteredPlayers]
+                .sort((a, b) => {
+                  if (a.isCaptain && !b.isCaptain) return -1;
+                  if (!a.isCaptain && b.isCaptain) return 1;
+                  return ((b.mvpPoints || 0) - (a.mvpPoints || 0)) || ((b.runsScored || 0) - (a.runsScored || 0));
+                })
+                .map((player) => (
                 <div
-                  className={'bg-white rounded-2xl border p-5 flex flex-col justify-between space-y-4 transition-all h-full relative overflow-hidden group-hover:border-slate-300 group-hover:shadow-md ' + (
-                    player.isAuthenticated 
-                      ? 'border-slate-200/80 shadow-sm' 
-                      : 'bg-amber-50/20 border-dashed border-amber-300 shadow-2xs'
-                  )}
+                  key={player.id}
+                  className={
+                    squadLayout === 'carousel'
+                      ? 'w-[285px] sm:w-[305px] shrink-0 snap-start'
+                      : 'w-full'
+                  }
                 >
-                  <div className="flex items-start gap-4">
-                    {/* Enlarged Player Photo Avatar */}
-                    <div className="relative shrink-0">
-                      <img
-                        src={player.photoUrl || player.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80'}
-                        alt={player.name}
-                        className="w-20 h-20 rounded-xl object-cover border border-slate-200 shadow-sm bg-slate-100 group-hover:scale-105 transition-transform"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&h=300&q=80';
-                        }}
-                      />
-                      <span className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-md bg-slate-900 text-amber-300 text-[11px] font-mono font-bold shadow-xs">
-                        #{player.jerseyNumber}
-                      </span>
-                    </div>
-
-                    {/* Player Details */}
-                    <div className="space-y-1 flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <h3 className="font-bold text-base text-slate-900 font-cabinet truncate">{player.name}</h3>
-                        {player.isCaptain && <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-900 border border-amber-200">(C)</span>}
-                        {player.isViceCaptain && <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">(VC)</span>}
-                        {player.isWicketKeeper && <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-blue-50 text-blue-800 border border-blue-200">(WK)</span>}
-                      </div>
-
-                      <p className="text-xs font-medium text-slate-500">
-                        {getRoleLabel(player.role)}
-                      </p>
-
-                      <div className="text-[10px] text-slate-400 font-mono truncate">
-                        ID: {player.idProofNumber || 'PENDING AUTH'}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Player Performance Stats Strip */}
-                  <div className="grid grid-cols-4 gap-1 p-2 bg-slate-50 rounded-xl border border-slate-100 text-center font-mono">
-                    <div>
-                      <span className="text-[9px] text-slate-400 font-semibold block">RUNS</span>
-                      <span className="text-xs font-bold text-slate-900">{player.runsScored || 0}</span>
-                    </div>
-                    <div>
-                      <span className="text-[9px] text-slate-400 font-semibold block">WKTS</span>
-                      <span className="text-xs font-bold text-slate-900">{player.wicketsTaken || 0}</span>
-                    </div>
-                    <div>
-                      <span className="text-[9px] text-slate-400 font-semibold block">HS</span>
-                      <span className="text-xs font-bold text-slate-900">{player.highestScore || 0}</span>
-                    </div>
-                    <div>
-                      <span className="text-[9px] text-slate-400 font-semibold block">SR</span>
-                      <span className="text-xs font-bold text-slate-900">{player.strikeRate || 135}</span>
-                    </div>
-                  </div>
-
-                  {/* Captain Verification Bar & Actions */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
-                    {/* View Certificate / Passport button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedCertPlayer(player);
-                      }}
-                      className="inline-flex items-center gap-1 font-semibold text-emerald-800 text-[11px] bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors"
-                      title="View Official Player ID"
+                  <HoloTiltCard
+                    isSpecial={player.isCaptain}
+                    className="h-full cursor-pointer group"
+                    onClick={() => setEnlargedPlayer(player)}
+                  >
+                    <div
+                      className={
+                        'bg-white rounded-3xl border overflow-hidden flex flex-col justify-between transition-all h-full shadow-sm group-hover:shadow-xl group-hover:-translate-y-0.5 ' +
+                        (player.isAuthenticated
+                          ? 'border-slate-200/90'
+                          : 'border-dashed border-amber-300')
+                      }
                     >
-                      <FileBadge className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Player ID</span>
-                    </button>
-
-                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      {isAuthorized ? (
-                        <>
-                          <label 
-                            htmlFor={'direct-photo-' + player.id}
-                            className="cursor-pointer px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold text-[11px] border border-slate-200 flex items-center gap-1 transition-all shadow-2xs"
-                            title="Upload or change player photo"
-                          >
-                            <Camera className="w-3.5 h-3.5 text-slate-700" />
-                            <span>Upload Pic</span>
-                            <input
-                              id={'direct-photo-' + player.id}
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              onChange={(e) => {
-                                const file = e.target.files && e.target.files[0];
-                                if (file) handleDirectPlayerPhoto(player, file);
-                              }}
-                            />
-                          </label>
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEnlargedPlayer(player);
-                            }}
-                            className="p-1.5 rounded-lg text-slate-600 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 transition-all"
-                            title="Edit Player Info"
-                          >
-                            <Edit3 className="w-3.5 h-3.5" />
-                          </button>
-
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (window.confirm(`Are you sure you want to remove ${player.name} from ${team.name}?`)) {
-                                deletePlayer(team.id, player.id);
-                              }
-                            }}
-                            className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 transition-all"
-                            title="Delete Player from Squad"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEnlargedPlayer(player);
+                      {/* Editorial Dark Card Portrait Header (Inspired by Celtics Card Reference) */}
+                      <div className="relative h-52 bg-[#0c0d13] overflow-hidden flex items-end justify-center">
+                        <div
+                          className="absolute inset-0 opacity-40"
+                          style={{
+                            background: `radial-gradient(circle at 50% 35%, ${team.primaryColor || '#ff6a17'}66 0%, #0c0d13 75%)`
                           }}
-                          className="text-[10px] font-mono text-slate-600 hover:text-slate-950 bg-slate-50 hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 font-semibold flex items-center gap-1 transition-colors"
-                        >
-                          <span>Profile ➔</span>
-                        </button>
-                      )}
+                        />
+
+                        {/* Giant Watermark Surname / Jersey */}
+                        <div className="absolute inset-x-0 top-3 text-center text-[56px] font-black tracking-tighter uppercase leading-none text-white/[0.08] select-none pointer-events-none truncate px-2 font-cabinet">
+                          {player.name.split(' ')[0]}
+                        </div>
+                        <div className="absolute right-3 bottom-1 text-[44px] font-black font-mono leading-none text-white/[0.12] select-none pointer-events-none">
+                          #{player.jerseyNumber}
+                        </div>
+
+                        {/* Top Pills Row */}
+                        <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-1">
+                            {player.isCaptain && (
+                              <span className="px-2 py-0.5 rounded-full bg-[#ff6a17] text-[#090909] text-[10px] font-black uppercase shadow">
+                                Captain
+                              </span>
+                            )}
+                            {player.isViceCaptain && !player.isCaptain && (
+                              <span className="px-2 py-0.5 rounded-full bg-white/15 backdrop-blur text-white text-[10px] font-bold uppercase border border-white/20">
+                                VC
+                              </span>
+                            )}
+                            {player.isWicketKeeper && (
+                              <span className="px-2 py-0.5 rounded-full bg-sky-400 text-slate-950 text-[10px] font-black uppercase">
+                                WK
+                              </span>
+                            )}
+                            {!player.isCaptain && !player.isViceCaptain && !player.isWicketKeeper && (
+                              <span className="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur text-slate-200 text-[10px] font-semibold border border-white/10">
+                                {team.code}
+                              </span>
+                            )}
+                          </div>
+
+                          <span
+                            className="w-7 h-7 rounded-full flex items-center justify-center text-xs bg-white/15 backdrop-blur border border-white/20 text-white"
+                            title={player.isAuthenticated ? 'Verified Player' : 'Pending Verification'}
+                          >
+                            {player.isAuthenticated ? '✓' : '•'}
+                          </span>
+                        </div>
+
+                        {/* Framed Player Photo */}
+                        <div className="relative z-10 w-36 h-40 rounded-t-2xl overflow-hidden border-t-2 border-x-2 border-white/20 bg-slate-800 shadow-2xl group-hover:scale-[1.03] transition-transform duration-500">
+                          <img
+                            src={player.photoUrl || player.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80'}
+                            alt={player.name}
+                            className="w-full h-full object-cover object-top"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80';
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Clean White Card Body & Season Stats */}
+                      <div className="p-4 space-y-3.5 flex-1 flex flex-col justify-between bg-white">
+                        <div>
+                          <h3 className="font-black text-base text-slate-950 font-cabinet truncate">
+                            {player.name}
+                          </h3>
+                          <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
+                            {getRoleLabel(player.role)} · {player.battingStyle === 'Left-hand Bat' ? 'LHB' : 'RHB'}
+                          </p>
+                        </div>
+
+                        {/* CricHeroes 2026 Stat Grid */}
+                        <div className="grid grid-cols-4 gap-1.5 p-2.5 bg-slate-50 rounded-2xl border border-slate-100 text-center font-mono">
+                          <div>
+                            <span className="text-[9px] text-slate-400 font-bold block">RUNS</span>
+                            <span className="text-sm font-black text-slate-950">{player.runsScored || 0}</span>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-slate-400 font-bold block">WKTS</span>
+                            <span className="text-sm font-black text-purple-700">{player.wicketsTaken || 0}</span>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-slate-400 font-bold block">6s</span>
+                            <span className="text-sm font-black text-amber-600">{player.sixes || 0}</span>
+                          </div>
+                          <div>
+                            <span className="text-[9px] text-slate-400 font-bold block">SR</span>
+                            <span className="text-sm font-black text-slate-800">{Math.round(player.strikeRate || 0)}</span>
+                          </div>
+                        </div>
+
+                        {/* Actions Strip */}
+                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedCertPlayer(player);
+                            }}
+                            className="inline-flex items-center gap-1 font-semibold text-emerald-800 text-[11px] bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors"
+                            title="View Official Player ID"
+                          >
+                            <FileBadge className="w-3.5 h-3.5 text-emerald-600" />
+                            <span>ID Card</span>
+                          </button>
+
+                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                            {isAuthorized ? (
+                              <>
+                                <label
+                                  htmlFor={'direct-photo-' + player.id}
+                                  className="cursor-pointer px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold text-[11px] border border-slate-200 flex items-center gap-1 transition-all"
+                                  title="Upload or change player photo"
+                                >
+                                  <Camera className="w-3.5 h-3.5 text-slate-700" />
+                                  <span>Pic</span>
+                                  <input
+                                    id={'direct-photo-' + player.id}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => {
+                                      const file = e.target.files && e.target.files[0];
+                                      if (file) handleDirectPlayerPhoto(player, file);
+                                    }}
+                                  />
+                                </label>
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEnlargedPlayer(player);
+                                  }}
+                                  className="p-1.5 rounded-lg text-slate-600 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 transition-all"
+                                  title="Edit Player Info"
+                                >
+                                  <Edit3 className="w-3.5 h-3.5" />
+                                </button>
+
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (window.confirm(`Are you sure you want to remove ${player.name} from ${team.name}?`)) {
+                                      deletePlayer(team.id, player.id);
+                                    }
+                                  }}
+                                  className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 transition-all"
+                                  title="Delete Player from Squad"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setEnlargedPlayer(player);
+                                }}
+                                className="text-[11px] font-bold text-slate-800 hover:text-[#ff6a17] bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-colors"
+                              >
+                                Full Stats →
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  </HoloTiltCard>
                 </div>
-              </HoloTiltCard>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       )}
