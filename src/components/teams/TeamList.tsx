@@ -21,9 +21,17 @@ const FALLBACK_IMG =
   'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1000&q=80';
 
 export const TeamList: React.FC = () => {
-  const { teams, hallOfFame, currentUser, canEditTeam, isAdmin, openAuthModal, addTeam } =
-    useTournament();
-  const [selectedTeamId, setSelectedTeamId] = useState<string | null>(null);
+  const {
+    teams,
+    hallOfFame,
+    currentUser,
+    canEditTeam,
+    isAdmin,
+    openAuthModal,
+    addTeam,
+    activeTeamProfileId: selectedTeamId,
+    setActiveTeamProfileId: setSelectedTeamId,
+  } = useTournament();
   const [editingTeam, setEditingTeam] = useState<Team | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<string>('all');

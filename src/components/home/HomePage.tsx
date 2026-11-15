@@ -8,6 +8,7 @@ import {
   KeyRound,
   Camera,
   CheckCircle2,
+  UserCheck,
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 import { calculatePointsTable } from '../../utils/nrrCalculator';
@@ -47,7 +48,7 @@ const FAQS = [
   },
   {
     q: 'How do captains manage their squad?',
-    a: 'Select your club in the Captain Portal at the top of the page and enter your 4-digit PIN to upload squad photos, add players and verify your roster.',
+    a: 'Click Captain Login in the top navigation or use the Captain Portal column to enter your 4-digit PIN and go directly to your team profile.',
   },
   {
     q: 'Where are matches played?',
@@ -70,6 +71,8 @@ export const HomePage: React.FC = () => {
     matches,
     hallOfFame,
     setActiveTab,
+    setActiveTeamProfileId,
+    openTeamProfile,
     setActiveMatchId,
     openAuthModal,
     currentUser,
@@ -82,13 +85,16 @@ export const HomePage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const go = (tab: string) => {
+    if (tab === 'teams') {
+      setActiveTeamProfileId(null);
+    }
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const teamById = (id?: string) => teams.find(t => t.id === id);
 
-  // Schedule (always 5 rows so left & right columns align with zero gap)
+  // Schedule (always 5 rows so all 3 columns align with zero gap)
   const schedule = useMemo(() => {
     const rank = (m: Match) =>
       m.status === 'live' || m.status === 'innings_break' ? 0 :
@@ -167,147 +173,71 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="bg-[#f6f4f4] text-[#090909]">
-      {/* ───────────── BAND 1: RALLY CRICKET BALL HERO ───────────── */}
+      {/* ───────────── BAND 1: UNOBSTRUCTED RALLY CRICKET BALL HERO ───────────── */}
       <section className="relative bg-[#090909] text-[#f6f4f4] overflow-hidden">
         <img
           src={CRICKET_BALL_HERO_IMG}
           alt="Cricket Ball on Pitch"
-          className="absolute inset-0 w-full h-full object-cover object-center opacity-50"
+          className="absolute inset-0 w-full h-full object-cover object-center opacity-85"
           onError={e => {
             e.currentTarget.onerror = null;
             e.currentTarget.src = FALLBACK_IMG;
           }}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#090909] via-[#090909]/80 to-[#090909]/35" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#090909] via-transparent to-[#090909]/40" />
+        {/* Left-only gradient so the cricket ball on the right is completely visible */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#090909] via-[#090909]/70 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#090909] via-transparent to-[#090909]/20" />
 
-        <div className="relative max-w-[1320px] mx-auto px-5 sm:px-8 pt-10 sm:pt-14 pb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
-            {/* Left 7 Cols: Rally Display Headline & CTAs */}
-            <div className="lg:col-span-7">
-              <div className="flex flex-wrap items-center gap-3 rally-rise">
-                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff6a17] text-[#090909] text-[11px] font-bold uppercase tracking-wider">
-                  <span className="w-2 h-2 rounded-full bg-[#090909]" />
-                  Season {String(editionNo).padStart(2, '0')} · {tournament.format || 'T20'}
-                </span>
-                <span className="rally-eyebrow text-[#f6f4f4]/75">
-                  Frankfurt, Germany · {teams.length} Clubs
-                </span>
-              </div>
-
-              <h1 className="rally-display mt-5 text-[48px] sm:text-[72px] lg:text-[88px] max-w-[11ch] rally-rise rally-rise-1">
-                Where every run is a fight
-              </h1>
-
-              <p className="mt-4 max-w-[500px] text-[16px] leading-relaxed text-[#f6f4f4]/75 rally-rise rally-rise-2">
-                Frankfurt’s premier T20 cricket league — {teams.length} clubs, one trophy. Follow every
-                ball live, track the group standings, and manage your squad in one place.
-              </p>
-
-              <div className="mt-6 flex flex-wrap items-center gap-3 rally-rise rally-rise-3">
-                <button onClick={() => go('fixtures')} className="rally-btn rally-btn-primary">
-                  View Schedule
-                </button>
-                <button onClick={() => go('teams')} className="rally-btn rally-btn-ghost-light">
-                  Explore {teams.length} Clubs
-                </button>
-                <button onClick={() => go('halloffame')} className="rally-btn rally-btn-ghost-light">
-                  Hall of Fame
-                </button>
-              </div>
+        <div className="relative max-w-[1320px] mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-8">
+          <div className="max-w-[680px]">
+            <div className="flex flex-wrap items-center gap-3 rally-rise">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff6a17] text-[#090909] text-[11px] font-bold uppercase tracking-wider">
+                <span className="w-2 h-2 rounded-full bg-[#090909]" />
+                Season {String(editionNo).padStart(2, '0')} · {tournament.format || 'T20'}
+              </span>
+              <span className="rally-eyebrow text-[#f6f4f4]/80">
+                Frankfurt, Germany · {teams.length} Clubs
+              </span>
             </div>
 
-            {/* Right 5 Cols: Captain Quick-Portal & Podium Box (Fills right side of hero) */}
-            <div className="lg:col-span-5">
-              <div className="rounded-[8px] bg-[#090909]/85 backdrop-blur-md border border-white/15 p-5 space-y-4">
-                {/* Captain Quick Unlock */}
-                <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                  <div className="flex items-center gap-2">
-                    <span className="relative w-5 h-5 rounded-full bg-[#ff6a17] flex items-center justify-center">
-                      <span className="absolute inset-[4px] rounded-full border border-[#090909] border-dashed" />
-                    </span>
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#f6f4f4]">
-                      Captain &amp; Squad Portal
-                    </span>
-                  </div>
-                  <span className="text-[11px] text-[#ff6a17] font-medium">40 Verified Clubs</span>
-                </div>
+            <h1 className="rally-display mt-5 text-[52px] sm:text-[76px] lg:text-[92px] max-w-[11ch] rally-rise rally-rise-1">
+              Where every run is a fight
+            </h1>
 
-                {myClub ? (
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-[11px] text-[#ff6a17] font-bold uppercase flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> Unlocked Captain Session
-                      </div>
-                      <div className="text-[18px] font-bold text-[#f6f4f4] truncate mt-0.5">
-                        {myClub.name}
-                      </div>
-                      <div className="text-[12px] text-[#f6f4f4]/60">
-                        {myClub.players.length} Players · Ready for photo &amp; roster updates
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => go('teams')}
-                      className="rally-btn rally-btn-primary !h-10 !px-4 !text-[13px] shrink-0"
-                    >
-                      <Camera className="w-4 h-4" />
-                      Manage Squad
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-2.5">
-                    <p className="text-[13px] text-[#f6f4f4]/70 leading-snug">
-                      Team captain? Select your club and enter your PIN to upload your squad photo and manage players:
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={quickLoginTeamId}
-                        onChange={e => setQuickLoginTeamId(e.target.value)}
-                        className="flex-1 h-10 px-3 rounded-full bg-white/10 border border-white/20 text-[13px] font-medium text-[#f6f4f4] focus:outline-none focus:border-[#ff6a17]"
-                      >
-                        {teams.map(t => (
-                          <option key={t.id} value={t.id} className="text-[#090909]">
-                            {t.name} ({t.code})
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        onClick={() => openAuthModal(quickLoginTeamId)}
-                        className="rally-btn rally-btn-primary !h-10 !px-4 !text-[13px] shrink-0"
-                      >
-                        <KeyRound className="w-3.5 h-3.5" />
-                        Unlock
-                      </button>
-                    </div>
-                  </div>
-                )}
+            <p className="mt-4 max-w-[500px] text-[16px] leading-relaxed text-[#f6f4f4]/80 rally-rise rally-rise-2">
+              Frankfurt’s premier T20 cricket league — {teams.length} clubs, one trophy. Follow every
+              ball live, track the group standings, and manage your squad in one place.
+            </p>
 
-                {/* Defending Champions Strip */}
-                {latest && (
-                  <div
-                    onClick={() => go('halloffame')}
-                    className="pt-3 border-t border-white/10 flex items-center justify-between gap-3 cursor-pointer group"
-                  >
-                    <div className="min-w-0">
-                      <div className="text-[11px] uppercase tracking-wider text-[#f6f4f4]/50">
-                        {latest.year} Reigning Champions
-                      </div>
-                      <div className="text-[15px] font-bold text-[#f6f4f4] group-hover:text-[#ff6a17] transition-colors truncate">
-                        {latest.championTeamName}{' '}
-                        <span className="text-[#f6f4f4]/45 font-normal">
-                          (Runner-up: {latest.runnerUpTeamName})
-                        </span>
-                      </div>
-                    </div>
-                    <ArrowUpRight className="w-4 h-4 text-[#ff6a17] shrink-0" />
-                  </div>
-                )}
-              </div>
+            <div className="mt-6 flex flex-wrap items-center gap-3 rally-rise rally-rise-3">
+              <button onClick={() => go('fixtures')} className="rally-btn rally-btn-primary">
+                View Schedule
+              </button>
+              {myClub ? (
+                <button
+                  onClick={() => openTeamProfile(myClub.id)}
+                  className="rally-btn rally-btn-ghost-light"
+                >
+                  <UserCheck className="w-4 h-4 text-[#ff6a17]" />
+                  My Team Profile ({myClub.shortName || myClub.code})
+                </button>
+              ) : (
+                <button
+                  onClick={() => openAuthModal()}
+                  className="rally-btn rally-btn-ghost-light"
+                >
+                  <KeyRound className="w-4 h-4 text-[#ff6a17]" />
+                  Captain Login
+                </button>
+              )}
+              <button onClick={() => go('teams')} className="rally-btn rally-btn-ghost-light">
+                Explore {teams.length} Clubs
+              </button>
             </div>
           </div>
 
           {/* Bottom 4-Column Stat Strip */}
-          <div className="mt-8 pt-5 grid grid-cols-2 sm:grid-cols-4 border-t border-white/15">
+          <div className="mt-10 pt-5 grid grid-cols-2 sm:grid-cols-4 border-t border-white/15">
             {[
               { k: String(teams.length), v: 'Competing Clubs' },
               { k: totalPlayers ? String(totalPlayers) : '600+', v: 'Registered Players' },
@@ -323,27 +253,27 @@ export const HomePage: React.FC = () => {
                 }`}
               >
                 <div className="text-[28px] sm:text-[34px] font-bold tracking-[-0.04em] leading-none">{s.k}</div>
-                <div className="mt-1 text-[12px] text-[#f6f4f4]/55 truncate">{s.v}</div>
+                <div className="mt-1 text-[12px] text-[#f6f4f4]/60 truncate">{s.v}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ───────────── BAND 2: MATCHED-HEIGHT SCHEDULE & STANDINGS (ZERO GAP) ───────────── */}
+      {/* ───────────── BAND 2: 3-COLUMN MATCHED-HEIGHT SCHEDULE | STANDINGS | CAPTAIN PORTAL ───────────── */}
       <section className="max-w-[1320px] mx-auto px-5 sm:px-8 py-10 sm:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          {/* Left 7 Cols: Hairline Schedule */}
-          <div className="lg:col-span-7 flex flex-col justify-between">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          {/* Column 1 (5 Cols): Hairline Schedule */}
+          <div className="lg:col-span-5 flex flex-col justify-between">
             <div>
-              <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
-                <h2 className="rally-h2 text-[28px] sm:text-[36px]">Schedule</h2>
-                <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-end justify-between gap-2 mb-4">
+                <h2 className="rally-h2 text-[26px] sm:text-[32px]">Schedule</h2>
+                <div className="flex items-center gap-1">
                   {(['all', 'live', 'upcoming', 'completed'] as const).map(f => (
                     <button
                       key={f}
                       onClick={() => setMatchFilter(f)}
-                      className={`h-7 px-3 rounded-full text-[12px] font-medium capitalize transition-colors cursor-pointer ${
+                      className={`h-7 px-2.5 rounded-full text-[11px] font-medium capitalize transition-colors cursor-pointer ${
                         matchFilter === f
                           ? 'bg-[#090909] text-[#f6f4f4]'
                           : 'border border-[#090909]/15 text-[#575252] hover:border-[#090909]'
@@ -352,12 +282,6 @@ export const HomePage: React.FC = () => {
                       {f === 'completed' ? 'Results' : f}
                     </button>
                   ))}
-                  <button
-                    onClick={() => go('fixtures')}
-                    className="rally-link-arrow ml-2 !text-[13px] hover:text-[#ff6a17]"
-                  >
-                    Full schedule <ArrowUpRight className="w-3.5 h-3.5" />
-                  </button>
                 </div>
               </div>
 
@@ -375,41 +299,35 @@ export const HomePage: React.FC = () => {
                       <button
                         key={m.id}
                         onClick={() => openMatch(m)}
-                        className="group w-full text-left grid grid-cols-12 items-center gap-2 py-3.5 border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer"
+                        className="group w-full text-left flex items-center justify-between gap-2 py-3.5 border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer"
                       >
-                        <div className="col-span-12 sm:col-span-3 flex items-center gap-2 text-[13px] text-[#575252]">
+                        <div className="flex items-center gap-2 min-w-0">
                           {live && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#ff6a17] text-[#090909] text-[10px] font-bold uppercase">
-                              <span className="w-1.5 h-1.5 rounded-full bg-[#090909]" /> Live
-                            </span>
+                            <span className="w-2 h-2 rounded-full bg-[#ff6a17] shrink-0" title="Live" />
                           )}
-                          <span className="truncate">{m.date}{m.time ? ` · ${m.time}` : ''}</span>
-                        </div>
-
-                        <div className="col-span-9 sm:col-span-6 flex items-center gap-2 min-w-0">
                           <TeamMark team={a} />
-                          <span className="text-[16px] font-bold tracking-[-0.02em] truncate">
-                            {a?.shortName || a?.name || 'TBD'}
+                          <span className="text-[14px] font-bold tracking-[-0.02em] truncate">
+                            {a?.shortName || a?.code || 'TBD'}
                           </span>
-                          <span className="text-[#9a9595] text-[12px] font-medium shrink-0">vs</span>
-                          <span className="text-[16px] font-bold tracking-[-0.02em] truncate">
-                            {b?.shortName || b?.name || 'TBD'}
+                          <span className="text-[#9a9595] text-[11px] font-medium shrink-0">vs</span>
+                          <span className="text-[14px] font-bold tracking-[-0.02em] truncate">
+                            {b?.shortName || b?.code || 'TBD'}
                           </span>
                           <TeamMark team={b} />
                         </div>
 
-                        <div className="col-span-3 sm:col-span-3 flex items-center justify-end gap-2.5">
-                          <div className="text-right hidden sm:block">
-                            <div className="text-[13px] font-medium">
+                        <div className="flex items-center gap-2 shrink-0">
+                          <div className="text-right">
+                            <div className="text-[12px] font-medium">
                               {(i1 || i2) ? (
                                 <span className="tabular-nums font-mono">
                                   {i1 ? `${i1.totalRuns}/${i1.totalWickets}` : '—'} · {i2 ? `${i2.totalRuns}/${i2.totalWickets}` : '—'}
                                 </span>
                               ) : statusLabel(m)}
                             </div>
-                            <div className="text-[11px] text-[#736e6e] truncate max-w-[140px]">{m.venue}</div>
+                            <div className="text-[10px] text-[#736e6e]">{m.date}</div>
                           </div>
-                          <span className="w-8 h-8 rounded-full border border-[#090909]/15 flex items-center justify-center shrink-0 group-hover:bg-[#090909] group-hover:text-[#f6f4f4] transition-colors">
+                          <span className="w-7 h-7 rounded-full border border-[#090909]/15 flex items-center justify-center shrink-0 group-hover:bg-[#090909] group-hover:text-[#f6f4f4] transition-colors">
                             <ArrowUpRight className="w-3.5 h-3.5" />
                           </span>
                         </div>
@@ -420,26 +338,25 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Bottom bar aligned with right column */}
-            <div className="pt-3 flex items-center justify-between text-[13px] text-[#575252]">
+            <div className="pt-3 flex items-center justify-between text-[12px] text-[#575252]">
               <span>Showing {schedule.length} of {matches.length} fixtures</span>
-              <button onClick={() => go('live')} className="font-bold text-[#090909] hover:text-[#ff6a17] flex items-center gap-1 cursor-pointer">
-                Open Live Scoring Console <ArrowRight className="w-3.5 h-3.5" />
+              <button onClick={() => go('fixtures')} className="font-bold text-[#090909] hover:text-[#ff6a17] flex items-center gap-1 cursor-pointer">
+                Full Schedule <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          {/* Right 5 Cols: Hairline Group Standings + Cap Leaders */}
-          <div className="lg:col-span-5 flex flex-col justify-between">
+          {/* Column 2 (4 Cols): Hairline Group Standings */}
+          <div className="lg:col-span-4 flex flex-col justify-between">
             <div>
               <div className="flex flex-wrap items-end justify-between gap-2 mb-4">
-                <h2 className="rally-h2 text-[28px] sm:text-[36px]">Standings</h2>
+                <h2 className="rally-h2 text-[26px] sm:text-[32px]">Standings</h2>
                 <div className="flex items-center gap-1">
                   {groups.map(g => (
                     <button
                       key={g}
                       onClick={() => setSelectedGroupTab(g)}
-                      className={`h-7 px-2.5 rounded-full text-[12px] font-medium transition-colors cursor-pointer ${
+                      className={`h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
                         selectedGroupTab === g
                           ? 'bg-[#090909] text-[#f6f4f4]'
                           : 'border border-[#090909]/15 text-[#575252] hover:border-[#090909]'
@@ -448,12 +365,6 @@ export const HomePage: React.FC = () => {
                       {g.replace('Group ', 'Grp ')}
                     </button>
                   ))}
-                  <button
-                    onClick={() => go('standings')}
-                    className="rally-link-arrow ml-1.5 !text-[13px] hover:text-[#ff6a17]"
-                  >
-                    Full table <ArrowUpRight className="w-3.5 h-3.5" />
-                  </button>
                 </div>
               </div>
 
@@ -461,21 +372,21 @@ export const HomePage: React.FC = () => {
                 {miniStandings.map((row, idx) => (
                   <button
                     key={row.teamId}
-                    onClick={() => go('standings')}
-                    className="w-full text-left grid grid-cols-12 items-center py-3.5 border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer text-[14px]"
+                    onClick={() => openTeamProfile(row.teamId)}
+                    className="w-full text-left grid grid-cols-12 items-center py-3.5 border-b border-[#090909]/15 hover:bg-white/60 transition-colors cursor-pointer text-[13px]"
                   >
                     <div className="col-span-1 font-mono font-bold text-[#736e6e]">
-                      {String(idx + 1).padStart(2, '0')}
+                      {idx + 1}
                     </div>
-                    <div className="col-span-6 font-bold text-[#090909] truncate flex items-center gap-2">
+                    <div className="col-span-6 font-bold text-[#090909] truncate flex items-center gap-1.5">
                       <span>{row.teamLogo}</span>
                       <span className="truncate">{row.teamName}</span>
                     </div>
-                    <div className="col-span-2 text-center font-mono text-[13px] text-[#575252]">
-                      {row.played}P · {row.won}W
+                    <div className="col-span-2 text-center font-mono text-[12px] text-[#575252]">
+                      {row.played}P·{row.won}W
                     </div>
-                    <div className="col-span-2 text-right font-mono text-[12px] text-[#736e6e]">
-                      {row.nrr >= 0 ? `+${row.nrr.toFixed(2)}` : row.nrr.toFixed(2)}
+                    <div className="col-span-2 text-right font-mono text-[11px] text-[#736e6e]">
+                      {row.nrr >= 0 ? `+${row.nrr.toFixed(1)}` : row.nrr.toFixed(1)}
                     </div>
                     <div className="col-span-1 text-right font-mono font-black text-[#090909]">
                       {row.points}
@@ -485,20 +396,99 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Compact Cap Leaders Bar (Locks bottom edge to match Left Schedule column) */}
-            <div className="pt-3 grid grid-cols-2 gap-3">
+            <div className="pt-3 flex items-center justify-between text-[12px] text-[#575252]">
+              <span>{selectedGroupTab} Leaderboard</span>
+              <button onClick={() => go('standings')} className="font-bold text-[#090909] hover:text-[#ff6a17] flex items-center gap-1 cursor-pointer">
+                Full Standings Table <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Column 3 (3 Cols): Separate Captain & Squad Portal + Cap Leaders Column */}
+          <div className="lg:col-span-3 flex flex-col justify-between gap-3">
+            {/* Captain Login / Direct Profile Card */}
+            <div className="rounded-[6px] bg-[#090909] text-[#f6f4f4] p-4 flex flex-col justify-between gap-3">
+              <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                <div className="flex items-center gap-2">
+                  <span className="relative w-4 h-4 rounded-full bg-[#ff6a17] flex items-center justify-center">
+                    <span className="absolute inset-[3px] rounded-full border border-[#090909] border-dashed" />
+                  </span>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#f6f4f4]">
+                    Captain Login
+                  </span>
+                </div>
+                <span className="text-[10px] text-[#ff6a17] font-medium">Direct Profile</span>
+              </div>
+
+              {myClub ? (
+                <div className="space-y-2.5">
+                  <div>
+                    <div className="text-[10px] text-[#ff6a17] font-bold uppercase flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" /> Active Captain
+                    </div>
+                    <div className="text-[15px] font-bold text-[#f6f4f4] truncate mt-0.5">
+                      {myClub.name}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => openTeamProfile(myClub.id)}
+                      className="flex-1 rally-btn rally-btn-primary !h-9 !px-3 !text-[12px]"
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      My Team Profile
+                    </button>
+                    <button
+                      onClick={() => openAuthModal()}
+                      className="h-9 px-2.5 rounded-full border border-white/20 text-[11px] text-[#f6f4f4]/70 hover:text-white cursor-pointer"
+                    >
+                      Switch
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  <p className="text-[12px] text-[#f6f4f4]/70 leading-snug">
+                    Select your club and log in with your PIN to go straight to your team profile:
+                  </p>
+                  <select
+                    value={quickLoginTeamId}
+                    onChange={e => setQuickLoginTeamId(e.target.value)}
+                    className="w-full h-9 px-3 rounded-full bg-white/10 border border-white/20 text-[12px] font-medium text-[#f6f4f4] focus:outline-none focus:border-[#ff6a17]"
+                  >
+                    {teams.map(t => (
+                      <option key={t.id} value={t.id} className="text-[#090909]">
+                        {t.name} ({t.code})
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => openAuthModal(quickLoginTeamId)}
+                    className="w-full rally-btn rally-btn-primary !h-9 !px-4 !text-[12px]"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" />
+                    Login to Team Profile
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Orange & Purple Cap Cards */}
+            <div className="grid grid-cols-2 lg:grid-cols-1 gap-2.5">
               {orangeLeader && (
                 <button
                   onClick={() => go('stats')}
-                  className="p-2.5 rounded-[6px] bg-[#090909] text-[#f6f4f4] flex items-center justify-between text-left hover:bg-[#2c2727] transition-colors cursor-pointer"
+                  className="p-3 rounded-[6px] bg-white border border-[#090909]/12 flex items-center justify-between text-left hover:border-[#090909] transition-colors cursor-pointer"
                 >
                   <div className="min-w-0">
                     <div className="text-[10px] font-bold uppercase tracking-wider text-[#ff6a17]">
                       Orange Cap · Runs
                     </div>
-                    <div className="text-[13px] font-bold truncate mt-0.5">{orangeLeader.name}</div>
+                    <div className="text-[13px] font-bold text-[#090909] truncate mt-0.5">
+                      {orangeLeader.name}
+                    </div>
                   </div>
-                  <span className="font-mono text-[20px] font-black text-[#ff6a17] shrink-0 ml-2">
+                  <span className="font-mono text-[20px] font-black text-[#090909] shrink-0 ml-2">
                     {orangeLeader.runsScored}
                   </span>
                 </button>
@@ -506,20 +496,40 @@ export const HomePage: React.FC = () => {
               {purpleLeader && (
                 <button
                   onClick={() => go('stats')}
-                  className="p-2.5 rounded-[6px] bg-[#090909] text-[#f6f4f4] flex items-center justify-between text-left hover:bg-[#2c2727] transition-colors cursor-pointer"
+                  className="p-3 rounded-[6px] bg-white border border-[#090909]/12 flex items-center justify-between text-left hover:border-[#090909] transition-colors cursor-pointer"
                 >
                   <div className="min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#ff6a17]">
-                      Purple Cap · Wkts
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-[#736e6e]">
+                      Purple Cap · Wickets
                     </div>
-                    <div className="text-[13px] font-bold truncate mt-0.5">{purpleLeader.name}</div>
+                    <div className="text-[13px] font-bold text-[#090909] truncate mt-0.5">
+                      {purpleLeader.name}
+                    </div>
                   </div>
-                  <span className="font-mono text-[20px] font-black text-[#f6f4f4] shrink-0 ml-2">
+                  <span className="font-mono text-[20px] font-black text-[#090909] shrink-0 ml-2">
                     {purpleLeader.wicketsTaken}
                   </span>
                 </button>
               )}
             </div>
+
+            {/* Reigning Champions Card */}
+            {latest && (
+              <button
+                onClick={() => go('halloffame')}
+                className="p-3 rounded-[6px] bg-[#090909]/[0.05] border border-[#090909]/12 flex items-center justify-between gap-2 text-left hover:border-[#090909] transition-colors cursor-pointer"
+              >
+                <div className="min-w-0">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[#736e6e]">
+                    {latest.year} Reigning Champions
+                  </div>
+                  <div className="text-[13px] font-bold text-[#090909] truncate mt-0.5">
+                    {latest.championTeamName}
+                  </div>
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-[#ff6a17] shrink-0" />
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -571,7 +581,7 @@ export const HomePage: React.FC = () => {
             const isChamp = latest && (t.id === latest.championTeamId || t.name === latest.championTeamName);
             const isMine = currentUser.teamId === t.id;
             return (
-              <button key={t.id} onClick={() => go('teams')} className="group text-left cursor-pointer">
+              <button key={t.id} onClick={() => openTeamProfile(t.id)} className="group text-left cursor-pointer">
                 <div className="relative aspect-[16/10] rounded-[6px] overflow-hidden bg-[#2c2727]">
                   {img ? (
                     <img
@@ -739,10 +749,10 @@ export const HomePage: React.FC = () => {
         <div className="flex items-end justify-between gap-4 mb-5">
           <h2 className="rally-h2 text-[28px] sm:text-[36px]">Frequently asked</h2>
           <button
-            onClick={() => (currentUser.role === 'spectator' ? openAuthModal() : go('teams'))}
+            onClick={() => (myClub ? openTeamProfile(myClub.id) : openAuthModal())}
             className="rally-link-arrow hover:text-[#ff6a17]"
           >
-            {currentUser.role === 'spectator' ? 'Captain Login' : 'Manage Your Squad'}{' '}
+            {myClub ? 'My Team Profile' : 'Captain Login'}{' '}
             <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
         </div>

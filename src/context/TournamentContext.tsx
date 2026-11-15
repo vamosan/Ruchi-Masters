@@ -41,9 +41,12 @@ interface TournamentContextType {
   activeMatchId: string;
   viewMode: 'spectator' | 'organizer';
   activeTab: string;
+  activeTeamProfileId: string | null;
   setActiveMatchId: (id: string) => void;
   setViewMode: (mode: 'spectator' | 'organizer') => void;
   setActiveTab: (tab: string) => void;
+  setActiveTeamProfileId: (teamId: string | null) => void;
+  openTeamProfile: (teamId: string) => void;
   updateTournament: (updated: Tournament) => void;
   addAnnouncement: (ann: Omit<Announcement, 'id'>) => void;
   deleteAnnouncement: (id: string) => void;
@@ -98,8 +101,8 @@ const STORAGE_KEYS = {
   TOURNAMENT: 'cricmaster_tournament_v4',
   TEAMS: 'cricmaster_teams_v4',
   MATCHES: 'cricmaster_matches_v4',
-  VIEW_MODE: 'cricmaster_view_mode_v4',
-  AUTH_USER: 'cricmaster_auth_user_v4',
+  VIEW_MODE: 'cricmaster_view_mode_v5',
+  AUTH_USER: 'cricmaster_auth_user_v5',
 };
 
 export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -133,7 +136,21 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const saved = localStorage.getItem(STORAGE_KEYS.VIEW_MODE);
     return (saved as 'spectator' | 'organizer') || 'spectator';
   });
-  const [activeTab, setActiveTab] = useState<string>('overview');
+  const [activeTab, setActiveTabState] = useState<string>('overview');
+  const [activeTeamProfileId, setActiveTeamProfileId] = useState<string | null>(null);
+
+  const setActiveTab = (tab: string) => {
+    if (tab !== 'teams') {
+      setActiveTeamProfileId(null);
+    }
+    setActiveTabState(tab);
+  };
+
+  const openTeamProfile = (teamId: string) => {
+    setActiveTeamProfileId(teamId);
+    setActiveTabState('teams');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // Hall of Fame State with Guaranteed Persistence & Initialization Guard
   const [hallOfFame, setHallOfFame] = useState<HallOfFameEntry[]>(() => {
@@ -437,6 +454,9 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       };
       setCurrentUser(teamUser);
       setViewMode('organizer');
+      setActiveTeamProfileId(team.id);
+      setActiveTabState('teams');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return true;
     }
     return false;
@@ -1178,9 +1198,12 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         activeMatchId,
         viewMode,
         activeTab,
+        activeTeamProfileId,
         setActiveMatchId,
         setViewMode,
         setActiveTab,
+        setActiveTeamProfileId,
+        openTeamProfile,
         updateTournament,
         addAnnouncement,
         deleteAnnouncement,

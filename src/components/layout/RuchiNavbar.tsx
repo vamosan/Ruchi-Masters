@@ -1,12 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Menu, X, ArrowUpRight } from 'lucide-react';
+import { Menu, X, ArrowUpRight, KeyRound, UserCheck } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
 
 /**
- * Rally-style top navigation with the signature dashed-seam cricket ball mark.
+ * Rally-style top navigation with the signature dashed-seam cricket ball mark
+ * and direct Captain Login -> Team Profile access.
  */
 export const RuchiNavbar: React.FC = () => {
-  const { activeTab, setActiveTab, currentUser, openAuthModal, matches, teams } = useTournament();
+  const {
+    activeTab,
+    setActiveTab,
+    setActiveTeamProfileId,
+    openTeamProfile,
+    currentUser,
+    openAuthModal,
+    matches,
+    teams,
+  } = useTournament();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -32,17 +42,13 @@ export const RuchiNavbar: React.FC = () => {
   if (currentUser.role === 'admin') links.push({ id: 'organizer', label: 'Admin' });
 
   const go = (id: string) => {
+    if (id === 'teams') {
+      setActiveTeamProfileId(null);
+    }
     setActiveTab(id);
     setMobileOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-
-  const accountLabel =
-    currentUser.role === 'admin'
-      ? 'Admin'
-      : currentUser.role === 'team'
-      ? currentUser.teamName || 'My Team'
-      : 'Captain Login';
 
   return (
     <header
@@ -84,18 +90,24 @@ export const RuchiNavbar: React.FC = () => {
           })}
         </nav>
 
-        {/* Right actions */}
+        {/* Right actions: Direct Captain Login / My Profile + Live Scores */}
         <div className="hidden lg:flex items-center gap-2.5 shrink-0">
+          {currentUser.role === 'team' && currentUser.teamId && (
+            <button
+              onClick={() => openTeamProfile(currentUser.teamId!)}
+              className="h-9 px-3.5 rounded-full bg-white/10 hover:bg-white/20 text-[13px] font-bold text-[#ff6a17] transition-colors cursor-pointer flex items-center gap-1.5"
+              title="Go directly to your Team Profile"
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span>My Profile</span>
+            </button>
+          )}
           <button
-            onClick={() =>
-              openAuthModal(currentUser.role === 'team' ? currentUser.teamId : undefined)
-            }
-            className="h-9 px-3.5 rounded-full border border-white/20 hover:border-white/50 text-[13px] font-medium text-[#f6f4f4] transition-colors max-w-[180px] truncate cursor-pointer flex items-center gap-1.5"
+            onClick={() => openAuthModal()}
+            className="h-9 px-3.5 rounded-full border border-white/25 hover:border-[#ff6a17] hover:text-[#ff6a17] text-[13px] font-medium text-[#f6f4f4] transition-colors cursor-pointer flex items-center gap-1.5"
           >
-            {currentUser.role !== 'spectator' && (
-              <span className="w-2 h-2 rounded-full bg-[#ff6a17] shrink-0" />
-            )}
-            <span className="truncate">{accountLabel}</span>
+            <KeyRound className="w-3.5 h-3.5 text-[#ff6a17]" />
+            <span>{currentUser.role === 'spectator' ? 'Captain Login' : 'Switch Login'}</span>
           </button>
           <button
             onClick={() => go('live')}
@@ -134,17 +146,30 @@ export const RuchiNavbar: React.FC = () => {
             ))}
           </div>
           <div className="mt-6 flex flex-col gap-2.5">
-            <button onClick={() => go('live')} className="rally-btn rally-btn-primary w-full">
-              Live Scores
-            </button>
+            {currentUser.role === 'team' && currentUser.teamId && (
+              <button
+                onClick={() => {
+                  setMobileOpen(false);
+                  openTeamProfile(currentUser.teamId!);
+                }}
+                className="rally-btn rally-btn-primary w-full"
+              >
+                <UserCheck className="w-4 h-4" />
+                My Team Profile
+              </button>
+            )}
             <button
               onClick={() => {
                 setMobileOpen(false);
-                openAuthModal(currentUser.role === 'team' ? currentUser.teamId : undefined);
+                openAuthModal();
               }}
               className="rally-btn rally-btn-ghost-light w-full"
             >
-              {accountLabel}
+              <KeyRound className="w-4 h-4 text-[#ff6a17]" />
+              Captain Login
+            </button>
+            <button onClick={() => go('live')} className="rally-btn rally-btn-primary w-full">
+              Live Scores
             </button>
           </div>
         </div>
