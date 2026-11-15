@@ -93,6 +93,7 @@ export interface Team {
   bannerUrl?: string;
   teamPhotoUrl?: string;
   establishedYear?: number;
+  trophyCabinet?: string;
   address?: string;
   website?: string;
   instagram?: string;

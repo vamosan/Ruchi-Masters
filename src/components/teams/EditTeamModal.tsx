@@ -49,6 +49,7 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
   // Basic Details
   const [name, setName] = useState(team.name);
   const [establishedYear, setEstablishedYear] = useState<number | string>(team.establishedYear || 2022);
+  const [trophyCabinet, setTrophyCabinet] = useState(team.trophyCabinet || '');
   const [homeGround, setHomeGround] = useState(team.homeGround || '');
   const [address, setAddress] = useState(team.address || '');
   const [description, setDescription] = useState(team.description || '');
@@ -116,6 +117,7 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
       ...team,
       name,
       establishedYear: Number(establishedYear) || 2022,
+      trophyCabinet: trophyCabinet.trim() || undefined,
       homeGround,
       address,
       description,
@@ -294,6 +296,20 @@ export const EditTeamModal: React.FC<Props> = ({ team, onClose, onSave }) => {
                   value={address}
                   onChange={e => setAddress(e.target.value)}
                   placeholder="e.g. Sportpark Nord, Frankfurt am Main, Germany"
+                  className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 font-bold outline-none focus:bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block font-black uppercase tracking-wider text-slate-700 mb-1 flex items-center gap-1">
+                  <Shield className="w-3.5 h-3.5 text-amber-600" />
+                  Trophy Cabinet / Championships Won
+                </label>
+                <input
+                  type="text"
+                  value={trophyCabinet}
+                  onChange={e => setTrophyCabinet(e.target.value)}
+                  placeholder="e.g. 2026 Ruchi Masters Champions, 2024 Runner-Up"
                   className="w-full p-2.5 rounded-xl border-2 border-slate-900 bg-slate-50 font-bold outline-none focus:bg-white"
                 />
               </div>

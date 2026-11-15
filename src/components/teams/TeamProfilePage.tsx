@@ -1,51 +1,32 @@
 import React, { useState, useRef, useMemo } from 'react';
 import { 
   ArrowLeft,
-  ArrowRight,
-  Globe,
-  AtSign,
-  Share2,
-  Link2,
-  Building2, 
   Edit3, 
   Plus, 
   Shield, 
   MapPin, 
-  User, 
   Mail, 
-  Phone, 
-  Award, 
-  Sparkles, 
   Camera, 
-  CheckCircle2, 
-  Clock, 
+  CheckCircle2,
   Calendar, 
   Search, 
-  Filter, 
-  UserCheck, 
   ChevronLeft,
   ChevronRight, 
-  TrendingUp, 
-  Zap, 
   Users, 
-  Flame,
-  FileBadge,
   Upload,
   Info,
   Layers,
-  ChevronDown,
   Crown,
   Lock,
   KeyRound,
-  ShieldAlert,
   ShieldCheck,
   Trash2,
+  Trophy,
   LayoutGrid,
   GalleryHorizontalEnd
 } from 'lucide-react';
-import { Team, Player, Match, PlayerRole, BattingStyle, BowlingStyle } from '../../types/cricket';
+import { Team, Player, PlayerRole, BattingStyle, BowlingStyle } from '../../types/cricket';
 import { useTournament } from '../../context/TournamentContext';
-import { calculatePointsTable } from '../../utils/nrrCalculator';
 import { processPlayerPhoto, processBannerPhoto } from '../../utils/imageUtils';
 import { EditTeamModal } from './EditTeamModal';
 import { HoloTiltCard } from '../common/HoloTiltCard';
@@ -60,16 +41,13 @@ interface Props {
 
 export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam }) => {
   const { 
-    tournament,
     teams, 
     matches, 
+    hallOfFame,
     currentUser, 
     canEditTeam, 
-    isAdmin, 
     openAuthModal,
-    addTeam,
     updateTeam,
-    deleteTeam,
     addPlayer, 
     updatePlayer, 
     deletePlayer, 
@@ -113,33 +91,40 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
   const viceCaptain = team.players.find(p => p.isViceCaptain || p.id === team.viceCaptainId);
   const [captainSignName, setCaptainSignName] = useState(captain?.name || team.managerName || 'Team Captain');
 
-  // Standings & League Record for this club
-  const allStandings = useMemo(
-    () => calculatePointsTable(teams, matches, tournament.rules),
-    [teams, matches, tournament.rules]
-  );
-  const groupStandings = useMemo(
-    () => allStandings.filter(s => (team.group ? s.group === team.group : true)).slice(0, 5),
-    [allStandings, team.group]
-  );
-  const teamStanding = allStandings.find(s => s.teamId === team.id);
-  const groupPosition = Math.max(1, groupStandings.findIndex(s => s.teamId === team.id) + 1);
+  // Trophy Cabinet honors (custom club overrides + Hall of Fame records)
+  const { trophySummary, hasTrophies } = useMemo(() => {
+    if (team.trophyCabinet && team.trophyCabinet.trim()) {
+      return { trophySummary: team.trophyCabinet.trim(), hasTrophies: true };
+    }
+    const normalizedName = team.name.trim().toLowerCase();
+    const titlesWon = hallOfFame.filter(
+      h => h.championTeamId === team.id || h.championTeamName.trim().toLowerCase() === normalizedName
+    );
+    const runnerUps = hallOfFame.filter(
+      h => h.runnerUpTeamName && h.runnerUpTeamName.trim().toLowerCase() === normalizedName
+    );
 
-  // Filter matches involving this team
+    const badges: string[] = [];
+    if (titlesWon.length > 0) {
+      badges.push(
+        titlesWon.length === 1
+          ? `${titlesWon[0].year} Champions`
+          : `${titlesWon.length}× Champions (${titlesWon.map(t => t.year).join(', ')})`
+      );
+    }
+    if (runnerUps.length > 0) {
+      badges.push(`Runner-Up (${runnerUps.map(r => r.year).join(', ')})`);
+    }
+    return {
+      trophySummary: badges.length > 0 ? badges.join(' · ') : '0 Titles',
+      hasTrophies: badges.length > 0,
+    };
+  }, [team.id, team.name, team.trophyCabinet, hallOfFame]);
+
+  // Filter matches involving this club
   const teamMatches = matches.filter(m => m.teamAId === team.id || m.teamBId === team.id);
-  const completedMatches = teamMatches.filter(m => m.status === 'completed');
-  const winsCount = teamStanding ? teamStanding.won : completedMatches.filter(m => m.winnerTeamId === team.id).length;
-  const lossesCount = teamStanding ? teamStanding.lost : completedMatches.filter(m => m.winnerTeamId && m.winnerTeamId !== team.id).length;
-  const matchesPlayedCount = teamStanding ? teamStanding.played : teamMatches.length;
-
   const verifiedCount = team.players.filter(p => p.isAuthenticated).length;
-
-  // Key Team Statistics
-  const totalRunsScored = team.players.reduce((sum, p) => sum + (p.runsScored || 0), 0);
-  const totalWicketsTaken = team.players.reduce((sum, p) => sum + (p.wicketsTaken || 0), 0);
-  const topRunScorer = [...team.players].sort((a, b) => (b.runsScored || 0) - (a.runsScored || 0))[0];
-  const topWicketTaker = [...team.players].sort((a, b) => (b.wicketsTaken || 0) - (a.wicketsTaken || 0))[0];
-  const topMvpPlayer = [...team.players].sort((a, b) => (b.mvpPoints || 0) - (a.mvpPoints || 0))[0];
+  const hasImageCrest = Boolean(team.logo && (team.logo.startsWith('http') || team.logo.startsWith('data:')));
 
   const scrollCarousel = (dir: 'prev' | 'next') => {
     const el = carouselRef.current;
@@ -318,10 +303,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
   });
 
   return (
-    <div className="space-y-8 pb-20 animate-in fade-in duration-300">
+    <div className="space-y-4 sm:space-y-5 pb-12 animate-in fade-in duration-300">
       {/* Role Access Alert Strip (Compact) */}
       {isAuthorized ? (
-        <div className="px-4 py-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex flex-wrap items-center justify-between gap-2 text-xs shadow-2xs">
+        <div className="px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 flex flex-wrap items-center justify-between gap-2 text-xs shadow-2xs">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             <span className="font-bold">
@@ -347,20 +332,14 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
         />
 
         {/* Minimal Top Header Bar */}
-        <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 px-5 sm:px-8 py-4 border-b border-white/10 bg-[#0a0a0c]/75 backdrop-blur-md">
-          <div className="flex flex-wrap items-center gap-3">
-            <button
-              onClick={onBack}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-[#ff6a17] transition-colors cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>All Squads</span>
-            </button>
-            <span className="text-white/20">·</span>
-            <span className="text-xs font-mono uppercase tracking-wider text-[#ff6a17] font-bold">
-              {team.group || 'Ruchi Masters T20 2026'}
-            </span>
-          </div>
+        <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 px-5 sm:px-7 py-3.5 border-b border-white/10 bg-[#0a0a0c]/75 backdrop-blur-md">
+          <button
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-[#ff6a17] transition-colors cursor-pointer"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>All Squads</span>
+          </button>
 
           <div className="flex flex-wrap items-center gap-2">
             <select
@@ -418,21 +397,25 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
           </div>
         </div>
 
-        {/* Main Hero Split: Club Stats Ledger Left + Big Fading Team Image Right */}
+        {/* Main Hero Split: Clean Team Profile Left + Big Fading Team Photo Right */}
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 items-stretch">
-          {/* LEFT COLUMN (5 Cols): Club Title + 3-Box Strip + Hairline Season Ledger */}
-          <div className="lg:col-span-5 px-5 sm:px-8 py-7 sm:py-9 flex flex-col justify-between space-y-6 bg-[#0a0a0c]">
-            <div className="space-y-3">
+          {/* LEFT COLUMN (5 Cols): Club Identity & Hairline Club Ledger */}
+          <div className="lg:col-span-5 px-5 sm:px-7 py-6 sm:py-7 flex flex-col justify-center gap-5 bg-[#0a0a0c]">
+            <div className="space-y-2">
               <div className="flex items-center justify-between gap-3">
                 <span className="text-xs font-mono font-bold uppercase tracking-widest text-slate-400">
-                  #{groupPosition} · EST. {team.establishedYear || 2022}
+                  EST. {team.establishedYear || 2022}
                 </span>
-                <span className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-xl shadow">
-                  {team.logo}
-                </span>
+                {hasImageCrest && (
+                  <img
+                    src={team.logo}
+                    alt={`${team.name} crest`}
+                    className="w-9 h-9 rounded-full object-cover border border-white/15 bg-white/5"
+                  />
+                )}
               </div>
 
-              <h1 className="text-3xl sm:text-4xl xl:text-[44px] font-black font-cabinet tracking-tight leading-[1.02] text-white">
+              <h1 className="text-3xl sm:text-4xl font-black font-cabinet tracking-tight leading-[1.03] text-white">
                 {team.name}
               </h1>
 
@@ -441,82 +424,40 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               )}
             </div>
 
-            {/* 3-Box Highlight Strip (Pogba Reference Card Style) */}
-            <div className="grid grid-cols-3 border-y border-white/10 divide-x divide-white/10 text-center py-3">
-              <div className="px-2">
-                <div className="text-lg sm:text-xl font-black font-mono text-white">
-                  {winsCount}W–{lossesCount}L
-                </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">Record</div>
-              </div>
-              <div className="px-2">
-                <div className="text-lg sm:text-xl font-black font-mono text-[#ff6a17]">
-                  {teamStanding?.points ?? 0}
-                </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">Points</div>
-              </div>
-              <div className="px-2">
-                <div className="text-lg sm:text-xl font-black font-mono text-white">
-                  {teamStanding ? (teamStanding.nrr >= 0 ? `+${teamStanding.nrr.toFixed(2)}` : teamStanding.nrr.toFixed(2)) : '0.00'}
-                </div>
-                <div className="text-[11px] text-slate-400 mt-0.5">NRR</div>
-              </div>
-            </div>
-
-            {/* Clean Hairline Team Stats Ledger */}
-            <div className="space-y-2.5 text-xs">
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-                Team profile & 2026 stats
+            {/* Clean Hairline Team Profile Ledger */}
+            <div className="space-y-2 text-xs pt-1 border-t border-white/10">
+              <div className="text-[11px] font-bold text-[#ff6a17] uppercase tracking-wider pt-3">
+                Team Profile
               </div>
               <div className="divide-y divide-white/[0.08]">
-                <div className="py-2 flex items-center justify-between gap-3">
+                <div className="py-2.5 flex items-center justify-between gap-3">
                   <span className="text-slate-400">Captain</span>
                   <span className="font-bold text-white truncate">{captain?.name || 'TBD'}</span>
                 </div>
-                <div className="py-2 flex items-center justify-between gap-3">
-                  <span className="text-slate-400">Home ground</span>
-                  <span className="font-semibold text-slate-200 truncate">{team.homeGround || 'Apex Oval'}</span>
+                <div className="py-2.5 flex items-center justify-between gap-3">
+                  <span className="text-slate-400">Vice Captain</span>
+                  <span className="font-bold text-slate-100 truncate">{viceCaptain?.name || 'TBD'}</span>
                 </div>
-                <div className="py-2 flex items-center justify-between gap-3">
-                  <span className="text-slate-400">Matches played</span>
-                  <span className="font-mono font-bold text-white">{matchesPlayedCount}</span>
+                <div className="py-2.5 flex items-center justify-between gap-3">
+                  <span className="text-slate-400">Trophy Cabinet</span>
+                  <span className={`font-semibold truncate flex items-center gap-1.5 ${hasTrophies ? 'text-amber-300' : 'text-slate-300'}`}>
+                    <Trophy className={`w-3.5 h-3.5 shrink-0 ${hasTrophies ? 'text-amber-400' : 'text-slate-500'}`} />
+                    <span className="truncate">{trophySummary}</span>
+                  </span>
                 </div>
-                <div className="py-2 flex items-center justify-between gap-3">
-                  <span className="text-slate-400">Total runs scored</span>
-                  <span className="font-mono font-bold text-white">{totalRunsScored}</span>
+                <div className="py-2.5 flex items-center justify-between gap-3">
+                  <span className="text-slate-400">Home Ground</span>
+                  <span className="font-semibold text-slate-200 truncate">{team.homeGround || 'TBD'}</span>
                 </div>
-                <div className="py-2 flex items-center justify-between gap-3">
-                  <span className="text-slate-400">Total wickets taken</span>
-                  <span className="font-mono font-bold text-white">{totalWicketsTaken}</span>
-                </div>
-                <div className="py-2 flex items-center justify-between gap-3">
-                  <span className="text-slate-400">Registered squad</span>
+                <div className="py-2.5 flex items-center justify-between gap-3">
+                  <span className="text-slate-400">Registered Squad</span>
                   <span className="font-mono font-bold text-emerald-400">{team.players.length} Players ({verifiedCount} Verified)</span>
                 </div>
               </div>
             </div>
 
-            {/* Bottom Links / Form Strip */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
-              <div className="flex items-center gap-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-1">Form:</span>
-                {(teamStanding?.form || []).slice(-5).map((f, i) => (
-                  <span
-                    key={i}
-                    className={`w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center ${
-                      f === 'W'
-                        ? 'bg-emerald-500 text-[#090909]'
-                        : f === 'L'
-                          ? 'bg-rose-500 text-white'
-                          : 'bg-slate-600 text-white'
-                    }`}
-                  >
-                    {f}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex items-center gap-2 text-[11px]">
+            {(team.website || team.instagram) && (
+              <div className="flex items-center gap-4 text-[11px] pt-1">
                 {team.website && (
                   <a
                     href={team.website.startsWith('http') ? team.website : 'https://' + team.website}
@@ -534,11 +475,11 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                     rel="noopener noreferrer"
                     className="text-emerald-400 hover:underline font-bold uppercase tracking-wider"
                   >
-                    IG ↗
+                    Instagram ↗
                   </a>
                 )}
               </div>
-            </div>
+            )}
           </div>
 
           {/* RIGHT COLUMN (7 Cols): BIG Dramatic Edge-to-Edge Fading Team Photo */}
@@ -550,12 +491,12 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                 openAuthModal(team.id);
               }
             }}
-            className="lg:col-span-7 relative min-h-[340px] sm:min-h-[460px] lg:min-h-[520px] overflow-hidden cursor-pointer group bg-[#0a0a0c]"
+            className="lg:col-span-7 relative min-h-[260px] sm:min-h-[320px] lg:min-h-[380px] overflow-hidden cursor-pointer group bg-[#0a0a0c]"
           >
             <img
               src={team.teamPhotoUrl || team.bannerUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1400&q=80'}
               alt={team.name}
-              className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-700"
+              className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-700"
               onError={(e) => {
                 e.currentTarget.onerror = null;
                 (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1400&q=80';
@@ -564,38 +505,11 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
             {/* Vignette Fade Left & Bottom into #0a0a0c */}
             <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a0a0c] via-[#0a0a0c]/20 to-transparent" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-transparent to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a0a0c]/90 via-transparent to-transparent" />
 
-            {/* Subtle Top Performers Overlay at Bottom Right */}
-            <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap items-center justify-between gap-3">
-              <div className="flex flex-wrap items-center gap-2">
-                {topRunScorer && (
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setEnlargedPlayer(topRunScorer); }}
-                    className="px-3 py-1.5 rounded-xl bg-[#0a0a0c]/85 backdrop-blur-md border border-white/15 hover:border-[#ff6a17] text-left transition-colors cursor-pointer"
-                  >
-                    <div className="text-[9px] font-bold uppercase tracking-wider text-[#ff6a17]">Runs Leader</div>
-                    <div className="text-xs font-bold text-white">
-                      {topRunScorer.name} <span className="font-mono text-amber-300">({topRunScorer.runsScored || 0})</span>
-                    </div>
-                  </button>
-                )}
-                {topWicketTaker && (
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setEnlargedPlayer(topWicketTaker); }}
-                    className="px-3 py-1.5 rounded-xl bg-[#0a0a0c]/85 backdrop-blur-md border border-white/15 hover:border-[#ff6a17] text-left transition-colors cursor-pointer"
-                  >
-                    <div className="text-[9px] font-bold uppercase tracking-wider text-purple-300">Wickets Leader</div>
-                    <div className="text-xs font-bold text-white">
-                      {topWicketTaker.name} <span className="font-mono text-purple-300">({topWicketTaker.wicketsTaken || 0}W)</span>
-                    </div>
-                  </button>
-                )}
-              </div>
-
-              <span className="px-3 py-1.5 rounded-full bg-black/70 backdrop-blur border border-white/15 text-[11px] font-semibold text-white/90 opacity-85 group-hover:opacity-100 flex items-center gap-1.5 transition-opacity">
+            {/* Clean Photo Action Pill */}
+            <div className="absolute bottom-4 right-4 z-10">
+              <span className="px-3 py-1.5 rounded-full bg-black/75 backdrop-blur border border-white/15 text-[11px] font-semibold text-white/90 opacity-85 group-hover:opacity-100 flex items-center gap-1.5 transition-opacity">
                 <Camera className="w-3.5 h-3.5 text-[#ff6a17]" />
                 <span>{isAuthorized ? 'Change Squad Photo' : 'Captain Login for Photo'}</span>
               </span>
@@ -605,7 +519,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
       </div>
 
       {/* PROFILE NAVIGATION TABS (Rally Monochrome Pills) */}
-      <div className="flex items-center gap-2 border-b border-[#090909]/15 pb-3 overflow-x-auto">
+      <div className="flex items-center gap-2 border-b border-[#090909]/15 pb-2.5 overflow-x-auto">
         <button
           onClick={() => setActiveTabKey('squad')}
           className={'px-4 py-2 rounded-full font-semibold text-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer ' + (
@@ -657,10 +571,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
       {/* TAB 1: SQUAD ROSTER (3D HOLOGRAPHIC TILT CARDS + ACCESS GUARDS) */}
       {activeTabKey === 'squad' && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           
           {/* Carousel / Filter Toolbar with Next & Prev Controls */}
-          <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm space-y-3">
+          <div className="bg-white rounded-2xl p-3.5 sm:p-4 border border-slate-200/80 shadow-sm space-y-2.5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <h2 className="text-lg sm:text-xl font-black text-slate-950 font-cabinet flex items-center gap-2">
@@ -789,8 +703,8 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
               ref={carouselRef}
               className={
                 squadLayout === 'carousel'
-                  ? 'flex gap-5 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-4 pt-1'
-                  : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5'
+                  ? 'flex gap-4 overflow-x-auto snap-x snap-mandatory scroll-smooth pb-2 pt-0.5'
+                  : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
               }
             >
               {[...filteredPlayers]
@@ -892,9 +806,13 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                             </p>
                           </div>
 
-                          <span className="w-8 h-8 rounded-full bg-white/10 backdrop-blur border border-white/15 flex items-center justify-center text-base shrink-0">
-                            {team.logo}
-                          </span>
+                          {hasImageCrest && (
+                            <img
+                              src={team.logo}
+                              alt={team.name}
+                              className="w-8 h-8 rounded-full object-cover border border-white/15 shrink-0"
+                            />
+                          )}
                         </div>
                       </div>
 
@@ -1046,8 +964,8 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                   <span className="font-semibold text-slate-900 text-sm font-mono">{team.establishedYear || 2022}</span>
                 </div>
                 <div>
-                  <span className="text-slate-400 font-medium block">Mascot & Tagline:</span>
-                  <span className="font-semibold text-slate-900 text-sm">{team.logo} "{team.slogan || 'Play Bold'}"</span>
+                  <span className="text-slate-400 font-medium block">Club Tagline:</span>
+                  <span className="font-semibold text-slate-900 text-sm">"{team.slogan || 'Play Bold'}"</span>
                 </div>
               </div>
             </div>

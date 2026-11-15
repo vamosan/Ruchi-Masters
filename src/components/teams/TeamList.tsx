@@ -10,6 +10,7 @@ import {
   Users,
   LayoutGrid,
   List,
+  Shield,
   ShieldCheck,
 } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
@@ -202,7 +203,7 @@ export const TeamList: React.FC = () => {
             >
               {teams.map(t => (
                 <option key={t.id} value={t.id} className="text-slate-900">
-                  {t.logo} {t.name} ({t.code})
+                  {t.name}
                 </option>
               ))}
             </select>
@@ -365,7 +366,7 @@ export const TeamList: React.FC = () => {
                           background: `linear-gradient(135deg, ${team.primaryColor || '#1e293b'}, #0f172a)`,
                         }}
                       >
-                        <span className="text-4xl">{team.logo || '🏏'}</span>
+                        <Shield className="w-10 h-10 text-white/30" />
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
@@ -399,14 +400,11 @@ export const TeamList: React.FC = () => {
                       </button>
                     )}
 
-                    {/* Club Crest & Name Overlay */}
+                    {/* Club Name Overlay */}
                     <div className="absolute bottom-2 left-2.5 right-2.5 flex items-center justify-between gap-1.5 text-white">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-base shrink-0">{team.logo || '🏏'}</span>
-                        <h3 className="text-[13px] sm:text-[14px] font-extrabold truncate leading-tight">
-                          {team.name}
-                        </h3>
-                      </div>
+                      <h3 className="text-[13px] sm:text-[14px] font-extrabold truncate leading-tight">
+                        {team.name}
+                      </h3>
                     </div>
                   </div>
                 </div>
@@ -453,10 +451,10 @@ export const TeamList: React.FC = () => {
               >
                 <div className="flex items-center gap-3 min-w-0">
                   <div
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-lg text-white shrink-0"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-white shrink-0"
                     style={{ backgroundColor: team.primaryColor || '#0b0f19' }}
                   >
-                    {team.logo || '🏏'}
+                    <Shield className="w-4 h-4 text-white/90" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
