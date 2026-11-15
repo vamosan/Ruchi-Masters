@@ -407,9 +407,6 @@ export const TeamList: React.FC = () => {
                           {team.name}
                         </h3>
                       </div>
-                      <span className="px-1.5 py-0.2 rounded bg-black/60 text-[10px] font-mono font-bold text-amber-300 shrink-0">
-                        {team.code}
-                      </span>
                     </div>
                   </div>
                 </div>
@@ -465,9 +462,6 @@ export const TeamList: React.FC = () => {
                     <div className="flex items-center gap-2">
                       <span className="text-[14px] font-extrabold text-slate-900 truncate">
                         {team.name}
-                      </span>
-                      <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-mono text-[10px] font-bold">
-                        {team.code}
                       </span>
                       {team.group && (
                         <span className="text-[11px] font-semibold text-slate-400 hidden sm:inline">

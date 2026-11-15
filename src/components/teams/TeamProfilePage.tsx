@@ -292,6 +292,18 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
     }
   };
 
+  const getRoleShortLabel = (r: PlayerRole) => {
+    switch (r) {
+      case 'pure_batter': return 'BAT';
+      case 'wk_batter': return 'WK';
+      case 'pace_allrounder':
+      case 'spin_allrounder': return 'ALL-R';
+      case 'fast_bowler':
+      case 'spin_bowler': return 'BOWL';
+      default: return 'PRO';
+    }
+  };
+
   const filteredPlayers = team.players.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                           p.jerseyNumber.toString().includes(searchQuery) ||
@@ -324,402 +336,294 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
         </div>
       ) : null}
 
-      {/* EDITORIAL DARK ATHLETE / CLUB HERO SHOWCASE */}
-      <div className="relative rounded-3xl overflow-hidden bg-[#0c0d13] text-white border border-white/10 shadow-2xl">
-        {/* Soft Ghosted Backdrop Image + Radial Club Glow */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          <img
-            src={team.teamPhotoUrl || team.bannerUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1600&q=80'}
-            alt=""
-            aria-hidden="true"
-            className="w-full h-full object-cover object-center opacity-[0.14] scale-105 blur-[1px]"
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              background: `radial-gradient(circle at 72% 45%, ${team.primaryColor || '#ff6a17'}40 0%, rgba(12,13,19,0.92) 55%, #0c0d13 100%)`
-            }}
-          />
-          {/* Giant Ghosted Club Code Watermark */}
-          <div className="hidden lg:block absolute -left-6 bottom-12 text-[180px] font-black tracking-tighter leading-none text-white/[0.03] select-none pointer-events-none font-cabinet uppercase">
-            {team.code}
+      {/* EDITORIAL DARK ATHLETE-STYLE TEAM PROFILE HERO (Matches Pogba Card & Rally Vibe) */}
+      <div className="relative rounded-2xl overflow-hidden bg-[#0a0a0c] text-[#f6f4f4] border border-[#1d1d22] shadow-2xl">
+        {/* Dramatic Red/Rally Orange Crescent Glow Halo */}
+        <div
+          className="pointer-events-none select-none absolute -top-20 -right-16 w-[420px] h-[420px] sm:w-[540px] sm:h-[540px] rounded-full opacity-35"
+          style={{
+            background: `radial-gradient(circle, ${team.primaryColor || '#ff6a17'}cc 0%, #ff6a1744 48%, transparent 72%)`
+          }}
+        />
+
+        {/* Minimal Top Header Bar */}
+        <div className="relative z-20 flex flex-wrap items-center justify-between gap-3 px-5 sm:px-8 py-4 border-b border-white/10 bg-[#0a0a0c]/75 backdrop-blur-md">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={onBack}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-[#ff6a17] transition-colors cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>All Squads</span>
+            </button>
+            <span className="text-white/20">·</span>
+            <span className="text-xs font-mono uppercase tracking-wider text-[#ff6a17] font-bold">
+              {team.group || 'Ruchi Masters T20 2026'}
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <select
+              value={team.id}
+              onChange={(e) => {
+                const found = teams.find(t => t.id === e.target.value);
+                if (found) onSelectTeam(found);
+              }}
+              aria-label="Switch Team"
+              className="px-3 py-1.5 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold text-xs outline-none cursor-pointer"
+            >
+              {teams.map(t => (
+                <option key={t.id} value={t.id} className="bg-[#0a0a0c] text-white">
+                  {t.name}
+                </option>
+              ))}
+            </select>
+
+            {isAuthorized ? (
+              <>
+                <button
+                  onClick={() => setShowEditModal(true)}
+                  className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold text-xs flex items-center gap-1.5 border border-white/15 transition-all cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-[#ff6a17]" />
+                  <span>Edit Team</span>
+                </button>
+                <label
+                  htmlFor="team-direct-photo-upload"
+                  className="cursor-pointer px-3 py-1.5 rounded-lg bg-[#ff6a17] hover:bg-[#ff7f36] text-[#090909] font-bold text-xs flex items-center gap-1.5 transition-all"
+                >
+                  <Camera className="w-3.5 h-3.5" />
+                  <span>Photo</span>
+                  <input
+                    id="team-direct-photo-upload"
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const f = e.target.files && e.target.files[0];
+                      if (f) handleDirectTeamPhoto(f);
+                    }}
+                  />
+                </label>
+              </>
+            ) : (
+              <button
+                onClick={() => openAuthModal(team.id)}
+                className="px-3 py-1.5 rounded-lg bg-[#ff6a17] hover:bg-[#ff7f36] text-[#090909] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Captain Login</span>
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="relative z-10 p-5 sm:p-8 lg:p-10 space-y-8">
-          {/* Top Navigation Bar inside Hero */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-white/10">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <button
-                onClick={onBack}
-                className="inline-flex items-center gap-2 text-xs font-semibold text-slate-300 hover:text-[#ff6a17] transition-colors cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>back to all {teams.length} squads</span>
-              </button>
-              <span className="text-white/20">|</span>
-              <span className="px-2.5 py-0.5 rounded-full bg-[#ff6a17]/20 text-[#ff8e47] border border-[#ff6a17]/30 text-[11px] font-bold font-mono uppercase">
-                {team.group || 'Ruchi Masters'} • #{groupPosition}
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-white/5 text-slate-300 border border-white/10 text-[11px] font-mono">
-                EST. {team.establishedYear || 2022}
-              </span>
+        {/* Main Hero Split: Club Stats Ledger Left + Big Fading Team Image Right */}
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 items-stretch">
+          {/* LEFT COLUMN (5 Cols): Club Title + 3-Box Strip + Hairline Season Ledger */}
+          <div className="lg:col-span-5 px-5 sm:px-8 py-7 sm:py-9 flex flex-col justify-between space-y-6 bg-[#0a0a0c]">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-xs font-mono font-bold uppercase tracking-widest text-slate-400">
+                  #{groupPosition} · EST. {team.establishedYear || 2022}
+                </span>
+                <span className="w-10 h-10 rounded-full bg-white/[0.06] border border-white/10 flex items-center justify-center text-xl shadow">
+                  {team.logo}
+                </span>
+              </div>
+
+              <h1 className="text-3xl sm:text-4xl xl:text-[44px] font-black font-cabinet tracking-tight leading-[1.02] text-white">
+                {team.name}
+              </h1>
+
+              {team.slogan && (
+                <p className="text-xs text-slate-400">{team.slogan}</p>
+              )}
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <select
-                value={team.id}
-                onChange={(e) => {
-                  const found = teams.find(t => t.id === e.target.value);
-                  if (found) onSelectTeam(found);
-                }}
-                aria-label="Switch Franchise"
-                className="px-3 py-1.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white font-semibold text-xs outline-none cursor-pointer"
-              >
-                {teams.map(t => (
-                  <option key={t.id} value={t.id} className="bg-slate-900 text-white">
-                    {t.name} ({t.code})
-                  </option>
-                ))}
-              </select>
+            {/* 3-Box Highlight Strip (Pogba Reference Card Style) */}
+            <div className="grid grid-cols-3 border-y border-white/10 divide-x divide-white/10 text-center py-3">
+              <div className="px-2">
+                <div className="text-lg sm:text-xl font-black font-mono text-white">
+                  {winsCount}W–{lossesCount}L
+                </div>
+                <div className="text-[11px] text-slate-400 mt-0.5">Record</div>
+              </div>
+              <div className="px-2">
+                <div className="text-lg sm:text-xl font-black font-mono text-[#ff6a17]">
+                  {teamStanding?.points ?? 0}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-0.5">Points</div>
+              </div>
+              <div className="px-2">
+                <div className="text-lg sm:text-xl font-black font-mono text-white">
+                  {teamStanding ? (teamStanding.nrr >= 0 ? `+${teamStanding.nrr.toFixed(2)}` : teamStanding.nrr.toFixed(2)) : '0.00'}
+                </div>
+                <div className="text-[11px] text-slate-400 mt-0.5">NRR</div>
+              </div>
+            </div>
 
-              {isAuthorized ? (
-                <>
-                  <button
-                    onClick={() => setShowEditModal(true)}
-                    className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs flex items-center gap-1.5 border border-white/15 transition-all cursor-pointer"
+            {/* Clean Hairline Team Stats Ledger */}
+            <div className="space-y-2.5 text-xs">
+              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                Team profile & 2026 stats
+              </div>
+              <div className="divide-y divide-white/[0.08]">
+                <div className="py-2 flex items-center justify-between gap-3">
+                  <span className="text-slate-400">Captain</span>
+                  <span className="font-bold text-white truncate">{captain?.name || 'TBD'}</span>
+                </div>
+                <div className="py-2 flex items-center justify-between gap-3">
+                  <span className="text-slate-400">Home ground</span>
+                  <span className="font-semibold text-slate-200 truncate">{team.homeGround || 'Apex Oval'}</span>
+                </div>
+                <div className="py-2 flex items-center justify-between gap-3">
+                  <span className="text-slate-400">Matches played</span>
+                  <span className="font-mono font-bold text-white">{matchesPlayedCount}</span>
+                </div>
+                <div className="py-2 flex items-center justify-between gap-3">
+                  <span className="text-slate-400">Total runs scored</span>
+                  <span className="font-mono font-bold text-white">{totalRunsScored}</span>
+                </div>
+                <div className="py-2 flex items-center justify-between gap-3">
+                  <span className="text-slate-400">Total wickets taken</span>
+                  <span className="font-mono font-bold text-white">{totalWicketsTaken}</span>
+                </div>
+                <div className="py-2 flex items-center justify-between gap-3">
+                  <span className="text-slate-400">Registered squad</span>
+                  <span className="font-mono font-bold text-emerald-400">{team.players.length} Players ({verifiedCount} Verified)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Links / Form Strip */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mr-1">Form:</span>
+                {(teamStanding?.form || []).slice(-5).map((f, i) => (
+                  <span
+                    key={i}
+                    className={`w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center ${
+                      f === 'W'
+                        ? 'bg-emerald-500 text-[#090909]'
+                        : f === 'L'
+                          ? 'bg-rose-500 text-white'
+                          : 'bg-slate-600 text-white'
+                    }`}
                   >
-                    <Edit3 className="w-3.5 h-3.5 text-[#ff6a17]" />
-                    <span>Edit Info</span>
-                  </button>
-                  <label
-                    htmlFor="team-direct-photo-upload"
-                    className="cursor-pointer px-3 py-1.5 rounded-xl bg-[#ff6a17] hover:bg-[#ff7f36] text-[#090909] font-bold text-xs flex items-center gap-1.5 shadow transition-all"
+                    {f}
+                  </span>
+                ))}
+              </div>
+
+              <div className="flex items-center gap-2 text-[11px]">
+                {team.website && (
+                  <a
+                    href={team.website.startsWith('http') ? team.website : 'https://' + team.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-400 hover:underline font-bold uppercase tracking-wider"
                   >
-                    <Camera className="w-3.5 h-3.5" />
-                    <span>Update Photo</span>
-                    <input
-                      id="team-direct-photo-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files && e.target.files[0];
-                        if (f) handleDirectTeamPhoto(f);
-                      }}
-                    />
-                  </label>
-                </>
-              ) : (
-                <button
-                  onClick={() => openAuthModal(team.id)}
-                  className="px-3 py-1.5 rounded-xl bg-[#ff6a17] hover:bg-[#ff7f36] text-[#090909] text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <KeyRound className="w-3.5 h-3.5" />
-                  <span>Captain Login</span>
-                </button>
-              )}
+                    Website ↗
+                  </a>
+                )}
+                {team.instagram && (
+                  <a
+                    href={team.instagram.startsWith('http') ? team.instagram : 'https://instagram.com/' + team.instagram.replace('@', '')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-emerald-400 hover:underline font-bold uppercase tracking-wider"
+                  >
+                    IG ↗
+                  </a>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Main 2-Column Hero Showcase: Club Data Left + Big Team Photo Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* LEFT COLUMN (6 Cols): Oversized Title, Season Stats & Mini Group Standing */}
-            <div className="lg:col-span-6 space-y-6">
-              <div>
-                <div className="text-xs font-mono uppercase tracking-[0.2em] text-[#ff6a17] font-bold mb-1.5 flex items-center gap-2">
-                  <span>{team.logo}</span>
-                  <span>{team.shortName || team.code} · Official Franchise Profile</span>
-                </div>
-                <h1 className="text-4xl sm:text-5xl xl:text-[54px] font-black font-cabinet tracking-tight leading-[0.98] text-white">
-                  {team.name}
-                </h1>
-                {team.slogan && (
-                  <p className="text-sm text-slate-400 mt-2 italic">"{team.slogan}"</p>
+          {/* RIGHT COLUMN (7 Cols): BIG Dramatic Edge-to-Edge Fading Team Photo */}
+          <div
+            onClick={() => {
+              if (isAuthorized) {
+                document.getElementById('team-direct-photo-upload')?.click();
+              } else {
+                openAuthModal(team.id);
+              }
+            }}
+            className="lg:col-span-7 relative min-h-[340px] sm:min-h-[460px] lg:min-h-[520px] overflow-hidden cursor-pointer group bg-[#0a0a0c]"
+          >
+            <img
+              src={team.teamPhotoUrl || team.bannerUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1400&q=80'}
+              alt={team.name}
+              className="w-full h-full object-cover object-center group-hover:scale-[1.03] transition-transform duration-700"
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1400&q=80';
+              }}
+            />
+
+            {/* Vignette Fade Left & Bottom into #0a0a0c */}
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#0a0a0c] via-[#0a0a0c]/20 to-transparent" />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-transparent to-transparent" />
+
+            {/* Subtle Top Performers Overlay at Bottom Right */}
+            <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-2">
+                {topRunScorer && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setEnlargedPlayer(topRunScorer); }}
+                    className="px-3 py-1.5 rounded-xl bg-[#0a0a0c]/85 backdrop-blur-md border border-white/15 hover:border-[#ff6a17] text-left transition-colors cursor-pointer"
+                  >
+                    <div className="text-[9px] font-bold uppercase tracking-wider text-[#ff6a17]">Runs Leader</div>
+                    <div className="text-xs font-bold text-white">
+                      {topRunScorer.name} <span className="font-mono text-amber-300">({topRunScorer.runsScored || 0})</span>
+                    </div>
+                  </button>
+                )}
+                {topWicketTaker && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setEnlargedPlayer(topWicketTaker); }}
+                    className="px-3 py-1.5 rounded-xl bg-[#0a0a0c]/85 backdrop-blur-md border border-white/15 hover:border-[#ff6a17] text-left transition-colors cursor-pointer"
+                  >
+                    <div className="text-[9px] font-bold uppercase tracking-wider text-purple-300">Wickets Leader</div>
+                    <div className="text-xs font-bold text-white">
+                      {topWicketTaker.name} <span className="font-mono text-purple-300">({topWicketTaker.wicketsTaken || 0}W)</span>
+                    </div>
+                  </button>
                 )}
               </div>
 
-              {/* Clean Bulleted Profile + Season Facts (Reference Style) */}
-              <div className="grid grid-cols-2 gap-x-6 gap-y-2.5 text-xs border-y border-white/10 py-4">
-                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
-                  <span className="text-slate-400">• Captain:</span>
-                  <span className="font-bold text-white truncate">{captain?.name || 'TBD'}</span>
-                </div>
-                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
-                  <span className="text-slate-400">• Ground:</span>
-                  <span className="font-bold text-white truncate">{team.homeGround || 'Apex Oval'}</span>
-                </div>
-                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
-                  <span className="text-slate-400">• Squad:</span>
-                  <span className="font-bold text-white">{team.players.length} Players ({verifiedCount} Verified)</span>
-                </div>
-                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
-                  <span className="text-slate-400">• Season 2026:</span>
-                  <span className="font-bold text-emerald-400 font-mono">
-                    {matchesPlayedCount}M · {winsCount}W · {lossesCount}L
-                  </span>
-                </div>
-                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
-                  <span className="text-slate-400">• Total Runs:</span>
-                  <span className="font-bold text-amber-300 font-mono">{totalRunsScored}</span>
-                </div>
-                <div className="flex items-center justify-between sm:justify-start sm:gap-2">
-                  <span className="text-slate-400">• Total Wkts:</span>
-                  <span className="font-bold text-purple-300 font-mono">{totalWicketsTaken}</span>
-                </div>
-              </div>
-
-              {/* Inline Mini Group Standing Card (Inspired by Reference #1) */}
-              {groupStandings.length > 0 && (
-                <div className="rounded-2xl bg-white/[0.04] border border-white/10 p-4 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300">
-                      {team.group || 'Tournament'} Standing
-                    </span>
-                    <button
-                      onClick={() => setActiveTab('standings')}
-                      className="text-[11px] font-semibold text-[#ff6a17] hover:underline flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>View full table</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-
-                  <div className="divide-y divide-white/[0.06] text-xs">
-                    {groupStandings.map((row, idx) => {
-                      const isCurrent = row.teamId === team.id;
-                      return (
-                        <button
-                          key={row.teamId}
-                          onClick={() => {
-                            const found = teams.find(t => t.id === row.teamId);
-                            if (found) onSelectTeam(found);
-                          }}
-                          className={`w-full py-1.5 px-2 rounded-lg flex items-center justify-between gap-2 text-left transition-colors cursor-pointer ${
-                            isCurrent ? 'bg-[#ff6a17] text-[#090909] font-bold' : 'hover:bg-white/5 text-slate-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="font-mono w-4 text-[11px]">{idx + 1}.</span>
-                            <span>{row.teamLogo}</span>
-                            <span className="truncate">{row.teamName}</span>
-                          </div>
-                          <div className="flex items-center gap-3 shrink-0 font-mono text-[11px]">
-                            <span className="hidden sm:inline">{row.played}M</span>
-                            <span>{row.nrr >= 0 ? `+${row.nrr.toFixed(2)}` : row.nrr.toFixed(2)}</span>
-                            <span className="w-7 text-right font-black">{row.points}</span>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* RIGHT COLUMN (6 Cols): BIG Hero Team Photo Card + Bold Orange Glow Ring */}
-            <div className="lg:col-span-6 relative flex flex-col items-center">
-              {/* Circular Accent Glow behind Photo */}
-              <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 h-72 sm:w-96 sm:h-96 rounded-full opacity-80 blur-[2px] pointer-events-none"
-                style={{
-                  background: `radial-gradient(circle, ${team.secondaryColor || '#ff6a17'}cc 0%, ${team.primaryColor || '#ff6a17'}44 55%, transparent 72%)`
-                }}
-              />
-
-              <div
-                onClick={() => {
-                  if (isAuthorized) {
-                    document.getElementById('team-direct-photo-upload')?.click();
-                  } else {
-                    openAuthModal(team.id);
-                  }
-                }}
-                className="relative z-10 group cursor-pointer w-full rounded-3xl overflow-hidden border-2 border-white/15 shadow-2xl bg-slate-900"
-              >
-                <div className="h-[320px] sm:h-[400px] w-full overflow-hidden">
-                  <img
-                    src={team.teamPhotoUrl || team.bannerUrl || 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80'}
-                    alt={team.name}
-                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                    onError={(e) => {
-                      e.currentTarget.onerror = null;
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?auto=format&fit=crop&w=1200&q=80';
-                    }}
-                  />
-                </div>
-
-                {/* Hover Overlay for Upload */}
-                <div className="absolute inset-0 bg-black/55 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white text-xs font-bold backdrop-blur-[2px]">
-                  {isAuthorized ? (
-                    <>
-                      <Camera className="w-5 h-5 text-[#ff6a17]" />
-                      <span>Click to Upload New Team Photo</span>
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="w-4 h-4 text-[#ff6a17]" />
-                      <span>Captain Login to Update Photo</span>
-                    </>
-                  )}
-                </div>
-
-                {/* Bottom Overlay Bar Inside Photo */}
-                <div className="absolute bottom-3 left-3 right-3 px-4 py-2.5 rounded-2xl bg-[#090909]/85 backdrop-blur-md border border-white/15 flex flex-wrap items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="font-bold text-white">#{groupPosition} in {team.group || 'League'}</span>
-                    <span className="text-white/30">•</span>
-                    <span className="font-mono text-slate-300">
-                      For: {teamStanding?.runsScored ?? 0}/{teamStanding?.legalOversFaced ?? 0}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    {(teamStanding?.form || []).slice(-5).map((f, i) => (
-                      <span
-                        key={i}
-                        className={`w-5 h-5 rounded-full text-[10px] font-black flex items-center justify-center ${
-                          f === 'W'
-                            ? 'bg-emerald-500 text-slate-950'
-                            : f === 'L'
-                              ? 'bg-rose-500 text-white'
-                              : 'bg-slate-600 text-white'
-                        }`}
-                      >
-                        {f}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Optional Club Links Strip */}
-              {(team.website || team.instagram || team.facebook) && (
-                <div className="relative z-10 flex items-center gap-2 mt-3 self-end text-[11px]">
-                  {team.website && (
-                    <a
-                      href={team.website.startsWith('http') ? team.website : 'https://' + team.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1"
-                    >
-                      <Globe className="w-3 h-3" /> Website
-                    </a>
-                  )}
-                  {team.instagram && (
-                    <a
-                      href={team.instagram.startsWith('http') ? team.instagram : 'https://instagram.com/' + team.instagram.replace('@', '')}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1"
-                    >
-                      <AtSign className="w-3 h-3" /> Instagram
-                    </a>
-                  )}
-                  {team.facebook && (
-                    <a
-                      href={team.facebook.startsWith('http') ? team.facebook : 'https://facebook.com/' + team.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-slate-200 flex items-center gap-1"
-                    >
-                      <Share2 className="w-3 h-3" /> Facebook
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Bottom Spotlight Strip (Club Leaders + Bold Points Card — Reference #1 Style) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
-            {/* Top Run Scorer */}
-            <button
-              onClick={() => topRunScorer && setEnlargedPlayer(topRunScorer)}
-              className="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/10 flex items-center gap-3 text-left transition-colors cursor-pointer"
-            >
-              <img
-                src={topRunScorer?.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'}
-                alt={topRunScorer?.name || 'Runs Leader'}
-                className="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/15"
-              />
-              <div className="min-w-0">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400">Club Top Scorer</div>
-                <div className="text-sm font-bold text-white truncate">{topRunScorer?.name || 'TBD'}</div>
-                <div className="text-xs font-mono text-slate-300">{topRunScorer?.runsScored || 0} runs · SR {topRunScorer?.strikeRate || 0}</div>
-              </div>
-            </button>
-
-            {/* Top Wicket Taker */}
-            <button
-              onClick={() => topWicketTaker && setEnlargedPlayer(topWicketTaker)}
-              className="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/10 flex items-center gap-3 text-left transition-colors cursor-pointer"
-            >
-              <img
-                src={topWicketTaker?.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'}
-                alt={topWicketTaker?.name || 'Wickets Leader'}
-                className="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/15"
-              />
-              <div className="min-w-0">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-purple-400">Lead Bowler</div>
-                <div className="text-sm font-bold text-white truncate">{topWicketTaker?.name || 'TBD'}</div>
-                <div className="text-xs font-mono text-slate-300">{topWicketTaker?.wicketsTaken || 0} wkts · Econ {topWicketTaker?.economy || 0}</div>
-              </div>
-            </button>
-
-            {/* Top MVP */}
-            <button
-              onClick={() => topMvpPlayer && setEnlargedPlayer(topMvpPlayer)}
-              className="p-3.5 rounded-2xl bg-white/[0.05] hover:bg-white/[0.09] border border-white/10 flex items-center gap-3 text-left transition-colors cursor-pointer"
-            >
-              <img
-                src={topMvpPlayer?.photoUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80'}
-                alt={topMvpPlayer?.name || 'Club MVP'}
-                className="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/15"
-              />
-              <div className="min-w-0">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">Club MVP Leader</div>
-                <div className="text-sm font-bold text-white truncate">{topMvpPlayer?.name || 'TBD'}</div>
-                <div className="text-xs font-mono text-slate-300">{topMvpPlayer?.mvpPoints ?? 0} MVP pts</div>
-              </div>
-            </button>
-
-            {/* Bold Highlighted Points / NRR Callout */}
-            <div className="p-4 rounded-2xl bg-[#ff6a17] text-[#090909] flex items-center justify-between shadow-lg">
-              <div>
-                <div className="text-[10px] font-black uppercase tracking-wider opacity-80">Season 2026 Points</div>
-                <div className="text-3xl font-black font-mono leading-none mt-1">
-                  {teamStanding?.points ?? 0} PTS
-                </div>
-                <div className="text-xs font-bold font-mono mt-1 opacity-85">
-                  NRR {teamStanding ? (teamStanding.nrr >= 0 ? `+${teamStanding.nrr.toFixed(3)}` : teamStanding.nrr.toFixed(3)) : '+0.000'}
-                </div>
-              </div>
-              <span className="text-3xl">{team.logo}</span>
+              <span className="px-3 py-1.5 rounded-full bg-black/70 backdrop-blur border border-white/15 text-[11px] font-semibold text-white/90 opacity-85 group-hover:opacity-100 flex items-center gap-1.5 transition-opacity">
+                <Camera className="w-3.5 h-3.5 text-[#ff6a17]" />
+                <span>{isAuthorized ? 'Change Squad Photo' : 'Captain Login for Photo'}</span>
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* PROFILE NAVIGATION TABS (Mobbin-style Segmented Pills) */}
-      <div className="flex items-center gap-2 border-b border-slate-200/80 pb-2 overflow-x-auto">
+      {/* PROFILE NAVIGATION TABS (Rally Monochrome Pills) */}
+      <div className="flex items-center gap-2 border-b border-[#090909]/15 pb-3 overflow-x-auto">
         <button
           onClick={() => setActiveTabKey('squad')}
-          className={'px-4 py-2 rounded-xl font-semibold text-xs transition-all flex items-center gap-2 shrink-0 ' + (
+          className={'px-4 py-2 rounded-full font-semibold text-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer ' + (
             activeTabKey === 'squad'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
+              ? 'bg-[#090909] text-[#f6f4f4]'
+              : 'bg-white text-[#575252] hover:text-[#090909] border border-[#090909]/15'
           )}
         >
           <Users className="w-4 h-4" />
-          <span>Squad Roster ({team.players.length})</span>
+          <span>Squad Cards ({team.players.length})</span>
         </button>
 
         <button
           onClick={() => setActiveTabKey('overview')}
-          className={'px-4 py-2 rounded-xl font-semibold text-xs transition-all flex items-center gap-2 shrink-0 ' + (
+          className={'px-4 py-2 rounded-full font-semibold text-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer ' + (
             activeTabKey === 'overview'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
+              ? 'bg-[#090909] text-[#f6f4f4]'
+              : 'bg-white text-[#575252] hover:text-[#090909] border border-[#090909]/15'
           )}
         >
           <Info className="w-4 h-4" />
@@ -728,10 +632,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
         <button
           onClick={() => setActiveTabKey('matches')}
-          className={'px-4 py-2 rounded-xl font-semibold text-xs transition-all flex items-center gap-2 shrink-0 ' + (
+          className={'px-4 py-2 rounded-full font-semibold text-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer ' + (
             activeTabKey === 'matches'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
+              ? 'bg-[#090909] text-[#f6f4f4]'
+              : 'bg-white text-[#575252] hover:text-[#090909] border border-[#090909]/15'
           )}
         >
           <Calendar className="w-4 h-4" />
@@ -740,10 +644,10 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
         <button
           onClick={() => setActiveTabKey('media')}
-          className={'px-4 py-2 rounded-xl font-semibold text-xs transition-all flex items-center gap-2 shrink-0 ' + (
+          className={'px-4 py-2 rounded-full font-semibold text-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer ' + (
             activeTabKey === 'media'
-              ? 'bg-slate-900 text-white shadow-sm'
-              : 'bg-white text-slate-600 hover:text-slate-900 hover:bg-slate-50 border border-slate-200/80'
+              ? 'bg-[#090909] text-[#f6f4f4]'
+              : 'bg-white text-[#575252] hover:text-[#090909] border border-[#090909]/15'
           )}
         >
           <Camera className="w-4 h-4" />
@@ -909,181 +813,194 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                     className="h-full cursor-pointer group"
                     onClick={() => setEnlargedPlayer(player)}
                   >
+                    {/* Paul Pogba / Alexis Sanchez Dark Editorial Athlete Card */}
                     <div
                       className={
-                        'bg-white rounded-3xl border overflow-hidden flex flex-col justify-between transition-all h-full shadow-sm group-hover:shadow-xl group-hover:-translate-y-0.5 ' +
-                        (player.isAuthenticated
-                          ? 'border-slate-200/90'
-                          : 'border-dashed border-amber-300')
+                        'bg-[#0a0a0c] text-[#f6f4f4] rounded-2xl border overflow-hidden flex flex-col justify-between transition-all h-full shadow-xl group-hover:-translate-y-0.5 ' +
+                        (player.isCaptain
+                          ? 'border-[#ff6a17]/70'
+                          : player.isAuthenticated
+                            ? 'border-[#1e1e24] group-hover:border-[#ff6a17]/50'
+                            : 'border-dashed border-amber-400/60')
                       }
                     >
-                      {/* Editorial Dark Card Portrait Header (Inspired by Celtics Card Reference) */}
-                      <div className="relative h-52 bg-[#0c0d13] overflow-hidden flex items-end justify-center">
+                      {/* Full-Bleed Portrait with Dark Vignette Fade & Stacked Typography */}
+                      <div className="relative h-72 overflow-hidden bg-[#0a0a0c]">
+                        {/* Subtle Red/Orange Crescent Glow behind Shoulders */}
                         <div
-                          className="absolute inset-0 opacity-40"
+                          className="pointer-events-none absolute -top-10 -left-10 w-56 h-56 rounded-full opacity-45"
                           style={{
-                            background: `radial-gradient(circle at 50% 35%, ${team.primaryColor || '#ff6a17'}66 0%, #0c0d13 75%)`
+                            background: `radial-gradient(circle, ${team.primaryColor || '#ff6a17'}aa 0%, #ff6a1733 55%, transparent 72%)`
                           }}
                         />
 
-                        {/* Giant Watermark Surname / Jersey */}
-                        <div className="absolute inset-x-0 top-3 text-center text-[56px] font-black tracking-tighter uppercase leading-none text-white/[0.08] select-none pointer-events-none truncate px-2 font-cabinet">
-                          {player.name.split(' ')[0]}
-                        </div>
-                        <div className="absolute right-3 bottom-1 text-[44px] font-black font-mono leading-none text-white/[0.12] select-none pointer-events-none">
-                          #{player.jerseyNumber}
-                        </div>
+                        <img
+                          src={player.photoUrl || player.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&h=600&q=80'}
+                          alt={player.name}
+                          className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&h=600&q=80';
+                          }}
+                        />
 
-                        {/* Top Pills Row */}
+                        {/* Moody Vignette Gradient Fade into #0a0a0c */}
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0a0a0c] via-[#0a0a0c]/65 to-transparent" />
+
+                        {/* Top Bar: Captain / WK / Verification */}
                         <div className="absolute top-3 left-3 right-3 z-10 flex items-center justify-between gap-2">
                           <div className="flex items-center gap-1">
                             {player.isCaptain && (
-                              <span className="px-2 py-0.5 rounded-full bg-[#ff6a17] text-[#090909] text-[10px] font-black uppercase shadow">
+                              <span className="px-2 py-0.5 rounded-full bg-[#ff6a17] text-[#090909] text-[10px] font-black uppercase">
                                 Captain
                               </span>
                             )}
                             {player.isViceCaptain && !player.isCaptain && (
-                              <span className="px-2 py-0.5 rounded-full bg-white/15 backdrop-blur text-white text-[10px] font-bold uppercase border border-white/20">
+                              <span className="px-2 py-0.5 rounded-full bg-white/15 backdrop-blur text-white text-[10px] font-bold uppercase">
                                 VC
                               </span>
                             )}
                             {player.isWicketKeeper && (
-                              <span className="px-2 py-0.5 rounded-full bg-sky-400 text-slate-950 text-[10px] font-black uppercase">
+                              <span className="px-2 py-0.5 rounded-full bg-sky-400 text-[#090909] text-[10px] font-black uppercase">
                                 WK
-                              </span>
-                            )}
-                            {!player.isCaptain && !player.isViceCaptain && !player.isWicketKeeper && (
-                              <span className="px-2 py-0.5 rounded-full bg-white/10 backdrop-blur text-slate-200 text-[10px] font-semibold border border-white/10">
-                                {team.code}
                               </span>
                             )}
                           </div>
 
                           <span
-                            className="w-7 h-7 rounded-full flex items-center justify-center text-xs bg-white/15 backdrop-blur border border-white/20 text-white"
+                            className="w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold bg-black/60 backdrop-blur border border-white/15 text-emerald-400"
                             title={player.isAuthenticated ? 'Verified Player' : 'Pending Verification'}
                           >
                             {player.isAuthenticated ? '✓' : '•'}
                           </span>
                         </div>
 
-                        {/* Framed Player Photo */}
-                        <div className="relative z-10 w-36 h-40 rounded-t-2xl overflow-hidden border-t-2 border-x-2 border-white/20 bg-slate-800 shadow-2xl group-hover:scale-[1.03] transition-transform duration-500">
-                          <img
-                            src={player.photoUrl || player.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80'}
-                            alt={player.name}
-                            className="w-full h-full object-cover object-top"
-                            onError={(e) => {
-                              e.currentTarget.onerror = null;
-                              (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&h=400&q=80';
-                            }}
-                          />
+                        {/* Stacked Typographic Overlay anchored over Dark Vignette Fade */}
+                        <div className="absolute bottom-3 left-4 right-4 z-10 flex items-end justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="text-[11px] font-mono font-bold text-slate-300 tracking-wide">
+                              #{player.jerseyNumber} · {getRoleShortLabel(player.role)}
+                            </div>
+                            <h3 className="text-[22px] font-black font-cabinet text-white leading-[1.04] tracking-tight mt-0.5">
+                              <span className="block truncate">{player.name.split(' ')[0]}</span>
+                              {player.name.split(' ').length > 1 && (
+                                <span className="block truncate">{player.name.split(' ').slice(1).join(' ')}</span>
+                              )}
+                            </h3>
+                            <p className="text-[11px] text-slate-400 font-medium truncate mt-1">
+                              {team.name}
+                            </p>
+                          </div>
+
+                          <span className="w-8 h-8 rounded-full bg-white/10 backdrop-blur border border-white/15 flex items-center justify-center text-base shrink-0">
+                            {team.logo}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Clean White Card Body & Season Stats */}
-                      <div className="p-4 space-y-3.5 flex-1 flex flex-col justify-between bg-white">
-                        <div>
-                          <h3 className="font-black text-base text-slate-950 font-cabinet truncate">
-                            {player.name}
-                          </h3>
-                          <p className="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">
-                            {getRoleLabel(player.role)} · {player.battingStyle === 'Left-hand Bat' ? 'LHB' : 'RHB'}
-                          </p>
+                      {/* 3-Box Divided Attribute Strip (Pogba Reference Card) */}
+                      <div className="grid grid-cols-3 border-y border-white/10 divide-x divide-white/10 text-center py-2.5 bg-[#0a0a0c]">
+                        <div className="px-1">
+                          <div className="text-sm font-black font-mono text-white">{player.matchesPlayed ?? 0}</div>
+                          <div className="text-[10px] text-slate-400">Matches</div>
                         </div>
+                        <div className="px-1">
+                          <div className="text-sm font-black font-mono text-white">{Math.round(player.strikeRate || 0)}</div>
+                          <div className="text-[10px] text-slate-400">Strike Rate</div>
+                        </div>
+                        <div className="px-1">
+                          <div className="text-sm font-black font-mono text-white">
+                            {player.battingStyle === 'Left-hand Bat' ? 'Left' : 'Right'}
+                          </div>
+                          <div className="text-[10px] text-slate-400">Batting</div>
+                        </div>
+                      </div>
 
-                        {/* CricHeroes 2026 Stat Grid */}
-                        <div className="grid grid-cols-4 gap-1.5 p-2.5 bg-slate-50 rounded-2xl border border-slate-100 text-center font-mono">
-                          <div>
-                            <span className="text-[9px] text-slate-400 font-bold block">RUNS</span>
-                            <span className="text-sm font-black text-slate-950">{player.runsScored || 0}</span>
+                      {/* Clean Hairline Season Stats Rows */}
+                      <div className="px-4 pt-3 pb-2.5 space-y-2 text-xs flex-1 flex flex-col justify-between bg-[#0a0a0c]">
+                        <div className="text-[11px] font-semibold text-slate-400">Player stats</div>
+                        <div className="divide-y divide-white/[0.07]">
+                          <div className="py-1.5 flex items-center justify-between">
+                            <span className="text-slate-400">Runs scored</span>
+                            <span className="font-mono font-bold text-white">{player.runsScored || 0}</span>
                           </div>
-                          <div>
-                            <span className="text-[9px] text-slate-400 font-bold block">WKTS</span>
-                            <span className="text-sm font-black text-purple-700">{player.wicketsTaken || 0}</span>
+                          <div className="py-1.5 flex items-center justify-between">
+                            <span className="text-slate-400">Wickets · Sixes</span>
+                            <span className="font-mono font-bold text-white">
+                              {player.wicketsTaken || 0}W · {player.sixes || 0}×6
+                            </span>
                           </div>
-                          <div>
-                            <span className="text-[9px] text-slate-400 font-bold block">6s</span>
-                            <span className="text-sm font-black text-amber-600">{player.sixes || 0}</span>
-                          </div>
-                          <div>
-                            <span className="text-[9px] text-slate-400 font-bold block">SR</span>
-                            <span className="text-sm font-black text-slate-800">{Math.round(player.strikeRate || 0)}</span>
+                          <div className="py-1.5 flex items-center justify-between">
+                            <span className="text-slate-400">Highest · MVP</span>
+                            <span className="font-mono font-bold text-white">
+                              {player.highestScore || 0} · {player.mvpPoints ?? 0}
+                            </span>
                           </div>
                         </div>
+                      </div>
 
-                        {/* Actions Strip */}
-                        <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs gap-2">
+                      {/* Footer Action Bar */}
+                      <div
+                        className="px-4 py-2.5 flex items-center justify-between border-t border-white/10 bg-[#0d0e12] text-xs"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <button
+                          onClick={() => setEnlargedPlayer(player)}
+                          className="text-[11px] font-black uppercase tracking-wider text-emerald-400 hover:text-[#ff6a17] transition-colors cursor-pointer"
+                        >
+                          View Profile
+                        </button>
+
+                        <div className="flex items-center gap-1.5">
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelectedCertPlayer(player);
-                            }}
-                            className="inline-flex items-center gap-1 font-semibold text-emerald-800 text-[11px] bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition-colors"
+                            onClick={() => setSelectedCertPlayer(player)}
+                            className="px-2 py-1 rounded-md bg-white/5 hover:bg-white/15 text-slate-300 text-[10px] font-semibold border border-white/10 transition-colors cursor-pointer"
                             title="View Official Player ID"
                           >
-                            <FileBadge className="w-3.5 h-3.5 text-emerald-600" />
-                            <span>ID Card</span>
+                            ID
                           </button>
 
-                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                            {isAuthorized ? (
-                              <>
-                                <label
-                                  htmlFor={'direct-photo-' + player.id}
-                                  className="cursor-pointer px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-900 font-semibold text-[11px] border border-slate-200 flex items-center gap-1 transition-all"
-                                  title="Upload or change player photo"
-                                >
-                                  <Camera className="w-3.5 h-3.5 text-slate-700" />
-                                  <span>Pic</span>
-                                  <input
-                                    id={'direct-photo-' + player.id}
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={(e) => {
-                                      const file = e.target.files && e.target.files[0];
-                                      if (file) handleDirectPlayerPhoto(player, file);
-                                    }}
-                                  />
-                                </label>
-
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEnlargedPlayer(player);
-                                  }}
-                                  className="p-1.5 rounded-lg text-slate-600 hover:text-slate-950 hover:bg-slate-100 border border-slate-200 transition-all"
-                                  title="Edit Player Info"
-                                >
-                                  <Edit3 className="w-3.5 h-3.5" />
-                                </button>
-
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    if (window.confirm(`Are you sure you want to remove ${player.name} from ${team.name}?`)) {
-                                      deletePlayer(team.id, player.id);
-                                    }
-                                  }}
-                                  className="p-1.5 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 border border-rose-200 transition-all"
-                                  title="Delete Player from Squad"
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              </>
-                            ) : (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEnlargedPlayer(player);
-                                }}
-                                className="text-[11px] font-bold text-slate-800 hover:text-[#ff6a17] bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded-lg transition-colors"
+                          {isAuthorized && (
+                            <>
+                              <label
+                                htmlFor={'direct-photo-' + player.id}
+                                className="cursor-pointer p-1 rounded-md bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10 transition-all"
+                                title="Upload or change player photo"
                               >
-                                Full Stats →
+                                <Camera className="w-3.5 h-3.5" />
+                                <input
+                                  id={'direct-photo-' + player.id}
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files && e.target.files[0];
+                                    if (file) handleDirectPlayerPhoto(player, file);
+                                  }}
+                                />
+                              </label>
+
+                              <button
+                                onClick={() => setEnlargedPlayer(player)}
+                                className="p-1 rounded-md bg-white/5 hover:bg-white/15 text-slate-300 border border-white/10 transition-all cursor-pointer"
+                                title="Edit Player Info"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" />
                               </button>
-                            )}
-                          </div>
+
+                              <button
+                                onClick={() => {
+                                  if (window.confirm(`Are you sure you want to remove ${player.name} from ${team.name}?`)) {
+                                    deletePlayer(team.id, player.id);
+                                  }
+                                }}
+                                className="p-1 rounded-md bg-rose-500/15 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 transition-all cursor-pointer"
+                                title="Delete Player from Squad"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
