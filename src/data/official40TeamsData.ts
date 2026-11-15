@@ -10,7 +10,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#0284c7",
     "secondaryColor": "#38bdf8",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group B",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -950,7 +950,25 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 1.94
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 0,
+      "lost": 3,
+      "tied": 0,
+      "noResult": 1,
+      "points": 1,
+      "nrr": -2.811,
+      "runsScored": 383,
+      "legalOversFaced": 60,
+      "runsConceded": 472,
+      "legalOversBowled": 51.2,
+      "form": [
+        "L",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-spvgg-dragons",
@@ -961,7 +979,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#dc2626",
     "secondaryColor": "#f97316",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group H",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -1913,7 +1931,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 1,
+      "lost": 3,
+      "tied": 0,
+      "noResult": 0,
+      "points": 2,
+      "nrr": -0.624,
+      "runsScored": 509,
+      "legalOversFaced": 73.2,
+      "runsConceded": 522,
+      "legalOversBowled": 69,
+      "form": [
+        "L",
+        "W",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-tgs-royal-challengers",
@@ -1924,7 +1961,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#7c3aed",
     "secondaryColor": "#a855f7",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group C",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -2604,7 +2641,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 4.83
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": 0.662,
+      "runsScored": 499,
+      "legalOversFaced": 65.4,
+      "runsConceded": 533,
+      "legalOversBowled": 76.5,
+      "form": [
+        "L",
+        "W",
+        "W",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-royal-strikers",
@@ -2615,7 +2671,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#b91c1c",
     "secondaryColor": "#f59e0b",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group C",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -3495,7 +3551,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0.36
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 1,
+      "lost": 3,
+      "tied": 0,
+      "noResult": 0,
+      "points": 2,
+      "nrr": -1.798,
+      "runsScored": 540,
+      "legalOversFaced": 74.3,
+      "runsConceded": 689,
+      "legalOversBowled": 76.1,
+      "form": [
+        "L",
+        "L",
+        "L",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-svs-frankurt-eagels",
@@ -3506,7 +3581,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#059669",
     "secondaryColor": "#10b981",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group D",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -4534,7 +4609,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 1,
+      "lost": 3,
+      "tied": 0,
+      "noResult": 0,
+      "points": 2,
+      "nrr": -0.641,
+      "runsScored": 740,
+      "legalOversFaced": 79.4,
+      "runsConceded": 753,
+      "legalOversBowled": 75.5,
+      "form": [
+        "L",
+        "L",
+        "W",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-sulzbach-xi",
@@ -4545,7 +4639,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#4f46e5",
     "secondaryColor": "#818cf8",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group G",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -5445,7 +5539,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 2.17
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 1,
+      "lost": 3,
+      "tied": 0,
+      "noResult": 0,
+      "points": 2,
+      "nrr": -4.16,
+      "runsScored": 317,
+      "legalOversFaced": 75,
+      "runsConceded": 629,
+      "legalOversBowled": 75,
+      "form": [
+        "L",
+        "W",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-tsv-darmstadt-united",
@@ -5456,7 +5569,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#0d9488",
     "secondaryColor": "#2dd4bf",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group H",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -6112,7 +6225,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 3.23
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 4,
+      "lost": 0,
+      "tied": 0,
+      "noResult": 0,
+      "points": 8,
+      "nrr": 1.574,
+      "runsScored": 708,
+      "legalOversFaced": 79.2,
+      "runsConceded": 588,
+      "legalOversBowled": 80,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-kickers",
@@ -6123,7 +6255,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#ea580c",
     "secondaryColor": "#f97316",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group H",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -7023,7 +7155,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 1.72
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 0,
+      "lost": 4,
+      "tied": 0,
+      "noResult": 0,
+      "points": 0,
+      "nrr": -3.997,
+      "runsScored": 582,
+      "legalOversFaced": 80,
+      "runsConceded": 883,
+      "legalOversBowled": 78.2,
+      "form": [
+        "L",
+        "L",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-mannschaft-ginnheimer",
@@ -7034,7 +7185,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#2563eb",
     "secondaryColor": "#60a5fa",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group D",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -7782,7 +7933,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 1,
         "mvpPoints": 10.5
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": -0.525,
+      "runsScored": 714,
+      "legalOversFaced": 80,
+      "runsConceded": 745,
+      "legalOversBowled": 78.5,
+      "form": [
+        "W",
+        "W",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-darebulls",
@@ -7793,7 +7963,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#b45309",
     "secondaryColor": "#f59e0b",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group F",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -8745,7 +8915,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 4.71
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": 0.501,
+      "runsScored": 466,
+      "legalOversFaced": 70.2,
+      "runsConceded": 490,
+      "legalOversBowled": 80,
+      "form": [
+        "W",
+        "W",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-amu-sultans",
@@ -8756,7 +8945,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#047857",
     "secondaryColor": "#34d399",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group A",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -9788,7 +9977,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 0,
+      "lost": 4,
+      "tied": 0,
+      "noResult": 0,
+      "points": 0,
+      "nrr": -2.917,
+      "runsScored": 617,
+      "legalOversFaced": 80,
+      "runsConceded": 659,
+      "legalOversBowled": 62,
+      "form": [
+        "L",
+        "L",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-rcb-xi",
@@ -9799,7 +10007,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#be123c",
     "secondaryColor": "#fb7185",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group G",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -10939,7 +11147,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0.18
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 0,
+      "lost": 4,
+      "tied": 0,
+      "noResult": 0,
+      "points": 0,
+      "nrr": -4.05,
+      "runsScored": 438,
+      "legalOversFaced": 80,
+      "runsConceded": 762,
+      "legalOversBowled": 80,
+      "form": [
+        "L",
+        "L",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-rcb",
@@ -10950,7 +11177,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#991b1b",
     "secondaryColor": "#fbbf24",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group A",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -11778,7 +12005,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0.25
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": 0.132,
+      "runsScored": 644,
+      "legalOversFaced": 66.3,
+      "runsConceded": 640,
+      "legalOversBowled": 67,
+      "form": [
+        "L",
+        "L",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-old-monks-xi",
@@ -11789,7 +12035,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#78350f",
     "secondaryColor": "#d97706",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group D",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -12469,7 +12715,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 7.05
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 4,
+      "lost": 0,
+      "tied": 0,
+      "noResult": 0,
+      "points": 8,
+      "nrr": 1.312,
+      "runsScored": 547,
+      "legalOversFaced": 68.1,
+      "runsConceded": 537,
+      "legalOversBowled": 80,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-hawk-hunters",
@@ -12480,7 +12745,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#1e3a8a",
     "secondaryColor": "#3b82f6",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group G",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -13352,7 +13617,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 14.91
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 4,
+      "lost": 0,
+      "tied": 0,
+      "noResult": 0,
+      "points": 8,
+      "nrr": 2.855,
+      "runsScored": 726,
+      "legalOversFaced": 74.1,
+      "runsConceded": 520,
+      "legalOversBowled": 75,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-skg-falconsxi",
@@ -13363,7 +13647,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#0f766e",
     "secondaryColor": "#14b8a6",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group G",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -14243,7 +14527,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": -0.06
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": 1.804,
+      "runsScored": 738,
+      "legalOversFaced": 80,
+      "runsConceded": 585,
+      "legalOversBowled": 78.5,
+      "form": [
+        "W",
+        "L",
+        "L",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-giessener-11",
@@ -14254,7 +14557,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#581c87",
     "secondaryColor": "#c084fc",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group E",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -15110,7 +15413,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0.92
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": 0.569,
+      "runsScored": 493,
+      "legalOversFaced": 70.5,
+      "runsConceded": 425,
+      "legalOversBowled": 66.3,
+      "form": [
+        "W",
+        "L",
+        "L",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-fcc-friends-xi",
@@ -15121,7 +15443,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#0369a1",
     "secondaryColor": "#38bdf8",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group H",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -15989,7 +16311,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 5.32
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 3,
+      "lost": 1,
+      "tied": 0,
+      "noResult": 0,
+      "points": 6,
+      "nrr": 2.717,
+      "runsScored": 678,
+      "legalOversFaced": 73.1,
+      "runsConceded": 524,
+      "legalOversBowled": 80,
+      "form": [
+        "L",
+        "W",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-hanau-pioneers",
@@ -16000,7 +16341,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#4338ca",
     "secondaryColor": "#818cf8",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group E",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -16832,7 +17173,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0.45
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 1,
+      "lost": 3,
+      "tied": 0,
+      "noResult": 0,
+      "points": 2,
+      "nrr": -1.787,
+      "runsScored": 510,
+      "legalOversFaced": 80,
+      "runsConceded": 653,
+      "legalOversBowled": 80,
+      "form": [
+        "L",
+        "L",
+        "W",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-royal-lions",
@@ -16843,7 +17203,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#c2410c",
     "secondaryColor": "#f97316",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group G",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -17555,7 +17915,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 2.51
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 3,
+      "lost": 1,
+      "tied": 0,
+      "noResult": 0,
+      "points": 6,
+      "nrr": 3.501,
+      "runsScored": 745,
+      "legalOversFaced": 79.4,
+      "runsConceded": 468,
+      "legalOversBowled": 80,
+      "form": [
+        "W",
+        "W",
+        "L",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-sgm-guardians",
@@ -17566,7 +17945,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#0f766e",
     "secondaryColor": "#2dd4bf",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group C",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -18510,7 +18889,25 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0.51
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 3,
+      "won": 2,
+      "lost": 1,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": 0.764,
+      "runsScored": 461,
+      "legalOversFaced": 56.5,
+      "runsConceded": 398,
+      "legalOversBowled": 54.1,
+      "form": [
+        "L",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-fc-kvm-royal-warriors",
@@ -18521,7 +18918,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#701a75",
     "secondaryColor": "#d946ef",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group A",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -19349,7 +19746,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 1,
         "mvpPoints": 5.63
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 3,
+      "lost": 1,
+      "tied": 0,
+      "noResult": 0,
+      "points": 6,
+      "nrr": 1.494,
+      "runsScored": 817,
+      "legalOversFaced": 79.5,
+      "runsConceded": 696,
+      "legalOversBowled": 79.5,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-sv-tigers-am-main",
@@ -19360,7 +19776,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#c2410c",
     "secondaryColor": "#ea580c",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group B",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -20260,7 +20676,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 1,
         "mvpPoints": 9.72
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 3,
+      "lost": 1,
+      "tied": 0,
+      "noResult": 0,
+      "points": 6,
+      "nrr": 1.413,
+      "runsScored": 712,
+      "legalOversFaced": 80,
+      "runsConceded": 599,
+      "legalOversBowled": 80,
+      "form": [
+        "W",
+        "L",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-tsv-frankfurt-spartans",
@@ -20271,7 +20706,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#9f1239",
     "secondaryColor": "#f43f5e",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group C",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -21251,7 +21686,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 1.08
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 4,
+      "lost": 0,
+      "tied": 0,
+      "noResult": 0,
+      "points": 8,
+      "nrr": 4.21,
+      "runsScored": 951,
+      "legalOversFaced": 74.1,
+      "runsConceded": 689,
+      "legalOversBowled": 80,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-kk-challengers",
@@ -21262,7 +21716,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#581c87",
     "secondaryColor": "#a855f7",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group F",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -22202,7 +22656,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 4,
+      "lost": 0,
+      "tied": 0,
+      "noResult": 0,
+      "points": 8,
+      "nrr": 1.458,
+      "runsScored": 493,
+      "legalOversFaced": 66.2,
+      "runsConceded": 468,
+      "legalOversBowled": 78.2,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-tsv-frankfurt-garuda",
@@ -22213,7 +22686,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#0369a1",
     "secondaryColor": "#38bdf8",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group C",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -23089,7 +23562,25 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 3,
+      "won": 0,
+      "lost": 3,
+      "tied": 0,
+      "noResult": 0,
+      "points": 0,
+      "nrr": -5.773,
+      "runsScored": 420,
+      "legalOversFaced": 60,
+      "runsConceded": 562,
+      "legalOversBowled": 44,
+      "form": [
+        "L",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-frankfurt-strikers",
@@ -23100,7 +23591,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#b91c1c",
     "secondaryColor": "#f87171",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group E",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -23940,7 +24431,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 1.32
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 4,
+      "lost": 0,
+      "tied": 0,
+      "noResult": 0,
+      "points": 8,
+      "nrr": 4.576,
+      "runsScored": 704,
+      "legalOversFaced": 70.5,
+      "runsConceded": 421,
+      "legalOversBowled": 78.3,
+      "form": [
+        "W",
+        "W",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-tsgn-mavericks",
@@ -23951,7 +24461,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#0284c7",
     "secondaryColor": "#38bdf8",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group A",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -24811,7 +25321,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0.07
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": -0.162,
+      "runsScored": 631,
+      "legalOversFaced": 75.1,
+      "runsConceded": 666,
+      "legalOversBowled": 77.5,
+      "form": [
+        "W",
+        "L",
+        "L",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-tgs-indian-challengers",
@@ -24822,7 +25351,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#d97706",
     "secondaryColor": "#f59e0b",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group F",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -25370,7 +25899,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 5.21
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": 0.155,
+      "runsScored": 565,
+      "legalOversFaced": 70.5,
+      "runsConceded": 554,
+      "legalOversBowled": 70.5,
+      "form": [
+        "L",
+        "W",
+        "L",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-freizeit-cricket-club",
@@ -25381,7 +25929,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#15803d",
     "secondaryColor": "#4ade80",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group F",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -26225,7 +26773,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 1.99
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 0,
+      "lost": 4,
+      "tied": 0,
+      "noResult": 0,
+      "points": 0,
+      "nrr": -2.639,
+      "runsScored": 343,
+      "legalOversFaced": 65,
+      "runsConceded": 347,
+      "legalOversBowled": 43.5,
+      "form": [
+        "L",
+        "L",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-dcc-rising-stars",
@@ -26236,7 +26803,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#7e22ce",
     "secondaryColor": "#c084fc",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group B",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -27100,7 +27667,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 1.62
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 3,
+      "lost": 1,
+      "tied": 0,
+      "noResult": 0,
+      "points": 6,
+      "nrr": 1.888,
+      "runsScored": 620,
+      "legalOversFaced": 80,
+      "runsConceded": 469,
+      "legalOversBowled": 80,
+      "form": [
+        "W",
+        "L",
+        "W",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-dietzenbach-cricket-star",
@@ -27111,7 +27697,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#0e7490",
     "secondaryColor": "#22d3ee",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group E",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -28143,7 +28729,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0.23
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 1,
+      "lost": 3,
+      "tied": 0,
+      "noResult": 0,
+      "points": 2,
+      "nrr": -3.308,
+      "runsScored": 561,
+      "legalOversFaced": 80,
+      "runsConceded": 731,
+      "legalOversBowled": 70.5,
+      "form": [
+        "L",
+        "W",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-tsgn-titans",
@@ -28154,7 +28759,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#1e40af",
     "secondaryColor": "#60a5fa",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group B",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -28986,7 +29591,25 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 6.03
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 1,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 1,
+      "points": 3,
+      "nrr": -0.15,
+      "runsScored": 349,
+      "legalOversFaced": 60,
+      "runsConceded": 358,
+      "legalOversBowled": 60,
+      "form": [
+        "W",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-sg-malchen",
@@ -28997,7 +29620,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#166534",
     "secondaryColor": "#22c55e",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group B",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -29833,7 +30456,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": -1.477,
+      "runsScored": 394,
+      "legalOversFaced": 71.2,
+      "runsConceded": 560,
+      "legalOversBowled": 80,
+      "form": [
+        "W",
+        "L",
+        "W",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-hsv-hawks",
@@ -29844,7 +30486,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#9a3412",
     "secondaryColor": "#fb923c",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group D",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -30492,7 +31134,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0.59
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 1,
+      "lost": 3,
+      "tied": 0,
+      "noResult": 0,
+      "points": 2,
+      "nrr": -2.478,
+      "runsScored": 600,
+      "legalOversFaced": 77,
+      "runsConceded": 760,
+      "legalOversBowled": 74,
+      "form": [
+        "W",
+        "L",
+        "L",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-juggernaut-cricket-club",
@@ -30503,7 +31164,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#374151",
     "secondaryColor": "#9ca3af",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group E",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -31399,7 +32060,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 1,
         "mvpPoints": 8.51
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": 0.246,
+      "runsScored": 733,
+      "legalOversFaced": 74.1,
+      "runsConceded": 771,
+      "legalOversBowled": 80,
+      "form": [
+        "L",
+        "W",
+        "W",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-trebur-cc",
@@ -31410,7 +32090,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#047857",
     "secondaryColor": "#10b981",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group H",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -32154,7 +32834,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 1,
         "mvpPoints": 4.49
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": 0.349,
+      "runsScored": 716,
+      "legalOversFaced": 75,
+      "runsConceded": 676,
+      "legalOversBowled": 73.3,
+      "form": [
+        "W",
+        "L",
+        "W",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-darmstadt-xi",
@@ -32165,7 +32864,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#1e3a8a",
     "secondaryColor": "#3b82f6",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group F",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -32989,7 +33688,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 9.93
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": -0.188,
+      "runsScored": 438,
+      "legalOversFaced": 62,
+      "runsConceded": 446,
+      "legalOversBowled": 61.3,
+      "form": [
+        "W",
+        "L",
+        "L",
+        "W"
+      ]
+    }
   },
   {
     "id": "team-blue-wings",
@@ -33000,7 +33718,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#0284c7",
     "secondaryColor": "#38bdf8",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group D",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -33920,7 +34638,26 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 0,
         "mvpPoints": 0.24
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 2,
+      "lost": 2,
+      "tied": 0,
+      "noResult": 0,
+      "points": 4,
+      "nrr": 2.065,
+      "runsScored": 766,
+      "legalOversFaced": 80,
+      "runsConceded": 572,
+      "legalOversBowled": 76.1,
+      "form": [
+        "L",
+        "W",
+        "W",
+        "L"
+      ]
+    }
   },
   {
     "id": "team-tbg-neulusheim",
@@ -33931,7 +34668,7 @@ export const OFFICIAL_40_TEAMS: Team[] = [
     "primaryColor": "#4f46e5",
     "secondaryColor": "#818cf8",
     "homeGround": "Apex Oval Complex",
-    "group": "",
+    "group": "Group A",
     "slogan": "",
     "description": "Official franchise participating in Ruchi Masters T20 2026.",
     "establishedYear": 2022,
@@ -34751,6 +35488,25 @@ export const OFFICIAL_40_TEAMS: Team[] = [
         "runOuts": 1,
         "mvpPoints": 7.16
       }
-    ]
+    ],
+    "standingsOverride": {
+      "played": 4,
+      "won": 3,
+      "lost": 1,
+      "tied": 0,
+      "noResult": 0,
+      "points": 6,
+      "nrr": 1.171,
+      "runsScored": 614,
+      "legalOversFaced": 65,
+      "runsConceded": 662,
+      "legalOversBowled": 80,
+      "form": [
+        "W",
+        "L",
+        "W",
+        "W"
+      ]
+    }
   }
 ];

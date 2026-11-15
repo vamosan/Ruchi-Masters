@@ -64,6 +64,11 @@ export interface StandingsOverride {
   noResult: number;
   points: number;
   nrr: number;
+  runsScored?: number;
+  legalOversFaced?: number;
+  runsConceded?: number;
+  legalOversBowled?: number;
+  form?: ('W' | 'L' | 'T' | 'NR')[];
 }
 
 export interface Team {

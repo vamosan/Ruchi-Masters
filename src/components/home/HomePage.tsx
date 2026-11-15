@@ -115,7 +115,7 @@ export const HomePage: React.FC = () => {
   );
 
   const groups = useMemo(() => {
-    const g = Array.from(new Set(teams.map(t => t.group).filter(Boolean))) as string[];
+    const g = Array.from(new Set(teams.map(t => t.group).filter(Boolean))).sort() as string[];
     return g.length > 0 ? g : ['Group A', 'Group B'];
   }, [teams]);
 
@@ -517,20 +517,21 @@ export const HomePage: React.FC = () => {
 
           {/* Column 2 (4 Cols): Hairline Group Standings (Identical 58px Row Height) */}
           <div className="lg:col-span-4">
-            <div className="h-11 flex flex-wrap items-center justify-between gap-2 mb-3">
-              <h2 className="rally-h2 text-[26px] sm:text-[30px]">Standings</h2>
-              <div className="flex items-center gap-1">
+            <div className="h-11 flex items-center justify-between gap-2 mb-3">
+              <h2 className="rally-h2 text-[26px] sm:text-[30px] shrink-0">Standings</h2>
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
                 {groups.map(g => (
                   <button
                     key={g}
                     onClick={() => setSelectedGroupTab(g)}
-                    className={`h-7 px-2.5 rounded-full text-[11px] font-medium transition-colors cursor-pointer ${
+                    title={g}
+                    className={`h-6 min-w-[24px] px-1.5 rounded-full text-[11px] font-bold transition-colors cursor-pointer shrink-0 ${
                       selectedGroupTab === g
                         ? 'bg-[#090909] text-[#f6f4f4]'
                         : 'border border-[#090909]/15 text-[#575252] hover:border-[#090909]'
                     }`}
                   >
-                    {g.replace('Group ', 'Grp ')}
+                    {groups.length > 3 ? g.replace('Group ', '') : g.replace('Group ', 'Grp ')}
                   </button>
                 ))}
               </div>

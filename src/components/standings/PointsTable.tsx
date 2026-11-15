@@ -26,7 +26,7 @@ export const PointsTable: React.FC = () => {
 
   const standings = calculatePointsTable(teams, matches, tournament.rules);
 
-  const groups = Array.from(new Set(teams.map(t => t.group).filter(Boolean)));
+  const groups = Array.from(new Set(teams.map(t => t.group).filter(Boolean))).sort();
 
   const filteredStandings = standings.filter(entry => {
     if (selectedGroup === 'all') return true;
@@ -56,13 +56,13 @@ export const PointsTable: React.FC = () => {
             Tournament Standings & Net Run Rate (NRR)
           </h2>
           <p className="text-xs text-slate-500 font-normal">
-            Certified ICC Net Run Rate rules applied • Top 4 advance to Championship Playoffs
+            Certified ICC Net Run Rate rules applied • Top 2 from each group advance to Knockouts
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Group Filter */}
-          <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 rounded-xl p-1 text-xs">
+          <div className="flex flex-wrap items-center gap-1 bg-slate-100 border border-slate-200 rounded-xl p-1 text-xs">
             <Filter className="w-3.5 h-3.5 text-slate-400 ml-1.5" />
             <button
               onClick={() => setSelectedGroup('all')}
@@ -119,7 +119,7 @@ export const PointsTable: React.FC = () => {
 
             <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
               {filteredStandings.map((entry, idx) => {
-                const isPlayoffZone = idx < 4;
+                const isPlayoffZone = selectedGroup === 'all' ? Boolean(entry.isQualified) : idx < 2;
                 return (
                   <tr 
                     key={entry.teamId}

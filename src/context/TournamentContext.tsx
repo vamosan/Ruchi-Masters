@@ -108,54 +108,61 @@ const STORAGE_KEYS = {
 const normPlayerName = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 function mergeSeededStatsIfMissing(storedTeams: Team[]): { teams: Team[]; didMigrate: boolean } {
-  const alreadySynced = storedTeams.some(t => t.players.some(p => p.mvpPoints !== undefined));
-  if (alreadySynced) return { teams: storedTeams, didMigrate: false };
+  const needsStatsSync = !storedTeams.some(t => t.players.some(p => p.mvpPoints !== undefined));
+  const needsStandingsSync = !storedTeams.some(t => Boolean(t.standingsOverride));
+  if (!needsStatsSync && !needsStandingsSync) return { teams: storedTeams, didMigrate: false };
 
   const migrated = INITIAL_TEAMS.map(initTeam => {
     const cachedTeam = storedTeams.find(c => c.id === initTeam.id);
     if (!cachedTeam) return initTeam;
 
     const existingPlayers = cachedTeam.players || [];
-    const updatedPlayers: Player[] = initTeam.players.map(initPlayer => {
-      const existing = existingPlayers.find(
-        p => p.id === initPlayer.id || normPlayerName(p.name) === normPlayerName(initPlayer.name)
-      );
-      if (!existing) return initPlayer;
-      return {
-        ...initPlayer,
-        ...existing,
-        // Preserve custom photos / captaincy / jersey / PIN data while hydrating CricHeroes stats
-        matchesPlayed: existing.matchesPlayed > 0 ? existing.matchesPlayed : initPlayer.matchesPlayed,
-        runsScored: existing.runsScored > 0 ? existing.runsScored : initPlayer.runsScored,
-        wicketsTaken: existing.wicketsTaken > 0 ? existing.wicketsTaken : initPlayer.wicketsTaken,
-        highestScore: existing.highestScore > 0 ? existing.highestScore : initPlayer.highestScore,
-        bestBowling: existing.bestBowling && existing.bestBowling !== '0/0' ? existing.bestBowling : initPlayer.bestBowling,
-        fours: existing.fours !== undefined && existing.fours > 0 ? existing.fours : initPlayer.fours,
-        sixes: existing.sixes !== undefined && existing.sixes > 0 ? existing.sixes : initPlayer.sixes,
-        fifties: existing.fifties ?? initPlayer.fifties,
-        hundreds: existing.hundreds ?? initPlayer.hundreds,
-        strikeRate: existing.strikeRate && existing.strikeRate > 0 ? existing.strikeRate : initPlayer.strikeRate,
-        economy: existing.economy && existing.economy > 0 ? existing.economy : initPlayer.economy,
-        catches: existing.catches ?? initPlayer.catches,
-        stumpings: existing.stumpings ?? initPlayer.stumpings,
-        runOuts: existing.runOuts ?? initPlayer.runOuts,
-        mvpPoints: initPlayer.mvpPoints ?? 0,
-        battingStyle: initPlayer.battingStyle || existing.battingStyle,
-        bowlingStyle: initPlayer.bowlingStyle || existing.bowlingStyle,
-        role: initPlayer.role || existing.role,
-      };
-    });
+    const updatedPlayers: Player[] = needsStatsSync
+      ? initTeam.players.map(initPlayer => {
+          const existing = existingPlayers.find(
+            p => p.id === initPlayer.id || normPlayerName(p.name) === normPlayerName(initPlayer.name)
+          );
+          if (!existing) return initPlayer;
+          return {
+            ...initPlayer,
+            ...existing,
+            // Preserve custom photos / captaincy / jersey / PIN data while hydrating CricHeroes stats
+            matchesPlayed: existing.matchesPlayed > 0 ? existing.matchesPlayed : initPlayer.matchesPlayed,
+            runsScored: existing.runsScored > 0 ? existing.runsScored : initPlayer.runsScored,
+            wicketsTaken: existing.wicketsTaken > 0 ? existing.wicketsTaken : initPlayer.wicketsTaken,
+            highestScore: existing.highestScore > 0 ? existing.highestScore : initPlayer.highestScore,
+            bestBowling: existing.bestBowling && existing.bestBowling !== '0/0' ? existing.bestBowling : initPlayer.bestBowling,
+            fours: existing.fours !== undefined && existing.fours > 0 ? existing.fours : initPlayer.fours,
+            sixes: existing.sixes !== undefined && existing.sixes > 0 ? existing.sixes : initPlayer.sixes,
+            fifties: existing.fifties ?? initPlayer.fifties,
+            hundreds: existing.hundreds ?? initPlayer.hundreds,
+            strikeRate: existing.strikeRate && existing.strikeRate > 0 ? existing.strikeRate : initPlayer.strikeRate,
+            economy: existing.economy && existing.economy > 0 ? existing.economy : initPlayer.economy,
+            catches: existing.catches ?? initPlayer.catches,
+            stumpings: existing.stumpings ?? initPlayer.stumpings,
+            runOuts: existing.runOuts ?? initPlayer.runOuts,
+            mvpPoints: initPlayer.mvpPoints ?? 0,
+            battingStyle: initPlayer.battingStyle || existing.battingStyle,
+            bowlingStyle: initPlayer.bowlingStyle || existing.bowlingStyle,
+            role: initPlayer.role || existing.role,
+          };
+        })
+      : existingPlayers;
 
-    // Keep any custom-added players added by captains/admins not in INITIAL_TEAMS
-    existingPlayers.forEach(ep => {
-      if (!updatedPlayers.some(up => up.id === ep.id || normPlayerName(up.name) === normPlayerName(ep.name))) {
-        updatedPlayers.push({ ...ep, mvpPoints: ep.mvpPoints ?? 0 });
-      }
-    });
+    if (needsStatsSync) {
+      // Keep any custom-added players added by captains/admins not in INITIAL_TEAMS
+      existingPlayers.forEach(ep => {
+        if (!updatedPlayers.some(up => up.id === ep.id || normPlayerName(up.name) === normPlayerName(ep.name))) {
+          updatedPlayers.push({ ...ep, mvpPoints: ep.mvpPoints ?? 0 });
+        }
+      });
+    }
 
     return {
       ...initTeam,
       ...cachedTeam,
+      group: needsStandingsSync ? (initTeam.group || cachedTeam.group) : (cachedTeam.group || initTeam.group),
+      standingsOverride: needsStandingsSync ? (cachedTeam.standingsOverride || initTeam.standingsOverride) : cachedTeam.standingsOverride,
       teamPhotoUrl: cachedTeam.teamPhotoUrl || initTeam.teamPhotoUrl,
       bannerUrl: cachedTeam.bannerUrl || initTeam.bannerUrl,
       logo: cachedTeam.logo || initTeam.logo,

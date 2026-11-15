@@ -159,11 +159,11 @@ export function calculatePointsTable(
       noResult: ov ? ov.noResult : item.noResult,
       points: ov ? ov.points : item.points,
       nrr: ov ? ov.nrr : (isNaN(computedNrr) ? 0 : computedNrr),
-      runsScored: runsFor,
-      legalOversFaced: Number(oversFor.toFixed(2)),
-      runsConceded: runsAgainst,
-      legalOversBowled: Number(oversAgainst.toFixed(2)),
-      form: item.form.slice(-5), // last 5 matches
+      runsScored: ov?.runsScored ?? runsFor,
+      legalOversFaced: ov?.legalOversFaced ?? Number(oversFor.toFixed(2)),
+      runsConceded: ov?.runsConceded ?? runsAgainst,
+      legalOversBowled: ov?.legalOversBowled ?? Number(oversAgainst.toFixed(2)),
+      form: ov?.form ?? item.form.slice(-5), // last 5 matches
       rank: 1,
     };
   });
@@ -175,11 +175,17 @@ export function calculatePointsTable(
     return b.nrr - a.nrr;
   });
 
-  // Assign ranks & qualification flags (Top 4 qualify in T20 leagues)
-  return entries.map((entry, idx) => ({
-    ...entry,
-    rank: idx + 1,
-    isQualified: idx < 4 && entry.played >= 3,
-    isEliminated: idx >= 4 && entry.played >= 4 && entry.points < 4
-  }));
+  // Assign overall rank & per-group qualification flags (Top 2 per group advance in 8-group format)
+  const groupRankCounter = new Map<string, number>();
+  return entries.map((entry, idx) => {
+    const grpKey = entry.group || 'ALL';
+    const grpRank = (groupRankCounter.get(grpKey) || 0) + 1;
+    groupRankCounter.set(grpKey, grpRank);
+    return {
+      ...entry,
+      rank: idx + 1,
+      isQualified: grpRank <= 2 && entry.played >= 3,
+      isEliminated: grpRank > 2 && entry.played >= 4 && entry.points <= 2,
+    };
+  });
 }
