@@ -415,7 +415,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                 )}
               </div>
 
-              <h1 className="text-3xl sm:text-4xl font-black font-cabinet tracking-tight leading-[1.03] text-white">
+              <h1 className="rally-display text-[#f6f4f4] text-[40px] sm:text-[50px] lg:text-[56px]">
                 {team.name}
               </h1>
 
