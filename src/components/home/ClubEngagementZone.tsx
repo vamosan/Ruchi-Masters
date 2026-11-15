@@ -103,23 +103,9 @@ export const ClubEngagementZone: React.FC = () => {
     <section className="max-w-[1320px] mx-auto px-5 sm:px-8 pb-10 sm:pb-12">
       <div className="border-t border-[#090909]/15 pt-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          {/* Left 6 Cols: Interactive Head-to-Head Club Comparator with Batter vs Bowler Silhouettes */}
-          <div className="lg:col-span-6 relative overflow-hidden rounded-[6px] bg-white border border-[#090909]/12 p-5 flex flex-col justify-between">
-            {/* Subtle Batter & Bowler Action Silhouettes on Left & Right Edges */}
-            <img
-              src="/cricket-action/batter-lofted.png"
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none select-none absolute -left-2 bottom-2 h-56 w-auto object-contain opacity-[0.08]"
-            />
-            <img
-              src="/cricket-action/bowler-action.png"
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none select-none absolute -right-4 bottom-2 h-56 w-auto object-contain opacity-[0.10]"
-            />
-
-            <div className="relative z-10">
+          {/* Left 6 Cols: Interactive Head-to-Head Club Comparator */}
+          <div className="lg:col-span-6 rounded-[6px] bg-white border border-[#090909]/12 p-5 flex flex-col justify-between">
+            <div>
               <div className="flex items-center justify-between gap-2 mb-3">
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#090909] text-[#f6f4f4] text-[10px] font-bold uppercase tracking-wider">
