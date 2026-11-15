@@ -107,7 +107,7 @@ export const RuchiNavbar: React.FC = () => {
             className="h-9 px-3.5 rounded-full border border-white/25 hover:border-[#ff6a17] hover:text-[#ff6a17] text-[13px] font-medium text-[#f6f4f4] transition-colors cursor-pointer flex items-center gap-1.5"
           >
             <KeyRound className="w-3.5 h-3.5 text-[#ff6a17]" />
-            <span>{currentUser.role === 'spectator' ? 'Captain Login' : 'Switch Login'}</span>
+            <span>{currentUser.role === 'spectator' ? 'Team Login' : 'Switch Login'}</span>
           </button>
           <button
             onClick={() => go('live')}
@@ -166,7 +166,7 @@ export const RuchiNavbar: React.FC = () => {
               className="rally-btn rally-btn-ghost-light w-full"
             >
               <KeyRound className="w-4 h-4 text-[#ff6a17]" />
-              Captain Login
+              Team Login
             </button>
             <button onClick={() => go('live')} className="rally-btn rally-btn-primary w-full">
               Live Scores

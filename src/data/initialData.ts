@@ -320,5 +320,35 @@ export const INITIAL_MATCHES: Match[] = [
       ballsHistory: [],
       isCompleted: false,
     }
+  },
+  {
+    id: 'm-104',
+    matchNumber: 4,
+    title: 'Match 4 • Group A • Clash',
+    stage: 'Group Stage',
+    group: 'Group A',
+    teamAId: 'team-tsv-darmstadt-united',
+    teamBId: 'team-frankfurt-spartans',
+    date: '2026-09-19',
+    time: '14:00',
+    venue: 'Apex Oval Complex - Main Arena',
+    status: 'scheduled',
+    statusNote: 'Upcoming Fixture',
+    currentInningsNumber: 1
+  },
+  {
+    id: 'm-105',
+    matchNumber: 5,
+    title: 'Match 5 • Group B • Derby',
+    stage: 'Group Stage',
+    group: 'Group B',
+    teamAId: 'team-frankfurt-strikers',
+    teamBId: 'team-ksc-indians',
+    date: '2026-09-20',
+    time: '16:30',
+    venue: 'Apex Oval Complex - Pitch 2',
+    status: 'scheduled',
+    statusNote: 'Upcoming Fixture',
+    currentInningsNumber: 1
   }
 ];
