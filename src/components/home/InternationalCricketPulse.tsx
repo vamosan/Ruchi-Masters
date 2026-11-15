@@ -9,6 +9,39 @@ interface FeedItem {
   source: 'ESPNcricinfo' | 'Cricbuzz';
 }
 
+function parseBrowserXml(xml: string, source: 'ESPNcricinfo' | 'Cricbuzz', max = 4): FeedItem[] {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xml, 'text/xml');
+    const nodes = Array.from(doc.querySelectorAll('item')).slice(0, max);
+    return nodes
+      .map(node => {
+        const rawTitle = (node.querySelector('title')?.textContent || '')
+          .replace(/\s*-\s*Cricbuzz(\.com)?$/i, '')
+          .trim();
+        const rawDesc = (node.querySelector('description')?.textContent || '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+        const guid = (node.querySelector('guid')?.textContent || '').trim();
+        const rawLink = (node.querySelector('link')?.textContent || '').trim();
+        const link = (guid.startsWith('http') ? guid : rawLink) || rawLink;
+        const pubRaw = node.querySelector('pubDate')?.textContent || '';
+        const pubDate = pubRaw ? new Date(pubRaw).toLocaleDateString() : 'Latest';
+        return {
+          title: rawTitle,
+          description: rawDesc,
+          link,
+          pubDate,
+          source,
+        };
+      })
+      .filter(i => i.title && i.link.startsWith('http'));
+  } catch {
+    return [];
+  }
+}
+
 const FALLBACK_SCORES: FeedItem[] = [
   {
     title: 'IND 214/4 (20.0) vs AUS 198/7 (20.0)',
@@ -36,126 +69,163 @@ const FALLBACK_SCORES: FeedItem[] = [
   },
 ];
 
-const FALLBACK_NEWS: FeedItem[] = [
-  {
-    title: 'ICC T20 rankings update: Power-hitters and wristspinners dominate latest table',
-    description:
-      'Full analysis of the latest international T20I batting, bowling and all-rounder movements across top Test-playing nations.',
-    link: 'https://www.espncricinfo.com/cricket-news',
-    pubDate: 'Today',
-    source: 'ESPNcricinfo',
-  },
-  {
-    title: 'Tactical breakdown: How modern T20 captains use pace-off variations in death overs',
-    description:
-      'Data insights from Cricbuzz & ESPNcricinfo on Yorkers vs hard-length cutters in overs 16 to 20.',
-    link: 'https://www.cricbuzz.com/cricket-news',
-    pubDate: 'Today',
-    source: 'Cricbuzz',
-  },
-  {
-    title: 'International fixture calendar: Upcoming Test Championship and white-ball tours',
-    description:
-      'Complete schedule of marquee international series, squad announcements and venue guides.',
-    link: 'https://www.espncricinfo.com/live-cricket-match-schedule-fixtures',
-    pubDate: 'Today',
-    source: 'ESPNcricinfo',
-  },
-  {
-    title: 'Associate cricket surge: European T20 leagues driving grassroots growth across Germany',
-    description:
-      'Club and regional T20 tournaments continue to expand the talent pipeline across continental Europe.',
-    link: 'https://www.cricbuzz.com/cricket-news',
-    pubDate: 'Today',
-    source: 'Cricbuzz',
-  },
-];
-
 export const InternationalCricketPulse: React.FC = () => {
   const [scores, setScores] = useState<FeedItem[]>(FALLBACK_SCORES);
-  const [news, setNews] = useState<FeedItem[]>(FALLBACK_NEWS);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [news, setNews] = useState<FeedItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [isLiveFeed, setIsLiveFeed] = useState<boolean>(false);
 
   const fetchInternationalFeeds = useCallback(async () => {
     setLoading(true);
+    let loadedScores: FeedItem[] = [];
+    let loadedNews: FeedItem[] = [];
+
+    // 1. Try our Cloudflare Pages Edge Function (/api/cricket-feed) safely
     try {
-      // 1. Try our Cloudflare Pages Edge Function (/api/cricket-feed)
-      const edgeRes = await fetch('/api/cricket-feed').catch(() => null);
-      if (edgeRes && edgeRes.ok) {
+      const edgeRes = await fetch('/api/cricket-feed');
+      const contentType = edgeRes.headers.get('content-type') || '';
+      if (edgeRes.ok && contentType.includes('application/json')) {
         const data = await edgeRes.json();
         if (Array.isArray(data.scores) && data.scores.length > 0) {
-          setScores(
-            data.scores.slice(0, 4).map((s: FeedItem, idx: number) => ({
-              ...s,
-              source: idx % 2 === 0 ? 'ESPNcricinfo' : 'Cricbuzz',
-            }))
-          );
-          setIsLiveFeed(true);
+          loadedScores = data.scores.slice(0, 4);
         }
         if (Array.isArray(data.news) && data.news.length > 0) {
-          setNews(
-            data.news.slice(0, 4).map((n: FeedItem, idx: number) => ({
-              ...n,
-              source: idx % 2 === 0 ? 'ESPNcricinfo' : 'Cricbuzz',
-            }))
-          );
-          setIsLiveFeed(true);
-          setLoading(false);
-          return;
+          loadedNews = data.news.slice(0, 4);
         }
       }
-
-      // 2. Fallback to public RSS-to-JSON bridge for ESPNcricinfo live scores & news
-      const [scoresRss, newsRss] = await Promise.allSettled([
-        fetch(
-          'https://api.rss2json.com/v1/api.json?rss_url=' +
-            encodeURIComponent('https://static.cricinfo.com/rss/livescores.xml')
-        ),
-        fetch(
-          'https://api.rss2json.com/v1/api.json?rss_url=' +
-            encodeURIComponent('https://www.espncricinfo.com/rss/content/story/feeds/0.xml')
-        ),
-      ]);
-
-      if (scoresRss.status === 'fulfilled' && scoresRss.value.ok) {
-        const sJson = await scoresRss.value.json();
-        if (Array.isArray(sJson.items) && sJson.items.length > 0) {
-          const mappedScores: FeedItem[] = sJson.items.slice(0, 4).map((item: any, idx: number) => ({
-            title: String(item.title || '').replace(/&amp;/g, '&'),
-            description:
-              String(item.description || '')
-                .replace(/<[^>]+>/g, '')
-                .trim() || 'Live International Fixture',
-            link: item.link || 'https://www.espncricinfo.com/live-cricket-score',
-            source: idx % 2 === 0 ? 'ESPNcricinfo' : 'Cricbuzz',
-          }));
-          setScores(mappedScores);
-          setIsLiveFeed(true);
-        }
-      }
-
-      if (newsRss.status === 'fulfilled' && newsRss.value.ok) {
-        const nJson = await newsRss.value.json();
-        if (Array.isArray(nJson.items) && nJson.items.length > 0) {
-          const mappedNews: FeedItem[] = nJson.items.slice(0, 4).map((item: any, idx: number) => ({
-            title: String(item.title || '').replace(/&amp;/g, '&'),
-            description: String(item.description || '')
-              .replace(/<[^>]+>/g, '')
-              .trim(),
-            link: item.link || 'https://www.espncricinfo.com/cricket-news',
-            pubDate: item.pubDate ? new Date(item.pubDate).toLocaleDateString() : 'Latest',
-            source: idx % 2 === 0 ? 'ESPNcricinfo' : 'Cricbuzz',
-          }));
-          setNews(mappedNews);
-          setIsLiveFeed(true);
-        }
-      }
-    } catch (_) {
-      // Keep clean curated fallback if offline
-    } finally {
-      setLoading(false);
+    } catch {
+      // Proceed to browser RSS fetchers
     }
+
+    // 2. If Edge API didn't return items (e.g. local dev or static preview), fetch via rss2json
+    if (loadedScores.length === 0 || loadedNews.length === 0) {
+      try {
+        const [scoresRss, cricinfoNewsRss, cricbuzzNewsRss] = await Promise.allSettled([
+          fetch(
+            'https://api.rss2json.com/v1/api.json?rss_url=' +
+              encodeURIComponent('https://static.cricinfo.com/rss/livescores.xml')
+          ),
+          fetch(
+            'https://api.rss2json.com/v1/api.json?rss_url=' +
+              encodeURIComponent('https://www.espncricinfo.com/rss/content/story/feeds/0.xml')
+          ),
+          fetch(
+            'https://api.rss2json.com/v1/api.json?rss_url=' +
+              encodeURIComponent(
+                'https://news.google.com/rss/search?q=site:cricbuzz.com+cricket&hl=en-US&gl=US&ceid=US:en'
+              )
+          ),
+        ]);
+
+        if (loadedScores.length === 0 && scoresRss.status === 'fulfilled' && scoresRss.value.ok) {
+          const sJson = await scoresRss.value.json();
+          if (Array.isArray(sJson.items) && sJson.items.length > 0) {
+            loadedScores = sJson.items.slice(0, 4).map((item: any) => ({
+              title: String(item.title || '').replace(/&amp;/g, '&'),
+              description:
+                String(item.description || '')
+                  .replace(/<[^>]+>/g, '')
+                  .trim() || 'Live International Scorecard',
+              link:
+                (item.guid && String(item.guid).startsWith('http') ? item.guid : item.link) ||
+                'https://www.espncricinfo.com/live-cricket-score',
+              source: 'ESPNcricinfo',
+            }));
+          }
+        }
+
+        if (loadedNews.length === 0) {
+          const ciItems: FeedItem[] = [];
+          const cbItems: FeedItem[] = [];
+
+          if (cricinfoNewsRss.status === 'fulfilled' && cricinfoNewsRss.value.ok) {
+            const nJson = await cricinfoNewsRss.value.json();
+            if (Array.isArray(nJson.items)) {
+              nJson.items.slice(0, 4).forEach((item: any) => {
+                const exactLink =
+                  item.guid && String(item.guid).startsWith('http') ? item.guid : item.link;
+                if (item.title && exactLink) {
+                  ciItems.push({
+                    title: String(item.title).replace(/&amp;/g, '&'),
+                    description: String(item.description || '')
+                      .replace(/<[^>]+>/g, ' ')
+                      .replace(/\s+/g, ' ')
+                      .trim(),
+                    link: exactLink,
+                    pubDate: item.pubDate
+                      ? new Date(item.pubDate).toLocaleDateString()
+                      : 'Latest',
+                    source: 'ESPNcricinfo',
+                  });
+                }
+              });
+            }
+          }
+
+          if (cricbuzzNewsRss.status === 'fulfilled' && cricbuzzNewsRss.value.ok) {
+            const cbJson = await cricbuzzNewsRss.value.json();
+            if (Array.isArray(cbJson.items)) {
+              cbJson.items.slice(0, 4).forEach((item: any) => {
+                const exactLink = item.link || item.guid;
+                if (item.title && exactLink) {
+                  cbItems.push({
+                    title: String(item.title)
+                      .replace(/\s*-\s*Cricbuzz(\.com)?$/i, '')
+                      .replace(/&amp;/g, '&'),
+                    description: String(item.description || '')
+                      .replace(/<[^>]+>/g, ' ')
+                      .replace(/\s+/g, ' ')
+                      .trim(),
+                    link: exactLink,
+                    pubDate: item.pubDate
+                      ? new Date(item.pubDate).toLocaleDateString()
+                      : 'Latest',
+                    source: 'Cricbuzz',
+                  });
+                }
+              });
+            }
+          }
+
+          // Interleave real ESPNcricinfo & Cricbuzz articles with their exact article URLs
+          for (let i = 0; i < 4; i++) {
+            if (ciItems[i]) loadedNews.push(ciItems[i]);
+            if (cbItems[i]) loadedNews.push(cbItems[i]);
+          }
+          loadedNews = loadedNews.slice(0, 4);
+        }
+      } catch {
+        // Proceed to backup XML proxy
+      }
+    }
+
+    // 3. Secondary CORS proxy fallback (allorigins) if rss2json was blocked
+    if (loadedNews.length === 0) {
+      try {
+        const proxyRes = await fetch(
+          'https://api.allorigins.win/get?url=' +
+            encodeURIComponent('https://www.espncricinfo.com/rss/content/story/feeds/0.xml')
+        );
+        if (proxyRes.ok) {
+          const proxyJson = await proxyRes.json();
+          if (proxyJson.contents) {
+            loadedNews = parseBrowserXml(proxyJson.contents, 'ESPNcricinfo', 4);
+          }
+        }
+      } catch {
+        // Ignore
+      }
+    }
+
+    if (loadedScores.length > 0) {
+      setScores(loadedScores);
+      setIsLiveFeed(true);
+    }
+    if (loadedNews.length > 0) {
+      setNews(loadedNews);
+      setIsLiveFeed(true);
+    }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -175,7 +245,9 @@ export const InternationalCricketPulse: React.FC = () => {
                 <Globe className="w-3 h-3" /> International Wire
               </span>
               <span className="rally-eyebrow text-[#736e6e]">
-                {isLiveFeed ? 'Live Syndication · ESPNcricinfo & Cricbuzz' : 'Global Cricket Pulse · ESPNcricinfo & Cricbuzz'}
+                {isLiveFeed
+                  ? 'Live Syndication · Direct Article Links'
+                  : 'Global Cricket Pulse · ESPNcricinfo & Cricbuzz'}
               </span>
             </div>
             <h2 className="rally-h2 text-[28px] sm:text-[36px] mt-1">
@@ -246,40 +318,56 @@ export const InternationalCricketPulse: React.FC = () => {
 
         {/* Row 2: 4 Equal International Cricket News Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {news.slice(0, 4).map((story, idx) => (
-            <a
-              key={story.title + idx}
-              href={story.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group rounded-[6px] bg-white border border-[#090909]/12 hover:border-[#090909] p-4 flex flex-col justify-between gap-3 transition-colors"
-            >
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#575252]">
-                    <Newspaper className="w-3 h-3 text-[#ff6a17]" />
-                    {story.source}
-                  </span>
-                  {story.pubDate && (
-                    <span className="text-[10px] text-[#9a9595] font-mono">{story.pubDate}</span>
-                  )}
-                </div>
-                <h3 className="text-[14px] font-bold tracking-[-0.02em] text-[#090909] group-hover:text-[#ff6a17] transition-colors line-clamp-2 leading-snug">
-                  {story.title}
-                </h3>
-                {story.description && (
-                  <p className="mt-1.5 text-[12px] text-[#575252] line-clamp-2 leading-relaxed">
-                    {story.description}
-                  </p>
-                )}
-              </div>
+          {news.length > 0
+            ? news.slice(0, 4).map((story, idx) => (
+                <a
+                  key={story.link + idx}
+                  href={story.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group rounded-[6px] bg-white border border-[#090909]/12 hover:border-[#090909] p-4 flex flex-col justify-between gap-3 transition-colors"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#575252]">
+                        <Newspaper className="w-3 h-3 text-[#ff6a17]" />
+                        {story.source}
+                      </span>
+                      {story.pubDate && (
+                        <span className="text-[10px] text-[#9a9595] font-mono">
+                          {story.pubDate}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-[14px] font-bold tracking-[-0.02em] text-[#090909] group-hover:text-[#ff6a17] transition-colors line-clamp-2 leading-snug">
+                      {story.title}
+                    </h3>
+                    {story.description && (
+                      <p className="mt-1.5 text-[12px] text-[#575252] line-clamp-2 leading-relaxed">
+                        {story.description}
+                      </p>
+                    )}
+                  </div>
 
-              <div className="pt-2 border-t border-[#090909]/10 flex items-center justify-between text-[11px] font-bold text-[#090909] group-hover:text-[#ff6a17]">
-                <span>Read on {story.source}</span>
-                <ArrowUpRight className="w-3.5 h-3.5" />
-              </div>
-            </a>
-          ))}
+                  <div className="pt-2 border-t border-[#090909]/10 flex items-center justify-between text-[11px] font-bold text-[#090909] group-hover:text-[#ff6a17]">
+                    <span>Read full story on {story.source}</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </div>
+                </a>
+              ))
+            : [0, 1, 2, 3].map(idx => (
+                <div
+                  key={idx}
+                  className="rounded-[6px] bg-white border border-[#090909]/12 p-4 flex flex-col justify-between gap-3"
+                >
+                  <div>
+                    <div className="h-3 w-24 bg-[#090909]/10 rounded animate-pulse mb-2.5" />
+                    <div className="h-4 w-full bg-[#090909]/10 rounded animate-pulse mb-1.5" />
+                    <div className="h-4 w-3/4 bg-[#090909]/10 rounded animate-pulse" />
+                  </div>
+                  <div className="pt-2 border-t border-[#090909]/10 h-4 w-32 bg-[#090909]/10 rounded animate-pulse" />
+                </div>
+              ))}
         </div>
       </div>
     </section>

@@ -13,6 +13,7 @@ import { useTournament } from '../../context/TournamentContext';
 import { calculatePointsTable } from '../../utils/nrrCalculator';
 import { Match, Team } from '../../types/cricket';
 import { InternationalCricketPulse } from './InternationalCricketPulse';
+import { ClubEngagementZone } from './ClubEngagementZone';
 
 const CRICKET_BALL_HERO_IMG =
   'https://images.unsplash.com/photo-1531415074968-036ba1b575da?auto=format&fit=crop&w=2000&q=85';
@@ -244,7 +245,7 @@ export const HomePage: React.FC = () => {
               { k: String(teams.length), v: 'Competing Clubs' },
               { k: totalPlayers ? String(totalPlayers) : '600+', v: 'Registered Players' },
               { k: String(tournament.rules?.oversPerInnings || 20), v: 'Overs per Innings' },
-              { k: latest ? String(latest.year) : '2026', v: latest ? `Champion: ${latest.championTeamName}` : 'Active Season' },
+              { k: '96', v: 'Tournament Matches' },
             ].map((s, i) => (
               <div
                 key={i}
@@ -503,7 +504,10 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* ───────────── BAND 4: LIVE INTERNATIONAL CRICKET SCORES & NEWS (CRICINFO / CRICBUZZ) ───────────── */}
+      {/* ───────────── BAND 4: INTERACTIVE CLUB ZONE (HEAD-TO-HEAD & LIVE FAN POLLS) ───────────── */}
+      <ClubEngagementZone />
+
+      {/* ───────────── BAND 5: LIVE INTERNATIONAL CRICKET SCORES & NEWS (CRICINFO / CRICBUZZ) ───────────── */}
       <InternationalCricketPulse />
 
       {/* ───────────── BAND 5: MEET THE COMPETITION (4×2 COMPACT GRID, ZERO GAPS) ───────────── */}
