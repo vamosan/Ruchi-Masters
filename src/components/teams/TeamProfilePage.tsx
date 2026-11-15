@@ -425,31 +425,31 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             </div>
 
             {/* Clean Hairline Team Profile Ledger */}
-            <div className="space-y-2 text-xs pt-1 border-t border-white/10">
-              <div className="text-[11px] font-bold text-[#ff6a17] uppercase tracking-wider pt-3">
+            <div className="space-y-2.5 text-sm sm:text-[15px] pt-1 border-t border-white/10">
+              <div className="text-xs font-bold text-[#ff6a17] uppercase tracking-wider pt-3">
                 Team Profile
               </div>
               <div className="divide-y divide-white/[0.08]">
-                <div className="py-2.5 flex items-center justify-between gap-3">
+                <div className="py-3 flex items-center justify-between gap-3">
                   <span className="text-slate-400">Captain</span>
                   <span className="font-bold text-white truncate">{captain?.name || 'TBD'}</span>
                 </div>
-                <div className="py-2.5 flex items-center justify-between gap-3">
+                <div className="py-3 flex items-center justify-between gap-3">
                   <span className="text-slate-400">Vice Captain</span>
                   <span className="font-bold text-slate-100 truncate">{viceCaptain?.name || 'TBD'}</span>
                 </div>
-                <div className="py-2.5 flex items-center justify-between gap-3">
+                <div className="py-3 flex items-center justify-between gap-3">
                   <span className="text-slate-400">Trophy Cabinet</span>
-                  <span className={`font-semibold truncate flex items-center gap-1.5 ${hasTrophies ? 'text-amber-300' : 'text-slate-300'}`}>
-                    <Trophy className={`w-3.5 h-3.5 shrink-0 ${hasTrophies ? 'text-amber-400' : 'text-slate-500'}`} />
+                  <span className={`font-semibold truncate flex items-center gap-1.5 ${hasTrophies ? 'text-amber-300' : 'text-slate-200'}`}>
+                    <Trophy className={`w-4 h-4 shrink-0 ${hasTrophies ? 'text-amber-400' : 'text-slate-400'}`} />
                     <span className="truncate">{trophySummary}</span>
                   </span>
                 </div>
-                <div className="py-2.5 flex items-center justify-between gap-3">
+                <div className="py-3 flex items-center justify-between gap-3">
                   <span className="text-slate-400">Home Ground</span>
-                  <span className="font-semibold text-slate-200 truncate">{team.homeGround || 'TBD'}</span>
+                  <span className="font-semibold text-slate-100 truncate">{team.homeGround || 'TBD'}</span>
                 </div>
-                <div className="py-2.5 flex items-center justify-between gap-3">
+                <div className="py-3 flex items-center justify-between gap-3">
                   <span className="text-slate-400">Registered Squad</span>
                   <span className="font-mono font-bold text-emerald-400">{team.players.length} Players ({verifiedCount} Verified)</span>
                 </div>
@@ -457,7 +457,7 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
             </div>
 
             {(team.website || team.instagram) && (
-              <div className="flex items-center gap-4 text-[11px] pt-1">
+              <div className="flex items-center gap-4 text-xs pt-1">
                 {team.website && (
                   <a
                     href={team.website.startsWith('http') ? team.website : 'https://' + team.website}
