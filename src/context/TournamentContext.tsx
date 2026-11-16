@@ -103,7 +103,58 @@ const STORAGE_KEYS = {
   MATCHES: 'cricmaster_matches_v6',
   VIEW_MODE: 'cricmaster_view_mode_v5',
   AUTH_USER: 'cricmaster_auth_user_v5',
+  ACTIVE_ROUTE: 'ruchi_active_route_v1',
 };
+
+const VALID_TABS = new Set([
+  'overview',
+  'fixtures',
+  'teams',
+  'standings',
+  'stats',
+  'playoffs',
+  'halloffame',
+  'pickem',
+  'live',
+  'organizer',
+  'social',
+]);
+
+function parseRouteHash(rawHash?: string): { tab: string; teamId: string | null; matchId: string | null } | null {
+  const source = (rawHash ?? (typeof window !== 'undefined' ? window.location.hash : '')).replace(/^#\/?/, '').trim();
+  if (!source) return null;
+  const [seg0, ...rest] = source.split('/');
+  const seg1 = rest.join('/');
+  if (!VALID_TABS.has(seg0)) return null;
+  if (seg0 === 'teams') {
+    return { tab: 'teams', teamId: seg1 || null, matchId: null };
+  }
+  if (seg0 === 'live') {
+    return { tab: 'live', teamId: null, matchId: seg1 || null };
+  }
+  return { tab: seg0, teamId: null, matchId: null };
+}
+
+function getInitialRoute(): { tab: string; teamId: string | null; matchId: string } {
+  const fromHash = parseRouteHash();
+  if (fromHash) {
+    return { tab: fromHash.tab, teamId: fromHash.teamId, matchId: fromHash.matchId || 'm-103' };
+  }
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = window.sessionStorage.getItem(STORAGE_KEYS.ACTIVE_ROUTE) || window.localStorage.getItem(STORAGE_KEYS.ACTIVE_ROUTE);
+      if (saved) {
+        const parsed = parseRouteHash(saved);
+        if (parsed) {
+          return { tab: parsed.tab, teamId: parsed.teamId, matchId: parsed.matchId || 'm-103' };
+        }
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }
+  return { tab: 'overview', teamId: null, matchId: 'm-103' };
+}
 
 const normPlayerName = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
 
@@ -259,23 +310,59 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return saved ? JSON.parse(saved) : INITIAL_MATCHES;
   });
 
-  const [activeMatchId, setActiveMatchId] = useState<string>('m-103');
+  const initialRoute = useRef(getInitialRoute()).current;
+  const [activeMatchId, setActiveMatchId] = useState<string>(initialRoute.matchId);
   const [viewMode, setViewMode] = useState<'spectator' | 'organizer'>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.VIEW_MODE);
     return (saved as 'spectator' | 'organizer') || 'spectator';
   });
-  const [activeTab, setActiveTabState] = useState<string>('overview');
-  const [activeTeamProfileId, setActiveTeamProfileId] = useState<string | null>(null);
+  const [activeTab, setActiveTabState] = useState<string>(initialRoute.tab);
+  const [activeTeamProfileId, setActiveTeamProfileIdState] = useState<string | null>(initialRoute.teamId);
+
+  const buildRouteHash = (tab: string, teamId: string | null, matchId: string) => {
+    if (tab === 'teams' && teamId) return `#teams/${teamId}`;
+    if (tab === 'live' && matchId) return `#live/${matchId}`;
+    return `#${tab}`;
+  };
+
+  useEffect(() => {
+    const nextHash = buildRouteHash(activeTab, activeTeamProfileId, activeMatchId);
+    try {
+      window.sessionStorage.setItem(STORAGE_KEYS.ACTIVE_ROUTE, nextHash);
+      safeSetLocalStorage(STORAGE_KEYS.ACTIVE_ROUTE, nextHash);
+      if (window.location.hash !== nextHash) {
+        window.history.replaceState(null, '', nextHash);
+      }
+    } catch {
+      // ignore history errors
+    }
+  }, [activeTab, activeTeamProfileId, activeMatchId]);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      const parsed = parseRouteHash(window.location.hash);
+      if (!parsed) return;
+      setActiveTabState(parsed.tab);
+      setActiveTeamProfileIdState(parsed.teamId);
+      if (parsed.matchId) setActiveMatchId(parsed.matchId);
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  const setActiveTeamProfileId = (teamId: string | null) => {
+    setActiveTeamProfileIdState(teamId);
+  };
 
   const setActiveTab = (tab: string) => {
     if (tab !== 'teams') {
-      setActiveTeamProfileId(null);
+      setActiveTeamProfileIdState(null);
     }
     setActiveTabState(tab);
   };
 
   const openTeamProfile = (teamId: string) => {
-    setActiveTeamProfileId(teamId);
+    setActiveTeamProfileIdState(teamId);
     setActiveTabState('teams');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -297,9 +384,41 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
 
   // Guard refs to PREVENT overwriting IndexedDB/storage on initial mount/hydration!
+  const isTournamentLoadedRef = useRef(false);
   const isHofLoadedRef = useRef(false);
   const isTeamsLoadedRef = useRef(false);
   const isMatchesLoadedRef = useRef(false);
+
+  // Reconcile Tournament metadata & Instagram Feed with IndexedDB & Cloudflare API on mount
+  useEffect(() => {
+    let isMounted = true;
+    const initTournament = async () => {
+      try {
+        const remoteRes = await fetch('/api/tournament').catch(() => null);
+        if (remoteRes && remoteRes.ok) {
+          const remoteData = await remoteRes.json();
+          if (remoteData && typeof remoteData === 'object' && !Array.isArray(remoteData) && remoteData.name && isMounted) {
+            setTournament(remoteData);
+            saveToIndexedDB(STORAGE_KEYS.TOURNAMENT, remoteData);
+            isTournamentLoadedRef.current = true;
+            return;
+          }
+        }
+      } catch (_) {}
+
+      try {
+        const cached = await loadFromIndexedDB<Tournament>(STORAGE_KEYS.TOURNAMENT);
+        if (isMounted && cached && cached.name) {
+          setTournament(cached);
+        }
+      } catch (_) {}
+      finally {
+        if (isMounted) isTournamentLoadedRef.current = true;
+      }
+    };
+    initTournament();
+    return () => { isMounted = false; };
+  }, []);
 
   // Reconcile Matches with IndexedDB & Cloudflare API on mount
   useEffect(() => {
@@ -622,9 +741,18 @@ export const TournamentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
 
-  // Local storage persistence
+  // Local storage + IndexedDB + Cloudflare KV persistence
   useEffect(() => {
+    if (!isTournamentLoadedRef.current) return;
+    saveToIndexedDB(STORAGE_KEYS.TOURNAMENT, tournament);
     safeSetLocalStorage(STORAGE_KEYS.TOURNAMENT, JSON.stringify(tournament));
+    try {
+      fetch('/api/tournament', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tournament)
+      }).catch(() => {});
+    } catch (_) {}
   }, [tournament]);
 
   useEffect(() => {

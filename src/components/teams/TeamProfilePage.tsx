@@ -28,11 +28,14 @@ import {
   RotateCcw,
   Check,
   Maximize2,
-  X
+  X,
+  Video,
+  ExternalLink
 } from 'lucide-react';
-import { Team, Player, PlayerRole, BattingStyle, BowlingStyle } from '../../types/cricket';
+import { Team, Player, PlayerRole, BattingStyle, BowlingStyle, TeamSocialPost } from '../../types/cricket';
 import { useTournament } from '../../context/TournamentContext';
 import { processPlayerPhoto, processBannerPhoto } from '../../utils/imageUtils';
+import { detectSocialPlatform, parseYouTubeUrl, parseInstagramUrl, normalizeExternalUrl } from '../../utils/socialMedia';
 import { EditTeamModal } from './EditTeamModal';
 import { HoloTiltCard } from '../common/HoloTiltCard';
 import { PlayerCertificateModal } from './PlayerCertificateModal';
@@ -74,6 +77,9 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
 
   // Squad Photo Reposition & Fit State
   const [isAdjustingPhoto, setIsAdjustingPhoto] = useState(false);
+  const [socialPostUrl, setSocialPostUrl] = useState('');
+  const [socialPostTitle, setSocialPostTitle] = useState('');
+  const [socialPostError, setSocialPostError] = useState('');
   const [photoPosX, setPhotoPosX] = useState<number>(team.teamPhotoPosX ?? 50);
   const [photoPosY, setPhotoPosY] = useState<number>(team.teamPhotoPosY ?? 35);
   const [photoZoom, setPhotoZoom] = useState<number>(team.teamPhotoZoom ?? 1);
@@ -225,6 +231,43 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
     setPhotoZoom(team.teamPhotoZoom ?? 1);
     setPhotoFit(team.teamPhotoFit || 'cover');
     setIsAdjustingPhoto(false);
+  };
+
+  const handleAddTeamSocialPost = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAuthorized) {
+      openAuthModal(team.id);
+      return;
+    }
+    const cleanUrl = normalizeExternalUrl(socialPostUrl);
+    const yt = parseYouTubeUrl(cleanUrl);
+    const ig = parseInstagramUrl(cleanUrl);
+    if (!yt && !ig) {
+      setSocialPostError('Paste a valid YouTube video/Shorts URL or Instagram post/Reel URL (e.g. youtube.com/watch?v=... or instagram.com/reel/...).');
+      return;
+    }
+    const newPost: TeamSocialPost = {
+      id: `tsp-${Date.now()}`,
+      platform: yt ? 'youtube' : detectSocialPlatform(cleanUrl),
+      url: cleanUrl,
+      title: socialPostTitle.trim() || (yt ? `${team.name} Video Highlight` : `${team.name} Instagram Moment`),
+      addedAt: new Date().toISOString().slice(0, 10),
+    };
+    updateTeam({
+      ...team,
+      socialFeed: [newPost, ...(team.socialFeed || [])],
+    });
+    setSocialPostUrl('');
+    setSocialPostTitle('');
+    setSocialPostError('');
+  };
+
+  const handleRemoveTeamSocialPost = (postId: string) => {
+    if (!isAuthorized) return;
+    updateTeam({
+      ...team,
+      socialFeed: (team.socialFeed || []).filter(item => item.id !== postId),
+    });
   };
 
   const handlePhotoPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -974,7 +1017,12 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                         <img
                           src={player.photoUrl || player.avatar || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&h=600&q=80'}
                           alt={player.name}
-                          className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+                          style={{
+                            objectPosition: `${player.photoPosX ?? 50}% ${player.photoPosY ?? 20}%`,
+                            transform: `scale(${player.photoZoom ?? 1})`,
+                            transformOrigin: `${player.photoPosX ?? 50}% ${player.photoPosY ?? 20}%`,
+                          }}
+                          className="w-full h-full object-cover transition-transform duration-500"
                           onError={(e) => {
                             e.currentTarget.onerror = null;
                             (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=500&h=600&q=80';
@@ -1149,6 +1197,183 @@ export const TeamProfilePage: React.FC<Props> = ({ team, onBack, onSelectTeam })
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* CLUB HIGHLIGHTS & SOCIAL FEED (YOUTUBE & INSTAGRAM REELS) */}
+          <div className="bg-[#0a0a0c] text-[#f6f4f4] rounded-2xl border border-[#1d1d22] p-5 sm:p-6 shadow-xl space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div>
+                <div className="text-[11px] font-bold uppercase tracking-widest text-[#ff6a17]">
+                  Match Highlights &amp; Reels
+                </div>
+                <h3 className="text-xl sm:text-2xl font-black font-cabinet text-white flex items-center gap-2 mt-0.5">
+                  <Video className="w-5 h-5 text-[#ff6a17]" />
+                  <span>{team.name} Social Feed</span>
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Watch match clips, YouTube highlights, and Instagram reels shared by the club.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {team.instagram && (
+                  <a
+                    href={team.instagram.startsWith('http') ? team.instagram : 'https://instagram.com/' + team.instagram.replace('@', '')}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-[#ff6a17] hover:text-[#090909] text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
+                  >
+                    <span>Instagram</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+                {team.facebook && (
+                  <a
+                    href={team.facebook.startsWith('http') ? team.facebook : 'https://facebook.com/' + team.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white text-xs font-bold inline-flex items-center gap-1.5 transition-colors"
+                  >
+                    <span>Facebook</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+                {!isAuthorized && (
+                  <button
+                    type="button"
+                    onClick={() => openAuthModal(team.id)}
+                    className="px-3 py-1.5 rounded-full bg-[#ff6a17] hover:bg-[#ff8640] text-[#090909] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Captain Login to Post</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {isAuthorized && (
+              <form onSubmit={handleAddTeamSocialPost} className="p-3.5 rounded-xl bg-white/[0.04] border border-white/10 space-y-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                  <input
+                    type="url"
+                    required
+                    value={socialPostUrl}
+                    onChange={(e) => { setSocialPostUrl(e.target.value); setSocialPostError(''); }}
+                    placeholder="Paste YouTube video/Shorts or Instagram post/Reel URL..."
+                    className="sm:col-span-6 px-3 py-2 rounded-lg bg-[#090909] border border-white/15 focus:border-[#ff6a17] text-xs text-white placeholder-slate-500 outline-none"
+                  />
+                  <input
+                    type="text"
+                    value={socialPostTitle}
+                    onChange={(e) => setSocialPostTitle(e.target.value)}
+                    placeholder="Caption or match title (optional)"
+                    className="sm:col-span-4 px-3 py-2 rounded-lg bg-[#090909] border border-white/15 focus:border-[#ff6a17] text-xs text-white placeholder-slate-500 outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="sm:col-span-2 px-3 py-2 rounded-lg bg-[#ff6a17] hover:bg-[#ff8640] text-[#090909] text-xs font-black flex items-center justify-center gap-1 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Add Video</span>
+                  </button>
+                </div>
+                {socialPostError && (
+                  <p className="text-[11px] text-rose-400 font-medium">{socialPostError}</p>
+                )}
+              </form>
+            )}
+
+            {team.socialFeed && team.socialFeed.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {team.socialFeed.map((post) => {
+                  const yt = parseYouTubeUrl(post.url);
+                  const ig = parseInstagramUrl(post.url);
+                  return (
+                    <div
+                      key={post.id}
+                      className="rounded-xl overflow-hidden bg-[#121318] border border-white/10 flex flex-col justify-between"
+                    >
+                      {yt ? (
+                        <div className="relative aspect-video bg-black">
+                          <iframe
+                            src={yt.embedUrl}
+                            title={post.title || 'YouTube Highlight'}
+                            className="w-full h-full"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : ig ? (
+                        <div className="relative h-[380px] bg-white overflow-hidden">
+                          <iframe
+                            src={ig.embedUrl}
+                            title={post.title || 'Instagram Post'}
+                            className="w-full h-full border-0"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : (
+                        <a
+                          href={post.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="h-44 flex flex-col items-center justify-center gap-2 bg-white/5 hover:bg-white/10 transition-colors p-4 text-center"
+                        >
+                          <ExternalLink className="w-6 h-6 text-[#ff6a17]" />
+                          <span className="text-xs font-bold text-white">Open Post</span>
+                        </a>
+                      )}
+
+                      <div className="px-3.5 py-2.5 flex items-center justify-between gap-2 border-t border-white/10">
+                        <div className="min-w-0">
+                          <div className="text-[10px] font-bold uppercase tracking-wider text-[#ff6a17]">
+                            {post.platform === 'youtube' ? 'YouTube' : 'Instagram'}
+                            {post.addedAt ? ` · ${post.addedAt}` : ''}
+                          </div>
+                          <div className="text-xs font-semibold text-white truncate">
+                            {post.title || 'Club Highlight'}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <a
+                            href={post.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/15 text-slate-300 transition-colors"
+                            title="Open Original Post"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                          </a>
+                          {isAuthorized && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveTeamSocialPost(post.id)}
+                              className="p-1.5 rounded-lg bg-rose-500/15 hover:bg-rose-500 text-rose-300 hover:text-white transition-colors cursor-pointer"
+                              title="Remove from feed"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-8 px-4 rounded-xl border border-dashed border-white/15 text-center space-y-2">
+                <p className="text-sm font-bold text-slate-200">
+                  No match reels or highlight videos added yet
+                </p>
+                <p className="text-xs text-slate-400 max-w-md mx-auto">
+                  {isAuthorized
+                    ? 'Paste a YouTube highlight link or Instagram Reel link above so fans and visiting teams can watch your best moments right on your profile.'
+                    : `Captains for ${team.name} can log in to showcase YouTube highlights and Instagram Reels here.`}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

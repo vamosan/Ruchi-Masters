@@ -57,12 +57,12 @@ export const Footer: React.FC = () => {
             <p className="text-[14px] text-[#f6f4f4]/55 max-w-xs leading-relaxed">
               Season 05 Invitational — Frankfurt, Germany. Presented by Ruchi Restaurant &amp; Catering.
             </p>
-            <div className="inline-flex items-center gap-2.5 pt-1">
-              <div className="bg-white px-2 py-0.5 rounded-[4px]">
-                <img src="/images/ruchi-sponsor.png" alt="Ruchi Restaurant" className="h-4 object-contain" />
+            <div className="inline-flex items-center gap-3 pt-1">
+              <div className="bg-white px-3 py-1 rounded-[4px]">
+                <img src="/images/ruchi-sponsor.png" alt="Ruchi Restaurant" className="h-7 object-contain" />
               </div>
-              <span className="text-[11px] uppercase tracking-wider text-[#f6f4f4]/50">
-                Title Sponsor
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#f6f4f4]/70">
+                Official Title Sponsor
               </span>
             </div>
           </div>

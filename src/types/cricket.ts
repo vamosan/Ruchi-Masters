@@ -35,6 +35,9 @@ export interface Player {
   isWicketKeeper?: boolean;
   avatar?: string;
   photoUrl?: string;            // Real uploaded authenticated photo
+  photoPosX?: number;           // 0..100 horizontal focal point
+  photoPosY?: number;           // 0..100 vertical focal point
+  photoZoom?: number;           // 1..1.6 zoom scale
   idProofNumber?: string;       // Official tournament ID / Passport / Player License
   isAuthenticated?: boolean;    // Real player verified by team manager
   authenticatedAt?: string;     // Verification timestamp
@@ -54,6 +57,14 @@ export interface Player {
   stumpings?: number;
   runOuts?: number;
   mvpPoints?: number;
+}
+
+export interface TeamSocialPost {
+  id: string;
+  platform: 'instagram' | 'youtube';
+  url: string;
+  title?: string;
+  addedAt?: string;
 }
 
 export interface StandingsOverride {
@@ -110,6 +121,7 @@ export interface Team {
     website?: string;
     facebook?: string;
   };
+  socialFeed?: TeamSocialPost[];
   passcode?: string;
   isPinSet?: boolean;
   standingsOverride?: StandingsOverride;
@@ -331,6 +343,9 @@ export interface Tournament {
   rules: TournamentRules;
   sponsors: Sponsor[];
   announcements: Announcement[];
+  instagramHandle?: string;
+  instagramUrl?: string;
+  instagramPosts?: TeamSocialPost[];
 }
 
 export interface PointsTableEntry {

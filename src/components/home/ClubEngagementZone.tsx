@@ -1,7 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { ArrowUpRight, Swords, Flame, CheckCircle2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ArrowUpRight, Flame, CheckCircle2, Camera, Plus, Trash2, ExternalLink } from 'lucide-react';
 import { useTournament } from '../../context/TournamentContext';
-import { calculatePointsTable } from '../../utils/nrrCalculator';
+import { TeamSocialPost } from '../../types/cricket';
+import { parseInstagramUrl, normalizeExternalUrl } from '../../utils/socialMedia';
 
 interface PollState {
   matchVote?: 'A' | 'B';
@@ -25,10 +26,15 @@ const DEFAULT_POLL_STATE: PollState = {
 };
 
 export const ClubEngagementZone: React.FC = () => {
-  const { teams, matches, tournament, openTeamProfile, setActiveTab } = useTournament();
+  const { tournament, hallOfFame, updateTournament, isAdmin, setActiveTab } = useTournament();
 
-  const [teamAId, setTeamAId] = useState<string>(teams[0]?.id || '');
-  const [teamBId, setTeamBId] = useState<string>(teams[1]?.id || teams[0]?.id || '');
+  const [newIgUrl, setNewIgUrl] = useState('');
+  const [newIgCaption, setNewIgCaption] = useState('');
+  const [igError, setIgError] = useState('');
+  const [activePostIdx, setActivePostIdx] = useState(0);
+  const [editingHandle, setEditingHandle] = useState(false);
+  const [handleInput, setHandleInput] = useState(tournament.instagramHandle || '@ruchimasters');
+  const [profileUrlInput, setProfileUrlInput] = useState(tournament.instagramUrl || 'https://www.instagram.com/');
 
   const [polls, setPolls] = useState<PollState>(() => {
     try {
@@ -47,21 +53,61 @@ export const ClubEngagementZone: React.FC = () => {
     }
   }, [polls]);
 
-  const standings = useMemo(
-    () => calculatePointsTable(teams, matches, tournament.rules),
-    [teams, matches, tournament.rules]
-  );
+  const igPosts = tournament.instagramPosts || [];
+  const activeIgPost = igPosts[activePostIdx] || igPosts[0];
+  const parsedActiveIg = activeIgPost ? parseInstagramUrl(activeIgPost.url) : null;
 
-  const teamA = teams.find(t => t.id === teamAId) || teams[0];
-  const teamB = teams.find(t => t.id === teamBId) || teams[1] || teams[0];
+  const fallbackGallery = (hallOfFame[0]?.media || [])
+    .filter(m => m.type === 'image')
+    .slice(0, 4);
 
-  const statsA = standings.find(s => s.teamId === teamA?.id);
-  const statsB = standings.find(s => s.teamId === teamB?.id);
+  const handleAddInstagramPost = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAdmin()) return;
+    const clean = normalizeExternalUrl(newIgUrl);
+    const parsed = parseInstagramUrl(clean);
+    if (!parsed) {
+      setIgError('Enter a valid Instagram Post or Reel URL (e.g. https://www.instagram.com/p/... or /reel/...)');
+      return;
+    }
+    const post: TeamSocialPost = {
+      id: `ig-${Date.now()}`,
+      platform: 'instagram',
+      url: parsed.permalink,
+      title: newIgCaption.trim() || 'Ruchi Masters Matchday Moment',
+      addedAt: new Date().toISOString().slice(0, 10),
+    };
+    const nextPosts = [post, ...igPosts];
+    updateTournament({
+      ...tournament,
+      instagramPosts: nextPosts,
+    });
+    setActivePostIdx(0);
+    setNewIgUrl('');
+    setNewIgCaption('');
+    setIgError('');
+  };
 
-  const captainA =
-    teamA?.players.find(p => p.isCaptain)?.name || teamA?.managerName || 'Club Captain';
-  const captainB =
-    teamB?.players.find(p => p.isCaptain)?.name || teamB?.managerName || 'Club Captain';
+  const handleDeleteInstagramPost = (postId: string) => {
+    if (!isAdmin()) return;
+    const next = igPosts.filter(p => p.id !== postId);
+    updateTournament({
+      ...tournament,
+      instagramPosts: next,
+    });
+    setActivePostIdx(0);
+  };
+
+  const handleSaveHandle = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isAdmin()) return;
+    updateTournament({
+      ...tournament,
+      instagramHandle: handleInput.trim() || '@ruchimasters',
+      instagramUrl: normalizeExternalUrl(profileUrlInput) || 'https://www.instagram.com/',
+    });
+    setEditingHandle(false);
+  };
 
   const handleMatchVote = (choice: 'A' | 'B') => {
     if (polls.matchVote === choice) return;
@@ -103,129 +149,191 @@ export const ClubEngagementZone: React.FC = () => {
     <section className="max-w-[1320px] mx-auto px-5 sm:px-8 pb-10 sm:pb-12">
       <div className="border-t border-[#090909]/15 pt-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          {/* Left 6 Cols: Interactive Head-to-Head Club Comparator */}
-          <div className="lg:col-span-6 rounded-[6px] bg-white border border-[#090909]/12 p-5 flex flex-col justify-between">
-            <div>
-              <div className="flex items-center justify-between gap-2 mb-3">
+          {/* Left 6 Cols: Official Tournament Instagram Feed */}
+          <div className="lg:col-span-6 rounded-[6px] bg-white border border-[#090909]/12 p-5 flex flex-col justify-between gap-4">
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#090909] text-[#f6f4f4] text-[10px] font-bold uppercase tracking-wider">
-                    <Swords className="w-3 h-3 text-[#ff6a17]" /> Tale of the Tape
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#090909] text-[#f6f4f4] text-[10px] font-bold uppercase tracking-wider">
+                    <Camera className="w-3 h-3 text-[#ff6a17]" /> Instagram Feed
                   </span>
-                  <span className="rally-eyebrow text-[#736e6e]">40-Club Rivalry Matrix</span>
+                  <span className="rally-eyebrow text-[#736e6e]">
+                    {tournament.instagramHandle || '@ruchimasters'}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {isAdmin() && (
+                    <button
+                      type="button"
+                      onClick={() => setEditingHandle(v => !v)}
+                      className="text-[11px] font-bold text-[#ff6a17] hover:underline cursor-pointer"
+                    >
+                      {editingHandle ? 'Close Setup' : 'Configure IG'}
+                    </button>
+                  )}
+                  <a
+                    href={tournament.instagramUrl || 'https://www.instagram.com/'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#f6f4f4] hover:bg-[#090909] hover:text-white border border-[#090909]/15 text-[11px] font-bold text-[#090909] transition-colors"
+                  >
+                    <span>Follow</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
                 </div>
               </div>
 
-              <h3 className="rally-h2 text-[24px] sm:text-[28px] mb-4">
-                Head-to-head club comparison
-              </h3>
-
-              {/* Dual Club Selectors */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736e6e] mb-1">
-                    Select Club A
-                  </label>
-                  <select
-                    value={teamA?.id || ''}
-                    onChange={e => setTeamAId(e.target.value)}
-                    className="w-full h-9 px-2.5 rounded-[6px] bg-[#f6f4f4] border border-[#090909]/15 text-[13px] font-bold text-[#090909] focus:outline-none focus:border-[#ff6a17]"
-                  >
-                    {teams.map(t => (
-                      <option key={t.id} value={t.id}>
-                        {t.logo} {t.name} ({t.code})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold uppercase tracking-wider text-[#736e6e] mb-1">
-                    Select Club B
-                  </label>
-                  <select
-                    value={teamB?.id || ''}
-                    onChange={e => setTeamBId(e.target.value)}
-                    className="w-full h-9 px-2.5 rounded-[6px] bg-[#f6f4f4] border border-[#090909]/15 text-[13px] font-bold text-[#090909] focus:outline-none focus:border-[#ff6a17]"
-                  >
-                    {teams.map(t => (
-                      <option key={t.id} value={t.id}>
-                        {t.logo} {t.name} ({t.code})
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <div>
+                <h3 className="rally-h2 text-[24px] sm:text-[28px]">
+                  Tournament Instagram moments
+                </h3>
+                <p className="text-xs text-[#736e6e] mt-1">
+                  Matchday highlights, reels, and official tournament updates from the ground.
+                </p>
               </div>
 
-              {/* Comparison Rows */}
-              <div className="border-t border-[#090909]/12 text-[13px]">
-                {[
-                  {
-                    label: 'Division Group',
-                    valA: teamA?.group || 'Group A',
-                    valB: teamB?.group || 'Group B',
-                  },
-                  {
-                    label: 'Points & Wins',
-                    valA: `${statsA?.points ?? 0} Pts (${statsA?.won ?? 0}W)`,
-                    valB: `${statsB?.points ?? 0} Pts (${statsB?.won ?? 0}W)`,
-                  },
-                  {
-                    label: 'Net Run Rate (NRR)',
-                    valA:
-                      (statsA?.nrr ?? 0) >= 0
-                        ? `+${(statsA?.nrr ?? 0).toFixed(2)}`
-                        : (statsA?.nrr ?? 0).toFixed(2),
-                    valB:
-                      (statsB?.nrr ?? 0) >= 0
-                        ? `+${(statsB?.nrr ?? 0).toFixed(2)}`
-                        : (statsB?.nrr ?? 0).toFixed(2),
-                  },
-                  {
-                    label: 'Registered Squad',
-                    valA: `${teamA?.players.length || 0} Players`,
-                    valB: `${teamB?.players.length || 0} Players`,
-                  },
-                  {
-                    label: 'Club Captain',
-                    valA: captainA,
-                    valB: captainB,
-                  },
-                ].map(row => (
-                  <div
-                    key={row.label}
-                    className="grid grid-cols-12 items-center py-2.5 border-b border-[#090909]/10"
-                  >
-                    <div className="col-span-4 font-bold text-[#090909] truncate">{row.valA}</div>
-                    <div className="col-span-4 text-center text-[11px] uppercase tracking-wider text-[#736e6e]">
-                      {row.label}
-                    </div>
-                    <div className="col-span-4 text-right font-bold text-[#090909] truncate">
-                      {row.valB}
-                    </div>
+              {isAdmin() && editingHandle && (
+                <form onSubmit={handleSaveHandle} className="p-3 rounded-[6px] bg-[#f6f4f4] border border-[#090909]/15 space-y-2 text-xs">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={handleInput}
+                      onChange={e => setHandleInput(e.target.value)}
+                      placeholder="@ruchimasters"
+                      className="px-2.5 py-1.5 rounded bg-white border border-[#090909]/15 font-semibold outline-none"
+                    />
+                    <input
+                      type="url"
+                      value={profileUrlInput}
+                      onChange={e => setProfileUrlInput(e.target.value)}
+                      placeholder="https://instagram.com/yourhandle"
+                      className="px-2.5 py-1.5 rounded bg-white border border-[#090909]/15 font-semibold outline-none"
+                    />
                   </div>
-                ))}
-              </div>
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 rounded bg-[#090909] text-white font-bold text-[11px] cursor-pointer"
+                  >
+                    Save Instagram Profile
+                  </button>
+                </form>
+              )}
+
+              {isAdmin() && (
+                <form onSubmit={handleAddInstagramPost} className="p-3 rounded-[6px] bg-[#f6f4f4] border border-[#090909]/15 space-y-2 text-xs">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-[#575252]">
+                    Admin · Embed Tournament Instagram Post / Reel
+                  </div>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <input
+                      type="url"
+                      required
+                      value={newIgUrl}
+                      onChange={e => { setNewIgUrl(e.target.value); setIgError(''); }}
+                      placeholder="https://www.instagram.com/reel/... or /p/..."
+                      className="flex-1 px-2.5 py-1.5 rounded bg-white border border-[#090909]/15 font-medium outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={newIgCaption}
+                      onChange={e => setNewIgCaption(e.target.value)}
+                      placeholder="Caption (optional)"
+                      className="sm:w-36 px-2.5 py-1.5 rounded bg-white border border-[#090909]/15 font-medium outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="px-3 py-1.5 rounded bg-[#ff6a17] hover:bg-[#ff8640] text-[#090909] font-black flex items-center justify-center gap-1 shrink-0 cursor-pointer"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add</span>
+                    </button>
+                  </div>
+                  {igError && <p className="text-[11px] text-rose-600 font-semibold">{igError}</p>}
+                </form>
+              )}
+
+              {parsedActiveIg ? (
+                <div className="space-y-2.5">
+                  {igPosts.length > 1 && (
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+                        {igPosts.map((post, idx) => (
+                          <button
+                            key={post.id}
+                            type="button"
+                            onClick={() => setActivePostIdx(idx)}
+                            className={`px-2.5 py-1 rounded-full text-[11px] font-bold shrink-0 cursor-pointer ${
+                              idx === activePostIdx
+                                ? 'bg-[#090909] text-white'
+                                : 'bg-[#f6f4f4] text-[#575252] border border-[#090909]/15'
+                            }`}
+                          >
+                            Post {idx + 1}
+                          </button>
+                        ))}
+                      </div>
+                      {isAdmin() && activeIgPost && (
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteInstagramPost(activeIgPost.id)}
+                          className="p-1.5 rounded bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white transition-colors cursor-pointer"
+                          title="Remove this post"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="rounded-[6px] border border-[#090909]/12 overflow-hidden bg-[#f6f4f4] h-[360px]">
+                    <iframe
+                      src={parsedActiveIg.embedUrl}
+                      title={activeIgPost?.title || 'Tournament Instagram Post'}
+                      className="w-full h-full border-0"
+                      loading="lazy"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2.5">
+                  {fallbackGallery.map((item, idx) => (
+                    <a
+                      key={item.id || idx}
+                      href={tournament.instagramUrl || 'https://www.instagram.com/'}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative aspect-[16/10] rounded-[6px] overflow-hidden bg-[#191717]"
+                    >
+                      <img
+                        src={item.url}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+                      <div className="absolute bottom-2 left-2.5 right-2.5 text-[11px] font-bold text-white line-clamp-1">
+                        {item.title}
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Direct Profile Links */}
-            <div className="relative z-10 pt-3 flex items-center justify-between gap-3">
-              {teamA && (
-                <button
-                  onClick={() => openTeamProfile(teamA.id)}
-                  className="text-[12px] font-bold text-[#090909] hover:text-[#ff6a17] flex items-center gap-1 cursor-pointer truncate"
-                >
-                  <span>{teamA.shortName || teamA.name} Profile</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
-                </button>
-              )}
-              {teamB && (
-                <button
-                  onClick={() => openTeamProfile(teamB.id)}
-                  className="text-[12px] font-bold text-[#090909] hover:text-[#ff6a17] flex items-center gap-1 cursor-pointer truncate"
-                >
-                  <span>{teamB.shortName || teamB.name} Profile</span>
-                  <ArrowUpRight className="w-3.5 h-3.5 shrink-0" />
-                </button>
-              )}
+            <div className="pt-2 border-t border-[#090909]/10 flex items-center justify-between text-[12px] text-[#575252]">
+              <span>
+                {igPosts.length > 0
+                  ? `${igPosts.length} featured Instagram ${igPosts.length === 1 ? 'post' : 'posts'}`
+                  : 'Admins can paste live Instagram post/reel links anytime'}
+              </span>
+              <a
+                href={tournament.instagramUrl || 'https://www.instagram.com/'}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-[#090909] hover:text-[#ff6a17] flex items-center gap-1"
+              >
+                Open Instagram <ArrowUpRight className="w-3.5 h-3.5" />
+              </a>
             </div>
           </div>
 

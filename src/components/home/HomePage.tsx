@@ -180,12 +180,18 @@ export const HomePage: React.FC = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-[#090909] via-[#090909]/70 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#090909] via-transparent to-[#090909]/20" />
 
-        <div className="relative max-w-[1320px] mx-auto px-5 sm:px-8 pt-12 sm:pt-16 pb-8">
-          <div className="max-w-[680px]">
+        <div className="relative max-w-[1320px] mx-auto px-5 sm:px-8 pt-10 sm:pt-14 pb-8">
+          <div className="max-w-[700px]">
             <div className="flex flex-wrap items-center gap-3 rally-rise">
               <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#ff6a17] text-[#090909] text-[11px] font-bold uppercase tracking-wider">
                 <span className="w-2 h-2 rounded-full bg-[#090909]" />
                 Season {String(editionNo).padStart(2, '0')} · {tournament.format || 'T20'}
+              </span>
+              <span className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/15 text-[11px] font-semibold text-[#f6f4f4]">
+                <span className="text-[10px] uppercase tracking-wider text-[#f6f4f4]/65">Presented by</span>
+                <span className="bg-white px-2 py-0.5 rounded-full inline-flex items-center">
+                  <img src="/images/ruchi-sponsor.png" alt="Ruchi Restaurant & Catering" className="h-4 w-auto object-contain" />
+                </span>
               </span>
               <span className="rally-eyebrow text-[#f6f4f4]/80">
                 Frankfurt, Germany · {teams.length} Clubs
@@ -211,7 +217,7 @@ export const HomePage: React.FC = () => {
                   className="rally-btn rally-btn-ghost-light"
                 >
                   <UserCheck className="w-4 h-4 text-[#ff6a17]" />
-                  My Team Profile ({myClub.shortName || myClub.code})
+                  {myClub.name}
                 </button>
               ) : (
                 <button
@@ -248,6 +254,33 @@ export const HomePage: React.FC = () => {
                 <div className="mt-1 text-[12px] text-[#f6f4f4]/60 truncate">{s.v}</div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ───────────── PROMINENT OFFICIAL TITLE SPONSOR SHOWCASE ───────────── */}
+      <section className="bg-white border-b border-[#090909]/12">
+        <div className="max-w-[1320px] mx-auto px-5 sm:px-8 py-4 sm:py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
+            <span className="px-3 py-1 rounded-full bg-[#090909] text-[#ff6a17] text-[10px] font-black uppercase tracking-widest shrink-0">
+              Official Title Sponsor
+            </span>
+            <div>
+              <div className="text-[16px] sm:text-[18px] font-black tracking-tight text-[#090909]">
+                Ruchi Restaurant &amp; Catering · Frankfurt
+              </div>
+              <p className="text-[12px] text-[#575252]">
+                Proudly presenting Season {String(editionNo).padStart(2, '0')} of Ruchi Masters T20 Championship
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0 px-4 py-2 rounded-[6px] bg-[#f6f4f4] border border-[#090909]/12 shadow-2xs">
+            <img
+              src="/images/ruchi-sponsor.png"
+              alt="Ruchi Restaurant & Catering — Official Title Sponsor"
+              className="h-9 sm:h-11 w-auto object-contain"
+            />
           </div>
         </div>
       </section>
