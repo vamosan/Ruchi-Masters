@@ -37,7 +37,7 @@ export const onRequestGet = async (context: { env: Env }) => {
         return new Response(JSON.stringify(data), {
           headers: {
             'Content-Type': 'application/json',
-            'Cache-Control': 'public, max-age=10',
+            'Cache-Control': 'no-store',
             'X-Storage-Backend': 'cloudflare_kv',
             'Access-Control-Allow-Origin': '*'
           }
