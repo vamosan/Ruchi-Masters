@@ -93,7 +93,7 @@ export function parseInstagramUrl(url: string): ParsedInstagram | null {
       shortcode: cleanCode,
       kind: canonicalKind,
       permalink: `https://www.instagram.com/${canonicalKind}/${cleanCode}/`,
-      embedUrl: `https://www.instagram.com/${canonicalKind}/${cleanCode}/embed/captioned/`,
+      embedUrl: `https://www.instagram.com/${canonicalKind}/${cleanCode}/embed/`,
     };
   } catch {
     return null;
